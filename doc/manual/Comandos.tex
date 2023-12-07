@@ -1,0 +1,156 @@
+\chapter{Comandos}
+   Los comandos son los bloques básicos de ejecución formados por código Function v0.5 mediante el cual el sistema sabe que hacer y como actuar.
+   
+   \section{Tokens}
+      Las unidades léxicas con los que se trabaja se le llaman tokens, ejemplos de tokens pueden ser números, identificadores, símbolos, cada uno de los lados de un paréntesis, etc.
+      
+      Por ejemplo en el siguiente código(que representa una expresion) \texttt{35 + 12\^{}(1/2) - 4*Sin(-1.45)} los tokens son:
+      
+      \texttt{35}, \texttt{+}, \texttt{12}, \texttt{\^{}}, \texttt{(}, \texttt{1}, \texttt{/}, \texttt{2}, \texttt{)}, \texttt{-}, \texttt{4}, \texttt{*}, \texttt{Sin}, \texttt{(}, \texttt{-}, \texttt{1.45} y \texttt{)}
+      
+   \section{Clases de comandos}
+      Existen 8 clases de comandos los cuales son:
+      
+      \begin{longtable}[c]{lll}
+         \caption{Comandos}\label{tb:commands} \\ \hline
+         {\bf Nombre} & {\bf Ejemplo} & {\bf Descripción} \\ \hline &&\\
+         Ejecutar & \texttt{run "lib\textbackslash\textbackslash prelude.fx"} &
+         \begin{minipage}{7cm}
+            Este comando sirve para interpretar el código Function v0.5 que se encuentra en un archivo de texto también llamado guion o script que por defecto tienen extensión ``.fx''.
+         \end{minipage} \\ &&\\
+         Notación & \texttt{infixl 175 +} &
+         \begin{minipage}{7cm}
+            Este comando sirve para definir la posición, prioridad y precedencia de un operador.
+         \end{minipage}\\ &&\\
+         Sinónimo de tipo & \texttt{String ::= [char]} &
+         \begin{minipage}{7cm}
+            Este comando sirve para darle un nombre a un tipo de dato y simplificar el posteriores usos.
+         \end{minipage}\\ &&\\
+         Tipado heredable & \texttt{f :: real -> real} &
+         \begin{minipage}{7cm}
+            Sirve para establecer el tipo de dato que tendrá las posteriores definiciones de una función o constante.
+         \end{minipage}\\ &&\\
+         Definición & \texttt{f(x) := x\^{}3 - x\^{}2 + 1} &
+         \begin{minipage}{7cm}
+            Sirve para definir nuevas funciones o constantes.
+         \end{minipage}\\ &&\\
+         Asignación & \texttt{x <- 23*12 + 1} &
+         \begin{minipage}{7cm}
+            Sirve para otorgarle un valor a una variable o identificador para posteriores usos.
+         \end{minipage}\\ &&\\
+         Limpieza & clear f &
+         \begin{minipage}{7cm}
+            Este comando elimina cualquier definición, valor, etc. asociado a un identificador.
+         \end{minipage}\\ &&\\
+         Evaluación & \texttt{12*12\^{}2 - 3*(4 + 5)} &
+         \begin{minipage}{7cm}
+            Este comando evalúa la expresion e imprime el resultado.
+         \end{minipage}\\
+      \end{longtable}
+      
+      Como se ve todos los comandos pueden ser ingresados tanto desde la consola como en archivos guiones. Para interpretar un comando desde la consola se debe presionar la tecla {\it RETURN}.
+      
+   \section{Comandos multilínea y la regla del sangrado}
+      Los comandos pueden ser escritos en una sola linea o en varias, desde un guion esto no supone un problema pues los editores de texto son de múltiples lineas, pero desde la consola para ingresar mas lineas se debe colocar los puntos suspensivos ``\texttt{...}'' al final de una linea y luego presionar {\it RETURN} y cuando ya se han terminado de escribir todas las lineas nuevamente presionar {\it RETURN} esta vez sin puntos suspensivos para que sean interpretados.
+   
+      Al ingresar mas lineas desde la consola Function v0.5 no restringe la cantidad de comandos que se puedan ingresar por lo que pueden ser mas de uno pero que se interpretan de uno en uno y en orden.
+      
+      \begin{fxcode}
+         \arrowcode{10 + 3 * 3 ...}\\
+         \spacecode{~~~\texttt{-} (12 + ...}\\
+         \spacecode{~~~4) ...}\\
+         \spacecode{-2 + 7}\\
+         \outcode{3}\\
+         \outcode{5}
+      \end{fxcode}
+      
+      Ahora bien, ¿Como sabe Function v0.5 que en el anterior código hay exactamente dos comandos? pues, Function v0.5 tiene lo que se conoce como sintaxis bidimensional llamado sangrado (o {\it layout} en ingles) lo cual se puede resumir como:
+      
+      \begin{enumerate}
+         \item Para un nuevo comando, el primer carácter de su primer token establece o marca la columna de sangrado del comando de manera que para los demás tokens sean considerados como parte del comando estas deben empezar en una columna mayor a la columna marcada y en la misma o posteriores lineas.
+         \item Si un token inicia en la misma o antes de la columna de sangrado entonces establece el inicio de un nuevo comando con su propio sangrado.
+      \end{enumerate}
+      
+      \begin{fxcode}
+         \layoutcomment{~}{aquí marca la columna de sangrado}\\
+         \arrowcode{g(y) := y\^{}4 + ...}\\
+         \spacecode{ y} \codecomment{si pertenece al comando pues su columna es mayor que la columna de sangrado}
+      \end{fxcode}
+      \begin{fxcode}
+         \arrowcode{12 * 3 ...}\\
+         \spacecode{- 2} \codecomment{ya no es parte del anterior comando pues ``\texttt{-}'' empieza en la misma columna de sangrado}
+      \end{fxcode}
+      \begin{fxcode}
+         \arrowcode{~~v <- 12 ...}\\
+         \spacecode{- 1} \codecomment{tampoco es parte del anterior comando pues ``\texttt{-}'' empieza muy atrás de la columna de sangrado}
+      \end{fxcode}
+   
+      Para realizar un sangrado rápido se puede utilizar el tabulador que por defecto tiene el tamaño equivalente a 8 espacios en blanco.
+      
+      \begin{fxcode}
+         \arrowcode{y <- 23 * 14 ...}\\
+         \spacecode{~~~~~~~\texttt{-} 15 + 5\^{}(1/2)}
+      \end{fxcode}
+   \section{Comentarios}
+      Los comentarios son ciertas partes del código en el que se describe o se comenta algo sobre las expresiones o acerca del código pero que son ignorados por el interprete, en Function v0.5 los comentarios son secuencias de caracteres que tienen la forma:
+         
+         \texttt{...<texto en una sola linea>}
+      
+      donde \texttt{<texto en una sola linea>} es cualquier texto que termina al final de la linea, los comentarios pueden ir tanto en la consola como en los guiones.
+      
+      \begin{fxcode}
+         \arrowcode{...este es un comentario}
+      \end{fxcode}
+      \begin{fxcode}
+         \arrowcode{2 + 3 ...este texto será ignorado}
+      \end{fxcode}
+      
+      Los puntos suspensivos marcan el inicio del comentario pero si inmediatamente antes de los puntos suspensivos se encuentra un carácter simbólico ya no se interpretara como el inicio de un comentario sino como un identificador simbólico.
+      
+      \begin{fxcode}
+         \arrowcode{*... 0}
+      \end{fxcode}
+      
+      En el código anterior los puntos suspensivos esta inmediatamente precedidos por ``\texttt{*}'' por lo que el sistema lo interpreta como el token ``\texttt{*...}'' y ya no forma un comentario.
+      
+   \section{Consola multilínea}
+      Como se vio mas antes los puntos suspensivos son utilizados para poder ingresar mas lineas de código desde la consola pues por defecto al presionar {\it RETURN} ingresa una sola linea, lo que realmente sucede es que si hay un comentario al final de una linea en la consola Function v0.5 permitirá que el usuario ingrese una nueva linea antes de interpretar el código y esta vez de varias lineas.
+      
+      \begin{fxcode}
+         \arrowcode{2 + 3 ...esto es un comentario}\\
+         \spacecode{~* 4}\\
+         \outcode{14}\\
+         \arrowcode{1 ...}\\
+         \spacecode{~\texttt{-} 3}\\
+         \outcode{-2}
+      \end{fxcode}
+   
+      Este comportamiento de los comentarios solo es valido y útil en la consola, cuando se editan códigos Function v0.5 en archivos separados (llamados guiones) no es necesario pues los editores son multilinea y los comentarios son utilizados solo para su propósito original: comentar el código.
+      
+      \begin{fxcode}
+         \linecode{...Este es un archivo de texto con código Function v0.5 o "guion"}\\
+         \linecode{v <- 1}\\
+         \linecode{f(x) := x\^{}2 + 2*x - v}\\
+         \linecode{f(3) * }\\
+         \linecode{~~~~12} \codecomment{he aquí un comando multilinea y no necesita puntos suspensivos}
+      \end{fxcode}
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   

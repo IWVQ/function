@@ -1,0 +1,1067 @@
+
+\titleformat{\subsection}[runin]{\large \bfseries}{\thesubsection.}{10pt}{\bfseries}
+\titlespacing{\subsection}{0pt}{10pt}{0pt}
+
+\chapter{Programación de funciones}
+   La programación de funciones es una parte importante del lenguaje Function v0.5 pues permite ampliar la lista de funciones disponibles para futuros usos.
+   
+   \section{Definición de funciones}
+      Las definiciones de funciones son un comando en Function v0.5 que sirven para definir nuevas funciones y constantes, tienen la forma:
+      \\
+      
+      \texttt{<patrón aplicación>~:=~<retorno>}
+      \\
+      
+      donde \texttt{<patrón aplicación>} es una expresion especial formada por una aplicación sobre patrones y se le llama patrón de aplicación y \texttt{<retorno>} es una expresion.
+      \\
+      
+      Indica que cuando se encuentre con una aplicación de la forma \texttt{<patrón aplicación>} al evaluarla devolverá un valor según la expresion de \texttt{<retorno>}.
+      \\
+      
+      La regla de sangrado es igual que en el comando de evaluación de expresiones.
+      
+      \begin{fxcode}
+         \arrowcode{f(x) := 3*x\^{}2 + x - 1}
+      \end{fxcode}
+      
+      Este ejemplo define una función cuadrática.
+      \\
+      
+      Para utilizarlo solo basta escribir \texttt{f} aplicado a su argumento.
+      
+      \begin{fxcode}
+         \arrowcode{f(3)}\\
+         \outcode{29} \codecomment{que es el resultado de 3*3\^{}2 + 3 - 1}
+      \end{fxcode}
+      
+   \section{Funciones simples}
+      Para definir nuevas funciones de un solo argumento se escribe el nombre de la función y el argumento a la izquierda del simbolo \texttt{:=} y una expresion a la derecha.
+      \\
+      
+      \texttt{<nombre> <variable> := <retorno>}
+      \\
+      
+      Donde \texttt{<nombre>} es un identificador, \texttt{<variable>} es un identificador y \texttt{<retorno>} es una expresion formada con la variable \texttt{<variable>} esta variable puede estar entre paréntesis o no.
+      
+      \begin{fxcode}
+         \arrowcode{VerSin(x) := 1 - Cos(x)}
+      \end{fxcode}
+      
+      El código anterior define la función verseno.
+      \\
+      
+      Como al utilizar funciones no es necesario que el argumento este entre paréntesis (a menos sean tuplas) en las definiciones tampoco es necesario por lo que la anterior definición es equivalente a:
+      
+      \begin{fxcode}
+         \arrowcode{VerSin x := 1 - Cos(x)}
+      \end{fxcode}
+      
+      Como se sabe los identificadores también pueden ser simbólicos
+      
+      \begin{fxcode}
+         \arrowcode{~~ p := ~(~p)}
+      \end{fxcode}
+      
+      Esta es la función de doble negación
+      
+      \begin{fxcode}
+         \arrowcode{~~ true}
+         \outcode{true}
+      \end{fxcode}
+      
+   \section{Funciones con patrones}
+      Como se dijo anteriormente el argumento puede ser un patrón, en el siguiente ejemplo vemos una definición con patrones.
+      
+      \begin{fxcode}
+         \arrowcode{TailLength (x >| xs) := Length xs}
+      \end{fxcode}
+      
+      Este ejemplo define una función que devuelve la longitud de la cola de una lista.
+      
+      \begin{fxcode}
+         \arrowcode{TailLength [34, 56, 12, 3, 12, 0]}\\
+         \outcode{5}\\
+         \arrowcode{TailLength []}\\
+         \outcode{fail}
+      \end{fxcode}
+      
+      Este ultimo resultado sucede por que la lista vacía no encaja con el patrón \texttt{x >| xs} por lo que devuelve \texttt{fail}, en general si un valor no encaja con el patrón del argumento entonces devolverá \texttt{fail}.
+      \\
+      
+      Como en las expresiones lambda, las variables de los patrones para las definiciones pueden estar tipadas, por ejemplo definamos una función que solo acepte números enteros.
+      
+      \begin{fxcode}
+         \arrowcode{Kronecker(i: int, j: int) := i = j ? 1 ; 0}
+      \end{fxcode}
+      
+      Este ejemplo define la función delta de kronecker.
+      
+      \begin{fxcode}
+         \arrowcode{Kronecker(1, 1) + Kronecker(3, 5)}\\
+         \outcode{1}\\
+         \arrowcode{Kronecker(\textquotesingle a\textquotesingle, 3)}\\
+         \outcode{fail}\\
+         \arrowcode{Kronecker(2.5, 5)}\\
+         \outcode{fail}
+      \end{fxcode}
+      
+      Podemos ver que en la segunda y tercera evaluación devuelve \texttt{fail} pues es porque ni \texttt{\textquotesingle a\textquotesingle} ni \texttt{2.5} son números enteros por lo que los patrones no encajan.
+      \\
+      
+      Al igual que las expresiones lambda también se pueden utilizar patrones anónimos.
+      
+      \begin{fxcode}
+         \arrowcode{Abscisa(x, \_) := x}
+      \end{fxcode}
+      
+      Esta función devuelve el la abscisa del par.
+      
+      \begin{fxcode}
+         \arrowcode{Abscisa(3, 4)}\\
+         \outcode{3}
+      \end{fxcode}
+      
+   \section{Múltiples definiciones}
+      Al volver a declarar la definición de una función esta no reescribe la anterior sino que se adjunta para ser una opción mas durante el encaje de patrones.
+      \\
+      
+      Definamos la siguiente función:
+      
+      \begin{fxcode}
+         \arrowcode{HasHead [] := false}\\
+         \arrowcode{HasHead (x >| xs) := true}
+      \end{fxcode}
+      
+      Esta función verifica si una lista tiene cabeza o no.
+      
+      \begin{fxcode}
+         \arrowcode{HasHead [43, 1, 2]}\\
+         \outcode{true}\\
+         \arrowcode{HasHead []}\\
+         \outcode{false}
+      \end{fxcode}
+      
+      En la primera evaluación la lista \texttt{[43, 1, 2]} no encaja con la primera definición de \texttt{HasHead} con \texttt{[]} por lo que se prueba con su segunda definición que si encaja por lo que devuelve true.
+      \\
+      
+      En las definiciones múltiples el encaje de patrones se hace en el mismo orden en el que se hicieron las definiciones de la función y si ninguno encaja el valor que devuelve es \texttt{fail}.
+      \\
+      
+      \begin{fxcode}
+         \arrowcode{HasHead ()}\\
+         \outcode{fail}
+      \end{fxcode}
+      
+   \section{Eliminar definiciones}
+      Como las definiciones son agregadas y no redefinidas es necesario el uso de un comando que realiza esa tarea es el comando \texttt{clear}.
+      \\
+      
+      \texttt{clear~<identificador>~...~<identificador>}
+      \\
+      
+      La regla de sangrado para este comando es similar que para los demás comandos.
+      \\
+      
+      Este comando indica que todas las definiciones de ciertas funciones son eliminadas y el identificador queda indefinido.
+      
+      \begin{fxcode}
+         \arrowcode{clear HasHead}
+      \end{fxcode}
+      
+      Esto elimina las definiciones de la función \texttt{HasHead}, y luego:
+      
+      \begin{fxcode}
+         \arrowcode{HasHead}\\
+         \outcode{HasHead} \codecomment{queda indefinida}
+      \end{fxcode}
+      
+   \section{Funciones de orden superior}
+      Para definir funciones de orden superior solo hacer que el valor de retorno sea también una función o expresion lambda.
+      \\
+      
+      Pero hay una forma aun mas elegante de definir funciones de orden superior se logra haciendo que la aplicación se aplique a uno o varios patrones mas.
+      \\
+      
+      \texttt{<identificador>~<patrón>~<patrón>~...~<patrón>~:=~<retorno>}
+      \\
+      
+      Como ejemplo definamos la función:
+      
+      \begin{fxcode}
+         \arrowcode{Lim a f := (f(a + 0.00000001) + f(a - 0.00000001))/2}
+      \end{fxcode}
+      
+      Este ejemplo define la función limite que es el valor al que se acerca \texttt{f(x)} cuando \texttt{x} tiende a \texttt{a}.
+      
+      \begin{fxcode}
+         \arrowcode{SinXdivX(x) := Sin(x) / x}\\
+         \arrowcode{Lim 0 SinXdivX}\\
+         \outcode{1}
+      \end{fxcode}
+      
+      También se puede asociar el patrón aplicación de la sintaxis de arriba aunque solo por la izquierda.
+      
+      \begin{fxcode}
+         \arrowcode{(Flip f)(x, y) := f(y, x)}
+      \end{fxcode}
+      
+      En este ejemplo la función Flip devuelve una función que tome los argumentos en reversa.
+      
+      \begin{fxcode}
+         \arrowcode{Flip PairX (4, 5)}\\
+         \outcode{5}
+      \end{fxcode}
+      
+      Podemos aplicarle solo a su primer argumento.
+      
+      \begin{fxcode}
+         \arrowcode{Flip PairX}\\
+         \outcode{(\textbackslash var2 ->~(\textbackslash f (x, y) ->~f (y, x)) (\textbackslash var1 ->~(\textbackslash ((a : \_), \_) ->~ (a : \_)) var1 ; fail) var2 ; fail)}
+      \end{fxcode}
+      
+      Este resultado extraño en realidad representa a la función \texttt{PairY}, devuelve esta expresion porque internamente las funciones son expresiones lambda o funciones primitivas(que están definidas internamente), de acuerdo a esto \texttt{Flip} y todas las demás funciones (a excepción de las primitivas) no son mas que expresiones lambda.
+      
+      \begin{fxcode}
+         \arrowcode{Flip}\\
+         \outcode{(\textbackslash var1 var2 ->~(\textbackslash f (x, y) ->~f (y, x)) var1 var2 ; fail)}
+      \end{fxcode}
+      
+      Las definiciones múltiples también pueden tener múltiples patrones, con la condición de que todas las definiciones de la función tengan la misma cantidad de patrones.
+      
+      \begin{fxcode}
+         \arrowcode{MapToHead f [] := \textquotedbl Error list is empty\textquotedbl}\\
+         \arrowcode{MapToHead f (x~>| xs) := f x~>| xs}
+      \end{fxcode}
+      
+      Esta función ``mapea'' la función f al primer elemento de una lista.
+      
+      \begin{fxcode}
+         \arrowcode{MapToHead Sin []}\\
+         \outcode{ERROR - performing error in command 1 line 1, list is empty}\\
+         \arrowcode{MapToHead Sin [1, 2, 3, 4]}\\
+         \outcode{[0.841470984807897, 2, 3, 4]}
+      \end{fxcode}
+      
+      A la cantidad de patrones que aplica una función en una definición se le llama aridad de la definición(en contraste con la aridad de una tupla), por lo que la regla de la aridad es que todas las definiciones de una misma función tengan la misma aridad
+      
+   \section{Constantes}
+      También es posible que la parte izquierda de una definición solo sea un identificador en ese caso hablamos de una definición de aridad 0 o también llamado constantes.
+      
+      \begin{fxcode}
+         \arrowcode{Au := (1 + Sqrt(5))/2}
+      \end{fxcode}
+      
+      Este ejemplo define la constante llamada numero áureo.
+      
+      \begin{fxcode}
+         \arrowcode{Au}\\
+         \outcode{1.61803398874989}\\
+         \arrowcode{Au + Pi - E}\\
+         \outcode{2.04134481388064}
+      \end{fxcode}
+      
+      Es de notar que al momento de hacer esta definición Function v0.5 no evalúa la expresion de retorno esto tiene sentido pues se esta haciendo una definición no una evaluación.
+      \\
+      
+      Las definiciones sin argumento también pueden ser múltiples aunque en la mayoría de los casos no sea tan útil.
+      
+      \begin{fxcode}
+         \arrowcode{MultiConst := 1.2345}\\
+         \arrowcode{MultiConst := 0.9876}\\
+         \arrowcode{MultiConst}\\
+         \outcode{1.2345}
+      \end{fxcode}
+      
+      Esto sucede por que internamente \texttt{MultiConst} es \texttt{1.2345 ; 0.9876 ; fail} por lo que siempre devolverá el valor de su primera definición, pero en otros casos esto no es así.
+      
+      \begin{fxcode}
+         \arrowcode{SPANISH := 1}\\
+         \arrowcode{ENGLISH := 2}\\
+         \arrowcode{Language := SPANISH}\\
+         \arrowcode{IndexErrorStr := Language = SPANISH? \textquotedbl Indice fuera de rango\textquotedbl}\\
+         \arrowcode{IndexErrorStr := Language = ENGLISH? \textquotedbl Index out of bounds\textquotedbl}\\
+         \arrowcode{IndexErrorStr}\\
+         \outcode{\textquotedbl Indice fuera de rango\textquotedbl}\\
+         \arrowcode{clear Language}\\
+         \arrowcode{Language := ENGLISH}\\
+         \arrowcode{IndexErrorStr}\\
+         \outcode{\textquotedbl Index out of bounds\textquotedbl}
+      \end{fxcode}
+      
+      Generalmente sucede cuando la definición de alguna función o constante que usa cambia totalmente (en este ejemplo Language mediante el comando ``\texttt{clear}'').
+      
+   \section{Funciones recursivas}
+      Una función recursiva es aquella función que esta definida en términos de si misma en Function v0.5 se permite definiciones recursivas de funciones, por ejemplo:
+      
+      \begin{fxcode}
+         \arrowcode{Factorial 0 := 1}\\
+         \arrowcode{Factorial n := n*Factorial(n - 1)}
+      \end{fxcode}
+      
+      En este ejemplo se define la función factorial que como se puede ver es recursiva.
+      
+      \begin{fxcode}
+         \arrowcode{Factorial 5}\\
+         \outcode{120}
+      \end{fxcode}
+      
+      También es posible hacer una recursividad mutua como la siguiente:
+      
+      \begin{fxcode}
+         \arrowcode{Two 0 := \textquotedbl\textquotedbl}\\
+         \arrowcode{Two n := \textquotesingle 2\textquotesingle >| One(n - 1)}\\
+         \arrowcode{One 0 := \textquotedbl\textquotedbl}\\
+         \arrowcode{One n := \textquotesingle 1\textquotesingle >| Two(n - 1)}
+      \end{fxcode}
+      
+      Se puede notar que en el segundo comando la función \texttt{One} aun no esta definido y se define posteriormente esto sucede por que esta es una definición no una evaluación por lo que no es necesario saber la forma que tenga la función \texttt{One} pero que si es necesario cuando se realiza una evaluación que requiera de la función \texttt{One}, en general esta regla es valida para cualquier definición
+      
+      \begin{fxcode}
+         \arrowcode{One 5}\\
+         \outcode{\textquotedbl 12121\textquotedbl}\\
+         \arrowcode{Two 5}\\
+         \outcode{\textquotedbl 21212\textquotedbl}
+      \end{fxcode}
+      
+   \section{Tipado heredable}
+      Una forma elegante de tipado de funciones y demás definiciones es utilizando el tipado heredable, este comando tiene la siguiente forma:
+      \\
+      
+      \texttt{<identificador>~::~<expresion de tipo>}
+      \\
+      
+      La regla de sangrado para este comando es similar que para los demás.
+      \\
+      
+      Este comando permite simplificar el tipado de los argumentos para las posteriores definiciones de una función pues no se necesita estar tipaNdo a cada rato los argumentos de la función y permite que nos concentremos solo en la forma.
+      
+      \begin{fxcode}
+         \arrowcode{MCD :: (nat, nat) ->~nat}\\
+         \arrowcode{MCD (0, 0) := Error \textquotedbl Undefined MCD for (0, 0)\textquotedbl}\\
+         \arrowcode{MCD (a, 0) := a}\\
+         \arrowcode{MCD (a, b) := MCD(b, a Rem b)}
+      \end{fxcode}
+      
+      Esta es la función máximo común divisor y solo acepta números naturales y devuelve un numero naturales.
+      
+      \begin{fxcode}
+         \arrowcode{MCD(312, 200)}\\
+         \outcode{8}
+      \end{fxcode}
+      
+      El tipado heredable indica que todas las definiciones posteriores deben tener un tipo que encaje con el tipo de herencia y en caso de las variables este le otorga el tipo que le corresponde, por ejemplo:
+      
+      \begin{fxcode}
+         \arrowcode{F :: real ->~real}\\
+         \arrowcode{F [] := []}\\
+         \outcode{ERROR - performing error in command 1 line 1, couldn't inherit type real on expression []}
+      \end{fxcode}
+      
+      En este ejemplo la lista vacía no es del tipo real por lo que no encaja y no se puede heredar el tipo.
+      \\
+      
+      Ahora bien, es posible tipar las variables incluso si se a declarado un tipo heredable, a esto se le suele llamar pretipado y la regla es similar que al caso anterior pues el tipo de la variable debe encajar con el tipo que le corresponde en el tipo heredable si es así mantiene el pretipado sino se lanzara un error.
+      
+      \begin{fxcode}
+         \arrowcode{Double :: real ->~real}\\
+         \arrowcode{Double(n: int) := 2*n}
+      \end{fxcode}
+      
+      en este ejemplo \texttt{int} encaja con el tipo \texttt{real} por lo que no hay error y la función \texttt{Double} mantiene el tipo de su argumento.
+      
+      Si se declara nuevamente el tipado heredable para una misma función esto no afectara a las anteriores definiciones sino solamente a las posteriores definiciones.
+      
+      \begin{fxcode}
+         \arrowcode{IsZero :: real ->~bool}\\
+         \arrowcode{IsZero x := x = 0}\\
+         \arrowcode{IsZero 0}\\
+         \outcode{true}\\
+         \arrowcode{IsZero :: char ->~bool}\\
+         \arrowcode{IsZero c := c = \textquotesingle 0\textquotesingle}\\
+         \arrowcode{IsZero \textquotesingle 0\textquotesingle}
+         \outcode{true}\\
+      \end{fxcode}
+      
+      En este ejemplo para el primer tipado heredable la función \texttt{IsZero} es una función que toma números reales y devuelve un valor logico, para el segundo tipado heredable es una función que toma caracteres y devuelve un valor logico y al no afectarse las anteriores definiciones esta función queda sobrecargada(es decir que puede tomar argumentos reales o caracteres).
+      
+      \begin{fxcode}
+         \arrowcode{(IsZero 1, IsZero 0, IsZero \textquotesingle a\textquotesingle, IsZero \textquotesingle 0\textquotesingle)}\\
+         \outcode{(false, true, false, true)}
+      \end{fxcode}
+      
+      La sobrecarga de funciones sera explicada mas adelante.
+      \\
+      
+      El tipado heredable cumple otro papel aparte de simplificar el tipado de las funciones, pues le otorga una elegancia matemática a las definiciones, por ejemplo la función \texttt{f} definida en la primera sección puede quedar como.
+      \\
+      
+      Antes eliminamos su anterior definición.
+      
+      \begin{fxcode}
+         \arrowcode{clear f} \codecomment{primero eliminamos todas las definiciones de \texttt{f}}
+      \end{fxcode}
+      
+      Ahora la definimos de nuevo.
+      
+      \begin{fxcode}
+         \arrowcode{f :: real ->~real}\\
+         \arrowcode{f(x) := 3*x\^{}2 + x - 1}
+      \end{fxcode}
+      
+      Esto es tan parecido a la notación usual para la definición de funciones matemáticas.
+      
+      $$f : \R  \longrightarrow  \R$$
+      $$x \longmapsto y = f(x)$$
+      $$f(x) := 3x^2 + x - 1$$
+      
+      Y se lee: la función $f$ es una función de $R$ en $R$ que toma un $x$ de $R$ y devuelve un $y$ en $R$ que es igual a $f(x)$ donde $f(x)$ se define como $3x^2 + x - 1$.
+      
+   \section{Polimorfismo}
+      Polimorfismo es que una función este definido para cualquier valor existente el polimorfismo puede ser parcial o total.
+      \\
+      
+      Un ejemplo de polimorfismo total es la función identidad que devuelve siempre el mismo valor que el de entrada, y un ejemplo de polimorfismo parcial es la función longitud de una lista que aunque solo actúa sobre listas esta puede ser cualquier lista.
+      \\
+      
+      El polimorfismo en Function v0.5 se puede realizar de dos maneras, evitando el tipado de las variables o bien utilizando el tipo anónimo.
+      \\
+      
+      \begin{fxcode}
+         \arrowcode{Identity x := x} \codecomment{variables sin tipar}\\
+         \arrowcode{Zero (x: \_) := 0} \codecomment{variable tipada con anonimo}\\
+         \arrowcode{Exchange :: (\_, \_) ->~(\_, \_)}\\
+         \arrowcode{Exchange(x, y) := (y, x)} \codecomment{polimorfismo parcial}
+      \end{fxcode}
+      
+      La función \texttt{Length} es la función mas conocida de polimorfismo en Function v0.5 pero no es la única.
+      
+   \section{Sinónimo de tipo}
+      Ya habíamos visto o explicado sobre los identificadores en expresiones de tipo, pues estos son identificadores de alguna expresion de tipo y llamados sinónimos de tipo.
+      \\
+      
+      Un sinónimo de tipo es ponerle un nombre a una expresion de tipo, este comando esta formado por un identificador y su respectiva expresion de tipo.
+      \\
+      
+      \texttt{<identificador> ::= <expresion de tipo>}
+      \\
+      
+      La regla de sangrado para este comando es similar que para los demás.
+      \\
+      
+      Los sinónimos de tipo sirven para simplificar una expresion de tipo y hacer su significado mas claro.
+      
+      \begin{fxcode}
+         \arrowcode{Vector ::= [real]} \codecomment{Este sinónimo representa al tipo \texttt{[real]} que es una lista de números reales y dice que el identificador \texttt{Vector} sera el nombre o sinónimo del tipo de lista de números reales}
+      \end{fxcode}
+      
+      Ahora podemos utilizarla.
+      
+      \begin{fxcode}
+         \arrowcode{Norm :: Vector ->~real}\\
+         \arrowcode{Norm [] := 0}\\
+         \arrowcode{Norm (x~>| xs) := Sqrt(Sum [x*x | x |< xs])}
+      \end{fxcode}
+      
+      Esta función es la función norma de un vector, la función \texttt{Sum} del que hace uso es la suma de los elementos de una lista.
+      \\
+      
+      Los sinónimos de tipo no pueden ser recursivos como las funciones pues esa recursividad no tendría fin.
+      
+      \begin{fxcode}
+         \arrowcode{TAlpha ::= real ->~TAlpha} \codecomment{Este es un sinónimo invalido y se lanzara un error}
+      \end{fxcode}
+      
+      Al volver a declarar un sinónimo para un identificador se redefine el sinónimo tomando una nueva expresion de tipo, este cambio afecta globalmente.
+      
+      \begin{fxcode}
+         \arrowcode{Vector ::= [int]} \codecomment{redeclarando el sinónimo}
+      \end{fxcode}
+      
+      Un mismo identificador puede ser utilizado para definir un sinónimo de tipo y una función.
+      
+      \begin{fxcode}
+         \arrowcode{Integer ::= int}\\
+         \arrowcode{Integer (n: Integer) := true}\\
+         \arrowcode{Integer \_ := false}\\
+         \arrowcode{Character ::= char}\\
+         \arrowcode{Character :: nat ->~Character}\\
+         \arrowcode{Character n := EncodeChar n}
+      \end{fxcode}
+      
+      Esto sucede porque Function v0.5 no tiene problemas al distinguir una expresion de tipo de una expresion de valor por lo que si un identificador es sinónimo o función queda claramente determinado.
+      \\
+      
+      Los sinonimos de tipo que Function v0.5 proporciona son los siguientes:
+      \\
+      
+      \texttt{Nat      ::= nat    }\\
+      \texttt{Int      ::= int    }\\
+      \texttt{Real     ::= real   }\\
+      \texttt{Bool     ::= bool   }\\
+      \texttt{Char     ::= char   }\\
+      \texttt{String   ::= [Char] }\\
+      \texttt{Function ::= \_ ->~\_ }\\
+      \texttt{Pair     ::= (\_, \_) }\\
+      \texttt{List     ::= [\_]    }
+      \\
+      
+      Como se puede ver el tipo String que representa a la cadena de caracteres es un sinónimo del tipo de lista de caracteres esto concuerda con el hecho de que las cadenas de caracteres no son mas que listas de caracteres.
+      
+   \section{Definición por partes}
+      Las definiciones por partes son definiciones de funciones mediante condiciones, en Function v0.5 se puede utilizar las guardas y la captura de fallo en combinación para realizar dichas definiciones.
+      
+      \begin{fxcode}
+         \arrowcode{Heaviside :: real ->~real}\\
+         \arrowcode{Heaviside x := x~<~0 ? 0  ; ...}\\ 
+         \spacecode{~~~~~~~~~~~~~~~x~=~0 ? 0.5; ...}\\
+         \spacecode{~~~~~~~~~~~~~~~x~>~0 ? 1}
+      \end{fxcode}
+      
+      Esta es la función escalón unitario.
+      
+      \begin{fxcode}
+         \arrowcode{Heaviside 2}\\
+         \outcode{1}
+      \end{fxcode}
+      
+      Otra función que puede ser definida por partes es la función signo.
+      
+      \begin{fxcode}
+         \arrowcode{Sign :: real ->~real}\\
+         \arrowcode{Sign x := x~>~0 ?  1; ...}\\
+         \spacecode{~~~~~~~~~~x~=~0 ?  0; ...}\\
+         \spacecode{~~~~~~~~~~x~<~0 ? -1}
+      \end{fxcode}
+      
+      En algunos casos cuando un valor debe ser retornado para todo valor restante se puede utilizar la constante \texttt{Otherwise}.
+      
+      \begin{fxcode}
+         \arrowcode{Factorial :: int ->~int}\\
+         \arrowcode{Factorial n := n = 0 ? 1; ...}\\
+         \spacecode{~~~~~~~~~~~~~~~n~>~0 ? n * Factorial(n - 1); ...}\\
+         \spacecode{~~~~~~~~~~~~~~~Otherwise ? Error \textquotedbl indefinido\textquotedbl}
+      \end{fxcode}
+      
+      La constante \texttt{Otherwise} es una constante que siempre es verdadera.
+      
+      \begin{fxcode}
+         \arrowcode{Otherwise}\\
+         \outcode{true}
+      \end{fxcode}
+      
+   \section{Definiciones locales}
+      Ya habíamos visto como las expresiones \texttt{let} y \texttt{where} pueden utilizarse para hacer reemplazos o asignaciones a variables en una expresion, ahora en las definiciones pueden ser utilizadas con mayor elegancia para realizar definiciones locales es decir definir constantes o valores dentro de las definiciones de funciones.
+      
+      \begin{fxcode}
+         \arrowcode{clear f}\\
+         \arrowcode{f(a) := a*b + c ...}\\
+         \spacecode{~~~~~~~~where b~<- 12 ...}\\
+         \spacecode{~~~~~~~~where c~<- 7 }\\
+         \arrowcode{f(5)}\\
+         \outcode{67}
+      \end{fxcode}
+      
+      El ejemplo anterior también se puede hacer con expresiones \texttt{let}.
+      
+      \begin{fxcode}
+         \arrowcode{clear f}\\
+         \arrowcode{f(a) := let b~<- 12 in ...}\\
+         \spacecode{~~~~~~~~let c~<- 7 in ...}\\
+         \spacecode{~~~~~~~~a*b + c }\\
+         \arrowcode{f(5)}\\
+         \outcode{67}
+      \end{fxcode}
+      
+      De hecho es mas común usar \texttt{where} en definiciones y \texttt{let} en evaluaciones pero no es una regla por lo que dependiendo de como se ve mejor la expresion se puede decidir entre usar \texttt{let} o \texttt{where}.
+      
+      \begin{fxcode}
+         \arrowcode{Average :: [real] ->~real}\\
+         \arrowcode{Average xs := l~>~0 ? Sum xs / l ; 0 ...}\\
+         \spacecode{~~~~~~~~~~~~~~where l~<- Length xs}\\
+         \arrowcode{let x~<- 0.123456789 in Average [0, x, 2*x, 3*x]}\\
+         \outcode{0.1851851835}
+      \end{fxcode}
+      
+   \section{Notaciones}
+      Los operadores posfijos e infijos también son definibles en Function v0.5, son funciones que tienen cierta notación, el comando de notación es el siguiente.
+      \\
+      
+      \texttt{[infix, infixl, infixr]~<precedencia>~<identificador>~...~<identificador>}\\
+      \texttt{[prefix, posfix]~<identificador>~...~<identificador>}
+      \\
+      
+      Se puede ver que el comando de notación son de dos tipos el primero es de operadores binarios y el segundo de operadores unarios, este comando tiene la misma regla de sangrado que los demás comandos.
+      
+      \subsection*{Operadores binarios}\texttt{~}\\
+      
+      Los operadores binarios son operadores que tienen dos argumentos y el operador va en medio de ellos, ejm: \texttt{2 + 3} donde la suma es un operador binario.
+      
+      En los operadores binarios las palabras reservadas \texttt{infix}, \texttt{infixl}, \texttt{infixr} indican la asociatividad del operador de la siguiente manera:
+      
+      \begin{longtable}[x]{ll}
+         \texttt{infix } & no asociativo\\
+         \texttt{infixl} & asociativo por la izquierda\\
+         \texttt{infixr} & asociativo por la derecha\\
+      \end{longtable}
+      
+      Y \texttt{<precedencia>} es un numero entero de 0 a 255 que indica la prioridad que tiene frente a otros operadores al momento de hacer la evaluación (a menos que se hayan asociado explícitamente usando paréntesis), como ejemplo definamos el siguiente operador binario:
+      
+      \begin{fxcode}
+         \arrowcode{infixr 90 ==>}\\
+         \arrowcode{==>~:: (bool, bool) ->~bool}\\
+         \arrowcode{p ==>~q := \~{}p || q}\\
+      \end{fxcode}
+      
+      Esta ejemplo define el operador logico condicional y hacemos uso de ella.
+      
+      \begin{fxcode}
+         \arrowcode{true ==>~false \&\& true ==>~true}\\
+         \outcode{false}
+      \end{fxcode}
+      
+      Unas cuantas observaciones en el anterior ejemplo.
+      
+      \begin{enumerate}
+         \item Se puede notar que la declaración de notación va antes que la definición si bien no es una regla general esto es necesario pues al momento de definir la función se hacer uso de la notación.
+         \item Al ser un operador binario este tiene una forma infija en el patrón de aplicación (la parte izquierda de la definición) eso es posible pues la sintaxis de patrón de aplicación lo permite.
+         \item Este operador tiene en el tipado al argumento como un par ordenado eso es porque los operadores infijos son en realidad funciones sobre pares ordenados.
+         \item La precedencia del operador \texttt{==>} es 90 y la precedencia del operador \texttt{\&\&} es 80, por lo que el operador \texttt{==>} tiene mayor prioridad que el operador \texttt{\&\&}.
+      \end{enumerate}
+      
+      Los identificadores para los operadores no se restringen solo a identificadores simbólicos sino también están permitidos los identificadores literales.
+      
+      \begin{fxcode}
+         \arrowcode{infix 170 Dot}\\
+         \arrowcode{Dot :: (Vector, Vector) ->~real}\\
+         \arrowcode{[] Dot [] := 0}\\
+         \arrowcode{xs Dot ys := Sum[x*y | x |<~xs, y |<~ys]}
+      \end{fxcode}
+      
+      En este ejemplo esta definida el operador de producto punto vectorial.
+      
+      \begin{fxcode}
+         \arrowcode{[1, 2, 3, 4] Dot [4, 3, 2, 1]}\\
+         \outcode{20}
+      \end{fxcode}
+      
+      \subsection*{Operadores unarios}\texttt{~}\\
+      
+      Un operador unario es un operador con un solo argumento son de dos tipos los prefijos(que van delante de su argumento) y los posfijos(que van después de su argumento).
+      
+      \begin{fxcode}
+         \arrowcode{posfix !!}\\
+         \arrowcode{!! :: nat ->~nat}\\
+         \arrowcode{0!! :=  1}\\
+         \arrowcode{n!! := r = 0 ? a ; ...}\\
+         \spacecode{~~~~~~~r = 1 ? n! / a ...}\\
+         \spacecode{~~~~~~~where a <- 2\^m{} * m! ...}\\
+         \spacecode{~~~~~~~where m <- n Quot 2 ...}\\
+         \spacecode{~~~~~~~where r <- n Rem 2}
+      \end{fxcode}
+      
+      Este ejemplo define la función doble factorial.
+      
+      \begin{fxcode}
+         \arrowcode{12!!}\\
+         \outcode{46080}
+      \end{fxcode}
+      
+      \begin{fxcode}
+         \arrowcode{prefix Negate}\\
+         \arrowcode{Negate :: real ->~real}\\
+         \arrowcode{Negate x := -x}
+      \end{fxcode}
+      
+      Este código anterior define la función negativo de un numero.
+      \\
+      
+      Observaciones:
+      
+      \begin{enumerate}
+         \item Al igual que en los operadores infijos las declaraciones de notación suelen ir antes de la definición del operador.
+         \item La notación puede ser usada en la parte izquierda de la definición.
+         \item A diferencia de los operadores infijos estos operadores pueden tener argumentos de cualquier tipo.
+         \item La notación prefija en realidad es lo mismo que una función común, de hecho en Function v0.5 todas las funciones tienen notación prefija por lo que puede ser obviado.
+      \end{enumerate}
+      
+      \subsection*{Orden de evaluación}\texttt{~}\\
+      
+      entre operadores infijos, posfijos, prefijos y demás funciones el orden de evaluación es el siguiente:
+      
+      \begin{enumerate}
+         \item Paréntesis.
+         \item Funciones o prefijos.
+         \item Posfijos.
+         \item Infijos(según su precedencia y asociatividad).
+         \item Demás clases de expresiones(let, where, guardas, etc.).
+      \end{enumerate}
+      
+      es decir primero los paréntesis, funciones y/o prefijos, posfijos, infijos y finalmente otras expresiones.
+      
+   \section{Sobrecarga de funciones}
+      La sobrecarga significa que una función este definida para varios tipos de datos, en las matemáticas las funciones sobrecargadas son por ejemplo la suma que esta definida sobre números reales y números complejos.
+      \\
+      
+      La diferencia principal entre la sobrecarga de funciones y el polimorfismo es que mientras el polimorfismo es para todo tipo de datos de cierta clase la sobrecarga es solo para cierta cantidad de clases de tipos de dato.
+      \\
+      
+      Function v0.5 permite sobrecargar funciones utilizando el encaje de patrones tipados, de hecho la principal razón de la existencia de patrones tipados es su uso en la sobrecarga de funciones pues Function v0.5 posee lo que se llama tipado dinámico es decir revisa el tipo de los argumentos al momento de ser utilizados(es decir de hacer el encaje de patrones).
+      \\
+      
+      Los principales usos que tiene la sobrecarga de funciones es el de expandir la función hacia nuevos tipos de dato y el de poder definir funciones que acepten varios tipos.
+      
+      \begin{fxcode}
+         \arrowcode{MCD :: (int, int) ->~int}\\
+         \arrowcode{MCD(a, b) := MCD(Abs(a), Abs(b))}\\
+      \end{fxcode}
+      
+      En este ejemplo se expande la definición de la función de máximo común divisor desde los naturales hacia los enteros y esta bien definida pues en la expresion de retorno los argumentos para \texttt{MCD} se convierten en naturales y eso ya esta definido anteriormente.
+      \\
+      
+      En este ejemplo se ha usado el tipado heredable para la definición sobrecargada de \texttt{MCD}, el tipado heredable muestras su fortaleza mayor en la sobrecarga de funciones.
+      \\
+      
+      Veamos otro ejemplo con operadores.
+      
+      \begin{fxcode}
+         \arrowcode{Complex ::= (real, real)}\\
+         \arrowcode{+ :: (Complex, Complex) ->~Complex}\\
+         \arrowcode{(a, b) + (c, d) := (a + c, b + d)}
+      \end{fxcode}
+      
+      En el código anterior se esta sobrecargando el operador de suma para que pueda actuar sobre los números complejos.
+      
+   \section{Algoritmos}
+      Ya hemos visto que las expresiones imperativas pueden emular un programa estructurado pues bien en las definiciones su elegancia y usos es aun mas interesante.
+      \\
+      
+      Veamos los siguientes ejemplos.
+      
+      \begin{fxcode}
+         \arrowcode{PrimeTester(n: nat) :=                ...}\\
+         \spacecode{~~~begin                              ...}\\
+         \spacecode{~~~~~~~if n~<~2 then                  ...}\\
+         \spacecode{~~~~~~~~~~~return false               ...}\\
+         \spacecode{~~~~~~~else                           ...}\\
+         \spacecode{~~~~~~~~~~~for i in [2 .. Sqrt(n)] do ...}\\
+         \spacecode{~~~~~~~~~~~~~~~if (n Rem i) = 0 then  ...}\\
+         \spacecode{~~~~~~~~~~~~~~~~~~~return false       ...}\\
+         \spacecode{~~~~~~~~~~~return true                ...}\\
+         \spacecode{~~~end     }
+      \end{fxcode}
+      
+      Esta función determina si un numero natural es primo o no.
+      
+      \begin{fxcode}
+         \arrowcode{PrimeTester(11)}\\
+         \outcode{true}
+      \end{fxcode}
+      
+      Otro ejemplo
+      
+      \begin{fxcode}
+         \arrowcode{clear Exchange}\\
+         \arrowcode{Exchange(x, y) := ...}\\
+         \spacecode{~~~begin          ...}\\
+         \spacecode{~~~~~~~z~<- x     ...}\\
+         \spacecode{~~~~~~~x~<- y     ...}\\
+         \spacecode{~~~~~~~y~<- z     ...}\\
+         \spacecode{~~~~~~~return(x, y) ...}\\
+         \spacecode{~~~end}
+      \end{fxcode}
+      
+      Esta función intercambia los valores de un par ordenado.
+      \\
+      
+      En algunos casos es conveniente escribir funciones en forma iterativa que recursiva como en el siguiente ejemplo:
+      
+      \begin{fxcode}
+         \arrowcode{Fib 0 := 0}\\
+         \arrowcode{Fib 1 := 1}\\
+         \arrowcode{Fib n := Fib(n - 1) + Fib(n - 2)}\\
+         \arrowcode{Fibonacci :: Nat ->~Nat }\\
+         \arrowcode{Fibonacci n :=           ...}\\
+         \spacecode{~~~begin                 ...}\\
+         \spacecode{~~~~~~~i~<- 1            ...}\\
+         \spacecode{~~~~~~~j~<- 0            ...}\\
+         \spacecode{~~~~~~~while n~>~0 do    ...}\\
+         \spacecode{~~~~~~~~~~~t~<- i + j    ...}\\
+         \spacecode{~~~~~~~~~~~i~<- j        ...}\\
+         \spacecode{~~~~~~~~~~~j~<- t        ...}\\
+         \spacecode{~~~~~~~~~~~n~<- Prev n   ...}\\
+         \spacecode{~~~~~~~return j          ...}\\
+         \spacecode{~~~end}
+      \end{fxcode}
+      
+      Ambas funciones definen la sucesión de fibonacci pero la segunda es mas rápida que la primera, este es un caso especial en el cual la forma imperativa de una función es mas rápida que la funcional pero no siempre sucede así pues las expresiones imperativas están formadas por expresiones lambda mucho mas complejas.
+      \\
+      
+      El lugar mas idóneo en donde usar las expresiones imperativas es en entornos interactivos, por ejemplo este:
+      
+      \begin{fxcode}
+         \arrowcode{Adult() :=                                        ...}\\
+         \spacecode{~~~begin                                          ...}\\
+         \spacecode{~~~~~~~Print \textquotedbl Puede ingresar 0 para salir\textquotedbl         ...}\\
+         \spacecode{~~~~~~~break~<- false                             ...}\\
+         \spacecode{~~~~~~~while \~break do                            ...}\\
+         \spacecode{~~~~~~~~~~~n~<- StrToNum(Input \textquotedbl Edad>~\textquotedbl )          ...}\\
+         \spacecode{~~~~~~~~~~~if n~<~0 then                          ...}\\
+         \spacecode{~~~~~~~~~~~~~~~Print \textquotedbl Edad invalida\textquotedbl               ...}\\
+         \spacecode{~~~~~~~~~~~elif n = 0 then                        ...}\\
+         \spacecode{~~~~~~~~~~~~~~~break~<- true                      ...}\\
+         \spacecode{~~~~~~~~~~~elif n~<~18 then                       ...}\\
+         \spacecode{~~~~~~~~~~~~~~~Print \textquotedbl Usted es menor de edad\textquotedbl      ...}\\
+         \spacecode{~~~~~~~~~~~elif n~<~100 then                      ...}\\
+         \spacecode{~~~~~~~~~~~~~~~Print \textquotedbl Usted es mayor de edad\textquotedbl      ...}\\
+         \spacecode{~~~~~~~~~~~else                                   ...}\\
+         \spacecode{~~~~~~~~~~~~~~~Print \textquotedbl No creo que seas tan viejo\textquotedbl ...}\\
+         \spacecode{~~~~~~~Print \textquotedbl Hasta la proxima\textquotedbl                    ...}\\
+         \spacecode{~~~end}
+      \end{fxcode}
+      
+      Este programa interactivo permite identificar si eres mayor o menor de edad.
+      
+      \begin{fxcode}
+         \arrowcode{Adult()}\\
+         \outcode{Puede ingresar 0 para salir    }\\
+         \outcode{Edad>~\texttt{-}1                       }\\
+         \outcode{Edad invalida                  }\\
+         \outcode{Edad>~1                        }\\
+         \outcode{Usted es menor de edad         }\\
+         \outcode{Edad>~17                       }\\
+         \outcode{Usted es menor de edad         }\\
+         \outcode{Edad>~1718                     }\\
+         \outcode{No creo que seas tan viejo     }\\
+         \outcode{Edad>~18                       }\\
+         \outcode{Usted es mayor de edad         }\\
+         \outcode{Edad>~90                       }\\
+         \outcode{Usted es mayor de edad         }\\
+         \outcode{Edad>~100                      }\\
+         \outcode{No creo que seas tan viejo     }\\
+         \outcode{Edad>~0                        }\\
+         \outcode{Hasta la próxima               }\\
+         \outcode{()                             }
+      \end{fxcode}
+            
+      Por que escribe \texttt{()} al final? pues es por que \texttt{Adult} sigue siendo una función que toma una tupla vacía y al no haber sentencia de retorno en el cuerpo de la expresion imperativa este retornara la tupla vacía cuando termine su ejecución o evaluación, de hecho si se evalúa \texttt{Adult} sin aplicarlo a la tupla vacía devolverá una expresion bastante larga que es la representación interna que tiene.
+      \\
+            
+      Definamos un pequeño programa sin argumentos, lo cual es posible pues en la definición no evalúa nada.
+      
+      \begin{fxcode}
+         \arrowcode{Hello := ...}\\
+         \spacecode{~~~begin ...}\\
+         \spacecode{~~~~~~~Print "Hola mundo" ...}\\
+         \spacecode{~~~~~~~Input "Presione enter para salir ..." ...}\\
+         \spacecode{~~~end}\\
+         \arrowcode{Hello}\\
+         \outcode{Hola mundo                   }\\
+         \outcode{Presione enter para salir ...}\\
+         \outcode{()                           }
+      \end{fxcode}
+      
+      Los programas interactivos y la elegancia en los algoritmos es la principal razón por la que Function v0.5 incluye expresiones imperativas.
+            
+   \section{Definición vs asignación}
+      Como vimos en el segundo capitulo la asignación sirve para darle algún valor a una variable o identificador, en cierto modo una definición también puede ser similar a eso pero en una definición no evalúa la expresion mediante el cual se esta definiendo la función o constante en cambio en una asignación si evalúa y el valor resultante es el que se asigna al identificador.
+      
+      \begin{fxcode}
+         \arrowcode{s~<- Input \textquotedbl s: \textquotedbl} \codecomment{en este caso si evalúa}\\
+         \outcode{s: hola}\\
+         \arrowcode{t := Input \textquotedbl t: \textquotedbl} \codecomment{aqui ya no evalua}\\
+         \outcode{s}\\
+         \outcode{\textquotedbl hola\textquotedbl} \codecomment{hace uso del valor que se la asignado}\\
+         \arrowcode{t}\\
+         \outcode{t: hola} \codecomment{hace uso de la definición que se le a dado}\\
+         \arrowcode{\textquotedbl hola\textquotedbl}
+      \end{fxcode}
+      
+      En muchos casos usar asignaciones es mas recomendable que usar definiciones como al saber que hora fue anteriormente.
+      
+      \begin{fxcode}
+         \arrowcode{t~<- Time()}\\
+         \arrowcode{T := Time()}\\
+         \arrowcode{t}\\
+         \outcode{(9, 24, 24, 939)}\\
+         \arrowcode{T}\\
+         \outcode{(9, 25, 8, 416)}\\
+         \arrowcode{t}\\
+         \outcode{(9, 24, 24, 939)} \codecomment{sigue siendo igual a la anterior}\\
+         \arrowcode{T}\\
+         \outcode{(9, 27, 26, 492)} \codecomment{véase que no es igual a la anterior}
+      \end{fxcode}
+      
+      Cuando se hace una definición lo que en realidad se hace es usar todas las definiciones anteriores existentes y combinarlas para generar una expresion y asignarla sin evaluar al identificador para usarlo luego en las evaluaciones.
+      
+      \begin{fxcode}
+         \arrowcode{clear F}
+         \arrowcode{F 0 := 1}
+      \end{fxcode}
+      
+      Hasta aquí se ha generado una expresion para F que es igual a:
+      
+      \begin{fxcode}
+         \arrowcode{F}\\
+         \outcode{(\textbackslash var1 ->~(\textbackslash 0 ->~1) var1 ; fail)}
+      \end{fxcode}
+      
+      Agregando mas definiciones.
+      
+      \begin{fxcode}
+         \arrowcode{F n := n * F(n - 1)}
+      \end{fxcode}
+      
+      Aquí se a generado una nueva expresion para F combinando las dos definiciones.
+      
+      \begin{fxcode}
+         \arrowcode{F}\\
+         \outcode{(\textbackslash var1 ->~(\textbackslash 0 ->~1) var1 ; (\textbackslash n ->~n * F (n - 1)) var1 ; fail)}
+      \end{fxcode}
+      
+      En muchos casos la expresion generada es una abstracción lambda pero en la definición de constantes no es así.
+      
+      \begin{fxcode}
+         \arrowcode{MultiConst := 1.2345}\\
+         \arrowcode{MultiConst := 0.9876}\\
+         \arrowcode{MultiConst}\\
+         \outcode{1.2345} \codecomment{como se hizo la evaluación no se ve la forma que tenia la expresion asignada a \texttt{MultiConst} antes de evaluarla pero esta fue \texttt{1.2345 ; 0.9876 ; fail}}
+      \end{fxcode}
+      
+      Cuando se hace asignación y definición a un mismo identificador afecta al valor o expresion asignado que tiene pero a las definiciones que tienen es decir la lista de definiciones u opciones de encaje de patrones e incluso el tipado heredable siguen siendo los mismos y cuando se vuelva a hacer una definición se utilizara las anteriores definiciones para generarle una nueva expresion o valor.
+      
+      \begin{fxcode}
+         \arrowcode{clear F }\\
+         \arrowcode{F 0 := 1}\\
+         \arrowcode{F       }\\
+         \outcode{(\textbackslash var1 ->~(\textbackslash 0 ->~1) var1 ; fail)}\\
+         \arrowcode{F~<- 12 + 3}\\
+         \arrowcode{F}\\
+         \outcode{15}\\
+         \arrowcode{F n := n * F(n - 1)}\\
+         \arrowcode{F}\\
+         \outcode{(\textbackslash var1 ->~(\textbackslash 0 ->~1) var1 ; (\textbackslash n ->~n * F (n - 1)) var1 ; fail)}
+      \end{fxcode}
+      
+   \section{Limpieza de identificadores}
+      El comando \texttt{clear} no solo puede ser utilizado para eliminar definiciones de funciones u operadores, también puede ser utilizado para eliminar sinónimos y tipados heredables, de hecho \texttt{clear} borra todo lo que este relacionado con ese identificador y lo deja indefinido.
+      \\
+      
+      Ejemplo, con la función y sinónimo \texttt{Integer} y \texttt{Character} definido anteriormente.
+      
+      \begin{fxcode}
+         \arrowcode{clear Character Integer}
+      \end{fxcode}
+      
+      Ahora Character e Integer quedaran como identificadores indefinidos se han borrado tanto el sinónimo, tipo heredable y la definición asociado a ellos.
+      
+      \begin{fxcode}
+         \arrowcode{Character}\\
+         \outcode{Character}\\
+         \arrowcode{Integer 1}\\
+         \outcode{ERROR - performing error in command 1 line 1, expected function for application left side but ``Integer'' found}
+      \end{fxcode}
+      
+   \section{Primitivas}
+      Las primitivas son funciones que están definidas internamente y son los bloques de construcción de las demás funciones.
+      
+      \begin{fxcode}
+         \arrowcode{PrimAdd(4, 5)}\\
+         \arrowcode{PrimPow(42, PrimRandom(6))}
+      \end{fxcode}
+      
+      Muchas de las funciones en \texttt{prelude.fx} están definidas en base a primitivas.
+      \\
+      
+      Por ejemplo las suma esta definida como:
+      
+      \begin{fxcode}
+         \linecode{infixl 175 +}\\
+         \linecode{+ :: (real, real) ->~real}\\
+         \linecode{a + b := PrimAdd(a, b)}
+      \end{fxcode}
+      
+      La siguiente tabla muestra información acerca de las primitivas:
+      
+      \begin{longtable}[c]{lll}
+         \caption{Primitivas}\label{tb:primitives}\\ \hline
+         {\bf Primitiva} & {\bf Sintaxis} & {\bf Descripción} \\ \hline
+         PrimAdd              & \texttt{PrimAdd(<numero>,~<numero>)              } & Suma de números                                  \\
+         PrimSub              & \texttt{PrimSub(<numero>,~<numero>)              } & Resta de números                                 \\
+         PrimMul              & \texttt{PrimMul(<numero>,~<numero>)              } & Multiplicacion de números                        \\
+         PrimDiv              & \texttt{PrimDiv(<numero>,~<numero>)              } & División de números                              \\
+         PrimPow              & \texttt{PrimPow(<numero>,~<numero>)              } & Potenciación de números                          \\
+         PrimEqual            & \texttt{PrimEqual(<numero>,~<numero>)            } & Igualdad de números                              \\
+         PrimLess             & \texttt{PrimLess(<numero>,~<numero>)             } & Desigualdad menor o igual de números             \\
+         PrimGreater          & \texttt{PrimGreater(<numero>,~<numero>)          } & Desigualdad mayor o igual de números             \\
+         PrimIsNaN            & \texttt{PrimIsNaN~<numero>                       } & Verifica si es NaN                               \\
+         PrimTrunc            & \texttt{PrimTrunc~<numero>                       } & Parte entera                                     \\
+         PrimFrac             & \texttt{PrimFrac~<numero>                        } & Parte fraccionaria                               \\
+         PrimSin              & \texttt{PrimSin~<numero>                         } & Seno                                             \\
+         PrimCos              & \texttt{PrimCos~<numero>                         } & Coseno                                           \\
+         PrimTan              & \texttt{PrimTan~<numero>                         } & Tangente                                         \\
+         PrimASin             & \texttt{PrimASin~<numero>                        } & Arco seno                                        \\
+         PrimACos             & \texttt{PrimACos~<numero>                        } & Arco coseno                                      \\
+         PrimATan             & \texttt{PrimATan~<numero>                        } & Arco tangente                                    \\
+         PrimLn               & \texttt{PrimLn~<numero>                          } & Logaritmo natural                                \\
+         PrimExp              & \texttt{PrimExp~<numero>                         } & Exponencial                                      \\
+         PrimRem              & \texttt{PrimRem(<entero>,~<entero>)              } & Resto de una división entera                     \\
+         PrimQuot             & \texttt{PrimQuot(<entero>,~<entero>)             } & Cociente de una división entera                  \\
+         PrimBitNot           & \texttt{PrimBitNot~<entero>                      } & Negación a nivel de bits                         \\
+         PrimBitAnd           & \texttt{PrimBitAnd(<entero>,~<entero>)           } & Conjunción a nivel de bits                       \\
+         PrimBitOr            & \texttt{PrimBitOr(<entero>,~<entero>)            } & Disyunción a nivel de bits                       \\
+         PrimBitShl           & \texttt{PrimBitShl(<entero>,~<entero>)           } & Desplazamiento a la izquierda a nivel de bits    \\
+         PrimBitShr           & \texttt{PrimBitShr(<entero>,~<entero>)           } & Desplazamiento a la derecha a nivel de bits      \\
+         PrimRandom           & \texttt{PrimRandom~<entero>                      } & Numero entero aleatorio                          \\
+         PrimEncodeChar       & \texttt{PrimEncodeChar~<natural>                 } & Ordinal a carácter                               \\
+         PrimDecodeChar       & \texttt{PrimDecodeChar~<caracter>                } & Carácter a ordinal                               \\
+         PrimLength           & \texttt{PrimLength~<lista>                       } & Longitud de lista                                \\
+         PrimGet              & \texttt{PrimGet(<lista>,~<indice>)               } & Extraer elemento de lista                        \\&&\\
+         PrimSet              & 
+         \begin{minipage}{6cm}
+            \texttt{PrimSet(<elemento>,~<lista>,\\~<indice>)   }
+         \end{minipage}
+          & Establecer elemento de lista                     \\&&\\
+         PrimArity            & \texttt{PrimArity~<tupla>                        } & Aridad de tupla                                  \\
+         PrimSelect           & \texttt{PrimSelect(<tupla>,~<indice>)            } & Extraer elemento de tupla                        \\&&\\
+         PrimPut              & 
+         \begin{minipage}{6cm}
+            \texttt{PrimPut(<elemento>,~<tupla>,\\~<indice>)   }
+         \end{minipage}
+          & Establecer elemento de tupla                     \\&&\\
+         PrimInput            & \texttt{PrimInput()                              } & Leer una cadena                                  \\
+         PrimOutput           & \texttt{PrimOutput~<cadena>                      } & Escribir una cadena                              \\
+         PrimClearScreen      & \texttt{PrimClearScreen()                        } & Limpiar consola                                  \\
+         PrimGetDateTime      & \texttt{PrimGetDateTime()                        } & Obtener fecha y hora                             \\&&\\
+         PrimSetDateTime      & 
+         \begin{minipage}{6cm}
+            \texttt{PrimSetDateTime(<año>,~<mes>,\\~<dia de la semana>,~<dia>,\\~<hora>,~<minuto>,~<segundo>,\\~<milisegundos>)}
+         \end{minipage}
+         & Establecer fecha y hora \\&&\\
+         PrimAnswer           & \texttt{PrimAnswer()                             } & Resultado anterior                               \\
+         PrimError            & \texttt{PrimError~<cadena>                       } & Lanzar un error                                  \\
+         PrimTryStrToNum      & \texttt{PrimStrToNum~<cadena>                    } & Convertir cadena a numero                        \\
+         PrimValueToStr       & \texttt{PrimValueToStr~<argumento>               } & Convertir valor a cadena en forma elegante       \\
+         PrimTypeToStr        & \texttt{PrimTypeToStr~<argumento>                } & Inferir tipo y convertir a cadena                \\
+         PrimValueToStrFull   & \texttt{PrimValueToStrFull~<argumento>           } & Convertir valor a cadena en forma extendida      \\
+         PrimIsAnonymous      & \texttt{PrimIsAnonymous~<argumento>              } & Verifica si es anónimo                           \\
+         PrimIsFreeIdentifier & \texttt{PrimIsFreeIdentifier~<argumento>         } & Verifica si es identificador libre               \\
+         PrimIsTuple          & \texttt{PrimIsTuple~<argumento>                  } & Verifica si es tupla                             \\
+         PrimIsLambda         & \texttt{PrimIsLambda~<argumento>                 } & Verifica si es abstracción lambda                \\
+         PrimQuit             & \texttt{PrimQuit()                               } & Salir                                            \\
+         PrimInterrupt        & \texttt{PrimInterrupt()                          } & Interrumpir una tarea                            \\
+         PrimRestart          & \texttt{PrimRestart()                            } & Reiniciar                                        \\
+      \end{longtable}
+      
+      
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   

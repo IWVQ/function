@@ -1,0 +1,719 @@
+
+\titleformat{\subsection}[runin]{\large \bfseries}{\thesubsection.}{10pt}{\bfseries}
+\titlespacing{\subsection}{0pt}{10pt}{0pt}
+
+\chapter{Estructuras de control}
+   Las estructuras de control son estructuras que aparecen en la programación imperativa para realizar tareas paso a paso, dado que Function v0.5 esta basado en expresiones lambda no tiene la ejecución paso a paso de forma nativa pero en algunas situaciones es necesario tener esa ejecución paso a paso por lo que Function v0.5 incluye las llamadas expresiones imperativas que emulan esa ejecución paso a paso y estructurada de los programas imperativos.
+   
+   \section{Expresion imperativa}
+      Una expresion imperativa es una expresion que emula un programa imperativo, estas expresiones empiezan por la palabra clave \texttt{begin} y terminan con la palabra clave \texttt{end} dentro de ella se puede escribir las acciones de la misma manera que para un algoritmo estructurado.
+      \\
+      
+      \texttt{begin}\\
+      \texttt{\linetab<sentencia S1>}\\
+      \texttt{\linetab...}\\
+      \texttt{\linetab<sentencia Sn>}\\
+      \texttt{end}
+      \\
+      
+      donde \texttt{<sentencia Si>} es una sentencia, estas sentencias pueden ser asignaciones, condicionales, bucles, etc. Las sentencias se ejecutan uno a uno en orden hasta que se terminar o cuando se encuentre con la sentencia de retorno, la cantidad de sentencias puede ser 0 o mas.
+      \\
+      
+      Las sentencias pueden ser:
+      
+      \begin{enumerate}
+         \item Retorno.
+         \item Asignaciones
+         \item Llamadas.
+         \item Condicional.
+         \item Bucle while.
+         \item Bucle for.
+      \end{enumerate}
+      
+      Las sentencias suelen tener un sangrado propio que lo hace mas claro al momento de escribir, en cambio la expresion imperativa en conjunto no tiene ningún sangrado.
+      \\
+      
+      \texttt{\linetab begin}\\
+      \texttt{\linetab S1}\\
+      \texttt{\linetab ...}\\
+      \texttt{\linetab Sn}\\
+      \texttt{end}
+      \\
+      
+      \texttt{begin}\\
+      \texttt{\linetab S1}\\
+      \texttt{\linetab ...}\\
+      \texttt{\linetab Sn}\\
+      \texttt{\linetab end}
+      \\
+      
+      Ambas expresiones mostradas arriba son equivalentes.
+      \\
+      
+      {\bf Nota:} Aunque la expresion imperativa no tiene sangrado especifico cuando se escribe en la consola es necesario respetar el sangrado del comando de evaluación u otros comandos.
+      
+      \begin{fxcode}
+         \arrowcode{begin ...}\\
+         \spacecode{~~~Print \textquotedbl hola mundo\textquotedbl ...}\\
+         \spacecode{end}
+      \end{fxcode}
+      
+      En el código anterior se interpretara como dos comandos diferentes:
+      
+      \begin{fxcode}
+         \arrowcode{begin ...}\\
+         \spacecode{~~~Print \textquotedbl hola mundo\textquotedbl ...}
+      \end{fxcode}
+      
+      y
+      
+      \begin{fxcode}
+         \spacecode{end}
+      \end{fxcode}
+      
+      En cambio en los siguientes códigos todo va bien.
+      
+      \begin{fxcode}
+         \arrowcode{begin return 1 end}
+      \end{fxcode}
+      
+      \begin{fxcode}
+         \arrowcode{begin ...}\\
+         \spacecode{~~~Print x~<- 1...}\\
+         \spacecode{~end}
+      \end{fxcode}
+      
+      Veamos algunos ejemplos de expresiones imperativas.
+      
+      \begin{fxcode}
+         \arrowcode{begin ...}\\
+         \spacecode{~~~x~<- 3 ...}\\
+         \spacecode{~~~Print \textquotedbl Hola mundo\textquotedbl~...}\\
+         \spacecode{~~~Input \textquotedbl Presione enter para continuar...\textquotedbl~...}\\
+         \spacecode{~~~end}\\
+         \outcode{Hola mundo}\\
+         \outcode{Presione enter para continuar...}\\
+         \outcode{()}
+      \end{fxcode}
+   
+      En el ejemplo anterior primero se ejecuta en el siguiente orden:
+      
+      \begin{enumerate}
+         \item \texttt{x <- 3}, asigna $3$ a x.
+         \item \texttt{Print \textquotedbl Hola mundo\textquotedbl}, Imprime ``Hola mundo'' en la consola.
+         \item \texttt{Input \textquotedbl Presione enter para continuar...\textquotedbl}, Pide el ingreso de algún valor en la consola y luego de presionar enter continuara con la ejecución.
+      \end{enumerate}
+      
+      Luego de esto termina la ejecución y devuelve la tupla vacía como resultado.
+      
+      \begin{fxcode}
+         \arrowcode{begin ...}\\
+         \spacecode{~~~n <- 4\^{}2 ...}\\
+         \spacecode{~~~return n ...}\\
+         \spacecode{~~~end}\\
+         \outcode{16}
+      \end{fxcode}
+      
+      En este ejemplo se asigna $4^2$ a n y en el siguiente paso devuelve n como el valor de la expresion imperativa.
+      \\
+      
+      Devolver un valor especifico se hace solo si ejecuta la sentencia de retorno, en el siguiente paso veremos que no ejecuta la sentencia de retorno por lo que devuelve una tupla vacía.
+      
+      \begin{fxcode}
+         \arrowcode{let f~<- (\textbackslash x ->~Abs x) in ...}\\
+         \spacecode{~~~begin ...}\\
+         \spacecode{~~~~~~~y~<- 1 ...}\\
+         \spacecode{~~~~~~~if f(y)~<~0 then ...}\\
+         \spacecode{~~~~~~~~~~~return f(y) ...}\\
+         \spacecode{~~~end}\\
+         \outcode{()}
+      \end{fxcode}
+      
+      Ademas es interesante notar que ahora si se puede alinear la palabra clave \texttt{begin} con \texttt{end} pues ambas están dentro del sangrado del comando de evaluación.
+      
+      \begin{fxcode}
+         \layoutcomment{~}{sangrado de la evaluación}\\
+         \arrowcode{let f~<- (\textbackslash x ->~Abs x) in ...}\\
+         \spacecode{~~~begin ...}\\
+         \spacecode{~~~~~~~y~<- 1 ...}\\
+         \spacecode{~~~~~~~if f(y)~<~0 then ...}\\
+         \spacecode{~~~~~~~~~~~return f(y) ...}\\
+         \spacecode{~~~end}
+      \end{fxcode}
+      
+      Si no hay sentencias dentro de la expresion imperativa la evaluación devuelve una tupla vacía.
+      
+      \begin{fxcode}
+         \arrowcode{begin end}\\
+         \outcode{()}\\
+         \arrowcode{begin ...}\\
+         \spacecode{~end}\\
+         \outcode{()}\\
+         \arrowcode{let i~<- 1 in begin ...}\\
+         \spacecode{~~~~~~~~~~~~~~end}\\
+         \outcode{()}
+      \end{fxcode}
+      
+      En las siguientes secciones se detalla mas sobre cada una de las sentencias.
+      \\
+      
+      En algunos casos para simplificar la sintaxis de una secuencia de sentencias se le escribirá simplemente como \texttt{<sentencias>}.
+      
+   \section{Sentencia de retorno}
+      Esta es una sentencia que al ser ejecutada evalúa una expresion, termina la ejecución de la expresion imperativa y devuelve el valor de dicha como valor de la expresion imperativa, tiene la forma:
+      \\
+      
+      \texttt{return <expresion>}
+      \\
+      
+      \begin{fxcode}
+         \arrowcode{begin  ...}\\
+         \spacecode{~~~return 3 + 4\^{}2  ...} \codecomment{la sentencia de retorno}\\
+         \spacecode{~~~return 12   ...}\\
+         \spacecode{~~~end}\\
+         \outcode{19}
+      \end{fxcode}
+      
+      En el anterior ejemplo ya no ejecuta \texttt{return 12} pues se a terminado la ejecución al haberse ejecutado \texttt{return 3 + 4\^{}2} y ademas devuelve \texttt{19} que es el valor de \texttt{3 + 4\^{}2}.
+      \\
+      
+      Esta sentencia tiene la regla de sangrado en el cual para que un token sea parte de la sentencia debe estar dentro de ese sangrado, el token \texttt{return} es el que marca el sangrado para esta sentencia.
+      
+      \begin{fxcode}
+         \layoutcomment{~~~~~}{aquí marca la columna de sangrado}\\
+         \spacecode{~~~~return E}\\
+      \end{fxcode}
+      
+      Por ejemplo si tenemos:
+      
+      \begin{fxcode}
+         \arrowcode{begin}\\
+         \spacecode{~~~return 3}\\
+         \spacecode{~~~\texttt{-} 1} \codecomment{aquí el token ``-'' ya no es parte de la sentencia anterior pues tiene la misma columna de inicio que \texttt{return}, por lo que llega a ser una nueva sentencia}
+      \end{fxcode}
+   
+      En cambio si tenemos:
+      
+      \begin{fxcode}
+         \arrowcode{begin}\\
+         \spacecode{~~~return 3}\\
+         \spacecode{~~~~\texttt{-} 1} \codecomment{aquí el token ``-'' si es parte de la sentencia anterior pues esta dentro del sangrado}
+      \end{fxcode}
+      
+      \begin{fxcode}
+         \arrowcode{begin  ...}\\
+         \spacecode{~~~return 3    ...}\\
+         \spacecode{~~~\texttt{-} 1 ...}\\
+         \spacecode{~~~end}\\
+         \outcode{3}\\
+         \arrowcode{begin  ...}\\
+         \spacecode{~~~return 3    ...}\\
+         \spacecode{~~~~\texttt{-} 1 ...}\\
+         \spacecode{~~~end}\\
+         \outcode{2}
+      \end{fxcode}
+      
+   \section{Sentencia de asignación}
+      Esta sentencia es otro ejemplo de asignación local pues solo afecta a las variables dentro de la expresion imperativa, tienen la forma:
+      \\
+      
+      \texttt{<patrón>~<-~<expresion>}
+      \\
+      
+      Como se puede ver esta asignación no se limita solo a identificadores pues permite asignar a cualquier patrón.
+      \\
+      
+      En esta sentencia las variables del \texttt{<patrón>} toman los valores respectivos del valor de la \texttt{<expresion>} y podrán ser utilizados en las siguientes sentencias.
+      
+      \begin{fxcode}
+         \arrowcode{begin  ...}\\
+         \spacecode{~~~x~<- -0.1   ... } \codecomment{la sentencia de asignación}\\
+         \spacecode{~~~return x\^{}2 + x  ...}\\
+         \spacecode{~~~end}\\
+         \outcode{-0.09}
+      \end{fxcode}
+      En el ejemplo anterior la variable x adopta el valor $-0.1$ y es utilizado en la sentencia de retorno.
+      
+      \begin{fxcode}
+         \arrowcode{let (x, y)~<- (1, 2) in  ...}\\
+         \spacecode{~~~begin                 ...}\\
+         \spacecode{~~~~~~~z~<- x            ...}\\
+         \spacecode{~~~~~~~x~<- y            ...}\\
+         \spacecode{~~~~~~~y~<- z            ...}\\
+         \spacecode{~~~~~~~return (x, y)     ...}\\
+         \spacecode{~~~end                   ...}\\
+         \outcode{(2, 1)}\\
+         \arrowcode{begin        ...}\\
+         \spacecode{~~~x~<- 1    ...}\\
+         \spacecode{~~~y~<- 2    ...}\\
+         \spacecode{~~~z~<- x*y  ...}\\
+         \spacecode{~~~end}\\
+         \outcode{()} \codecomment{devuelve () pues no sea ejecutado ninguna sentencia de retorno}
+      \end{fxcode}
+      
+      Al igual que otras sentencias la sentencia de asignación también tiene sangrado que permite identificar donde termina la sentencia.
+      
+      \begin{fxcode}
+         \layoutcomment{~~~~}{el primer token de la sentencia marca la columna de sangrado para la sentencia de asignación}\\
+         \spacecode{~~~P <- E}
+      \end{fxcode}
+      
+      por ejemplo si tenemos:
+      
+      \begin{fxcode}
+         \arrowcode{begin ...}\\
+         \spacecode{~~~x <- 3 ...}\\ 
+         \spacecode{~~~\texttt{-} 4    ...} \codecomment{el token ``-''no esta en el sangrado de la sentencia anterior pues tiene la misma columna de inicio que x que es el que marca el sangrado}
+      \end{fxcode}
+      
+      En cambio si tenemos:
+      
+      \begin{fxcode}
+         \arrowcode{begin}\\
+         \spacecode{~~~x~>|~xs~<- 3~>|}\\
+         \spacecode{~~~~~~~[1, 2]} \codecomment{aqui el token [ si esta dentro del sangrado como todos los demás tokens [1, 2] y es parte de la asignación}
+      \end{fxcode}
+      
+      \begin{fxcode}
+         \arrowcode{begin       ...}\\
+         \spacecode{~~~x~<- 3   ...}\\
+         \spacecode{~~~\texttt{-} 4      ...}\\
+         \spacecode{~~~return x ...}\\
+         \spacecode{~~~end}\\
+         \outcode{3}\\
+         \arrowcode{begin              ...}\\
+         \spacecode{~~~x~>|~xs~<- 3~>| ...}\\
+         \spacecode{~~~~~~~[1, 2]       ...}\\
+         \spacecode{~~~return xs       ...}\\
+         \spacecode{~~~end}\\
+         \outcode{[1, 2]}
+      \end{fxcode}
+   
+   \section{Sentencias de evaluación}
+      Esta sentencia evalua una expresion dada:
+      \\
+      
+      \texttt{<expresion>}
+      \\
+
+      Al evaluar la expresion no hace mas y continua con la ejecución de la siguiente sentencia.
+      
+      \begin{fxcode}
+         \arrowcode{begin      ...}\\
+         \spacecode{~~~x <- 12 ...}\\
+         \spacecode{~~~12 + 3  ...} \codecomment{la sentencia de evaluación}\\
+         \spacecode{~~~end}\\
+         \outcode{()}
+      \end{fxcode}
+      
+      Es mas interesante cuando las expresiones a evaluar representan acciones pues se ejecutan paso a paso.
+      
+      \begin{fxcode}
+         \arrowcode{begin ...}\\
+         \spacecode{~~~(a, b)~<- (\textquotesingle a\textquotesingle, \textquotesingle b\textquotesingle) ...}\\
+         \spacecode{~~~Print (a~>| \textquotedbl~<-- es un literal\textquotedbl) ...}\\
+         \spacecode{~~~Print (b~>| \textquotedbl~<-- también es un literal\textquotedbl) ...}\\
+         \spacecode{~~~s~<- Input \textquotedbl Ingrese una cadena> \textquotedbl~ ...}\\
+         \spacecode{~~~Print (\textquotedbl usted ingreso: \textquotedbl~ ++ s) ...}\\
+         \spacecode{~~~end}\\
+         \outcode{a~<-- es un literal}\\
+         \outcode{b~<- también es un literal}\\
+         \outcode{Ingrese una cadena> hola}\\
+         \outcode{usted ingreso: hola}\\
+         \outcode{()}
+      \end{fxcode}
+      
+      La sentencia de evaluación también tiene sangrado como las demás sentencias:
+      
+      \begin{fxcode}
+         \spacecode{~~~E} \codecomment{El primer token de la expresion marca el sangrado}
+      \end{fxcode}
+      
+      Por ejemplo si tenemos:
+      
+      \begin{fxcode}
+         \arrowcode{begin}\\
+         \spacecode{~~~Print}\\
+         \spacecode{~~~\textquotedbl hola\textquotedbl} \codecomment{Este token no esta en el sangrado de la primera sentencia por lo que no es parte de esa sentencia}
+      \end{fxcode}
+      
+      En cambio si tenemos:
+      
+      \begin{fxcode}
+         \arrowcode{begin}\\
+         \spacecode{~~~Print}\\ 
+         \spacecode{~~~~~\textquotedbl hola\textquotedbl}    \codecomment{ Ahora el token si esta en el sangrado y es parte de esa sentencia}
+      \end{fxcode}
+      
+      \begin{fxcode}
+         \arrowcode{begin     ...}\\
+         \spacecode{~~~Print  ...} \codecomment{ cuando no esta aplicado no realiza acciones }\\
+         \spacecode{~~~\textquotedbl hola\textquotedbl ...  }\\
+         \spacecode{~~~end         }\\
+         \outcode{()}\\
+         \arrowcode{begin         ...}\\
+         \spacecode{~~~Print      ...}\\
+         \spacecode{~~~~~~~\textquotedbl hola\textquotedbl ...}\\
+         \spacecode{~~~end}\\
+         \outcode{hola}\\
+         \outcode{()}
+      \end{fxcode}
+   
+   \section{Condicional}
+      La condicional es una sentencia que ejecuta otras sentencias solo si una condición se cumple, tiene la forma:
+      \\
+      
+      \texttt{if~<condición C1>~then   }\\
+      \texttt{\linetab<sentencias SS1>     }\\
+      \texttt{elif~<condición C2>~then }\\
+      \texttt{\linetab<sentencias SS2>     }\\
+      \texttt{...                      }\\
+      \texttt{elif~<condición Cn>~then }\\
+      \texttt{\linetab<sentencias SSn>     }\\
+      \texttt{else                     }\\
+      \texttt{\linetab<sentencias ES>      }
+      \\
+      
+      donde \texttt{<condición Ci>} es una expresion que devuelve un valor logico y \texttt{<sentencias SSi>} y \texttt{<sentencias ES>} son sentencias un grupo de sentencias \texttt{SSi} es ejecutado solo si \texttt{Ci} es la primera condición de todas que resulta verdadera en caso de que ninguna \texttt{Ci} sea verdadera entonces se ejecutan las \texttt{<sentencias ES>}.
+      \\
+      
+      La condicional es un ejemplo de sentencia que esta formada por otras sentencias dentro de ellas.
+      
+      \begin{fxcode}
+         \arrowcode{begin                          ... }\\
+         \spacecode{~~~~Print \textquotedbl ingrese un numero\textquotedbl~   ...}\\
+         \spacecode{~~~~x~<- Input \textquotedbl >~\textquotedbl~             ...}\\
+         \spacecode{~~~~if x~<~0 then               ...}\\
+         \spacecode{~~~~~~~~Print \textquotedbl numero negativo\textquotedbl~ ...}\\
+         \spacecode{~~~~elif x = 0 then             ...}\\
+         \spacecode{~~~~~~~~Print \textquotedbl numero cero\textquotedbl~     ...}\\
+         \spacecode{~~~~else                        ...}\\
+         \spacecode{~~~~~~~~Print \textquotedbl numero positivo\textquotedbl~ ...}\\
+         \spacecode{~~~~Print \textquotedbl hasta luego\textquotedbl~         ...}\\
+         \spacecode{~~~~end}
+      \end{fxcode}
+      
+      En el ejemplo anterior dependiendo que valor tome x se ejecutara:
+      
+      \begin{enumerate}
+         \item \texttt{Print \textquotedbl numero negativo\textquotedbl}, si $x < 0$.
+         \item \texttt{Print \textquotedbl numero cero\textquotedbl    }, si $x = 0$.
+         \item \texttt{Print \textquotedbl numero positivo\textquotedbl}, en otro caso.
+      \end{enumerate}
+      
+      luego de ejecutarse la condicional prosigue con la ejecucion de otras sentencias en es caso:
+      \\
+      
+      \texttt{Print \textquotedbl hasta luego\textquotedbl}
+      \\
+      
+      los cuerpos \texttt{elif} y \texttt{else} son opcionales y pueden obviarse si no son necesarios, pero el cuerpo \texttt{if} es obligatorio.
+      
+      \begin{fxcode}
+         \arrowcode{begin ...}\\
+         \spacecode{~~~~~~~~x~<- Random(100) ...}\\
+         \spacecode{~~~~~~~~if x~<~10 then ...}\\
+         \spacecode{~~~~~~~~Print \textquotedbl Felicidades ha ganado el premio\textquotedbl ...}\\
+         \spacecode{~~~~~~~~Print \textquotedbl hasta luego\textquotedbl ...}\\
+         \spacecode{~~~~end}
+      \end{fxcode}
+      
+      \begin{fxcode}
+         \arrowcode{begin}\\
+         \spacecode{~~~~~~~~x~<- Random(100)...}\\
+         \spacecode{~~~~~~~~if x~<~10 then ...}\\
+         \spacecode{~~~~~~~~Print \textquotedbl Felicidades ha ganado el premio\textquotedbl ...}\\
+         \spacecode{~~~~~~~~else ...}\\
+         \spacecode{~~~~~~~~~~~~Print \textquotedbl Lo sentimos\textquotedbl ...}\\
+         \spacecode{~~~~end}
+      \end{fxcode}
+      
+      \begin{fxcode}
+         \arrowcode{begin ... }\\
+         \spacecode{~~~~~~~~x~<- Random(100*(-1)\^{}Random(2)) ...}\\
+         \spacecode{~~~~~~~~if x~<~0 then ...}\\
+         \spacecode{~~~~~~~~~~~~Print \textquotedbl negativo\textquotedbl ...}\\
+         \spacecode{~~~~~~~~elif x~>~0 then ...}\\
+         \spacecode{~~~~~~~~~~~~Print \textquotedbl positivo\textquotedbl ...}\\
+         \spacecode{~~~~~~~~return x ...}\\
+         \spacecode{~~~~end}
+      \end{fxcode}
+      
+      \begin{fxcode}
+         \arrowcode{begin ... }\\   
+         \spacecode{~~~~~~~~elif true then ...}\\
+         \spacecode{~~~~~~~~~~~~Print \textquotedbl error\textquotedbl ...}\\
+         \spacecode{~~~~~~~~else ...}\\
+         \spacecode{~~~~~~~~~~~~Print \textquotedbl\textquotedbl ...}\\
+         \spacecode{~~~~end}
+      \end{fxcode}
+      
+      En el código anterior hay un error pues no se encuentra el cuerpo \texttt{if} que es obligatorio.
+      
+      \begin{fxcode}
+         \arrowcode{begin             ... }\\
+         \spacecode{~~~~x~<- 12        ...}\\
+         \spacecode{~~~~if true then   ...}\\
+         \spacecode{~~~~~~~~a~<- 3     ...}\\
+         \spacecode{~~~~~~~~return 2*a ...}\\
+         \spacecode{~~~~x~<- x + 1     ...}\\
+         \spacecode{~~~~return x       ...}\\
+         \spacecode{~~~~end}\\
+         \outcode{12}
+      \end{fxcode}
+      
+      En este ultimo ejemplo al ser la condición verdadera se ejecutan las sentencias dentro de la condicional y luego al ejecutarse \texttt{return 12} la ejecución para y devuelve $12$ como resultado.
+      
+      Las condicionales también tienen sangrado y esta marcado por el token if mediante el cual puede distinguir que sentencias pertenecen a ella y cuales no.
+      
+      \begin{fxcode}
+         \layoutcomment{~~~~~}{aquí se marca la columna de sangrado}\\
+         \spacecode{~~~~if C then }
+      \end{fxcode}
+      
+      Por ejemplo en ultimo ejemplo las sentencias\\
+      \texttt{a~<- 3}\\
+      y\\
+      \texttt{return 2*a}\\ 
+      están dentro del sangrado de \texttt{if} por lo que son parte de ella,
+      en cambio las sentencias\\
+      \texttt{x~<- x + 1}\\
+      y\\
+      \texttt{return x}\\
+      no están dentro del sangrado por lo tanto son sentencias que están fuera de la condicional.
+      \\
+      
+      incluso las expresiones condicionales y la palabra \texttt{then} deben estar dentro del sangrado pues en otro caso no serian parte de la sentencia, una excepción a esta regla la forman las palabras \texttt{elif} y \texttt{else} que pueden empezar sobre la columna de sangrado de la condicional pero no antes.
+      
+      \begin{fxcode}
+         \arrowcode{begin ...}\\
+         \spacecode{~~~~~~~~Print \textquotedbl Escoge un simbolo[X/O/S]\textquotedbl ...}\\
+         \spacecode{~~~~~~~~s~<- UpperCase(Input \textquotedbl >~\textquotedbl) ...}\\
+         \spacecode{~~~~~~~~if s = \textquotedbl X\textquotedbl~then ...}\\
+         \spacecode{~~~~~~~~~~~~Print \textquotedbl Escogiste X\textquotedbl ...}\\
+         \spacecode{~~~~~~~~elif s = \textquotedbl O\textquotedbl~then ...}\\
+         \spacecode{~~~~~~~~~~~~Print \textquotedbl Escogiste O\textquotedbl ...}\\
+         \spacecode{~~~~~~elif s = \textquotedbl S\textquotedbl~then ...}\\
+         \spacecode{~~~~~~~~~~~~Print \textquotedbl Escogiste S\textquotedbl ...}\\    
+         \spacecode{~~~~~~~~~~else ...}\\
+         \spacecode{~~~~~~~~~~~~Print \textquotedbl Simbolo invalido\textquotedbl ...}\\
+         \spacecode{~~~~~~~~Return s ...}\\
+         \spacecode{~~~~end}
+      \end{fxcode}
+      
+      En el ejemplo anterior se ve que el primer \texttt{elif} empieza en la columna de sangrado y como eso se permite para las palabras \texttt{elif} y \texttt{else} entonces el primer \texttt{elif} si pertenece a la sentencia, también vemos que else esta dentro del sangrado por lo que también pertenece a la sentencia, en cambio el segundo \texttt{elif} empieza detrás de la columna de sangrado por lo que no pertenece a la sentencia.
+      
+      \begin{fxcode}
+         \arrowcode{\textbackslash (x, y) ->~...}\\
+         \spacecode{~~~~begin ... }\\
+         \spacecode{~~~~~~~~if x~<~y then return x else return y ...}\\
+         \spacecode{~~~~end}
+         \end{fxcode}
+         
+         En el ejemplo anterior la expresion si es correcta pues cumple con la regla del sangrado.
+         \\
+         
+         La condicional al estar formadas por sentencias también pueden ser anidadas.
+         
+         \begin{fxcode}
+         \arrowcode{begin ...}\\
+         \spacecode{~~~~x~<- StrToNum(Input \textquotedbl ingrese un numero>~\textquotedbl)  ...}\\
+         \spacecode{~~~~if x~<~0 then ...}\\
+         \spacecode{~~~~~~~~if x = -inf then ...}\\
+         \spacecode{~~~~~~~~~~~~Print \textquotedbl infinito negativo\textquotedbl ...}\\
+         \spacecode{~~~~~~~~else ...}\\
+         \spacecode{~~~~~~~~~~~~Print \textquotedbl numero negativo\textquotedbl ...}\\
+         \spacecode{~~~~elif x = 0 then ...}\\
+         \spacecode{~~~~~~~~Print \textquotedbl cero\textquotedbl...}\\
+         \spacecode{~~~~else ...}\\
+         \spacecode{~~~~~~~~if x = inf then ...}\\
+         \spacecode{~~~~~~~~~~~~Print \textquotedbl infinito positivo\textquotedbl ...}\\
+         \spacecode{~~~~~~~~else Print \textquotedbl numero positivo\textquotedbl ...}\\
+         \spacecode{~~~~end}
+         \end{fxcode}
+         
+   \section{Bucle while}
+      Los bucles son útiles al momento de escribir programas imperativos pues permiten hacer tareas repetitivas en un numero determinado de veces, las sentencias de bucle \texttt{while} tienen la siguiente forma:
+      \\
+      
+      \texttt{while~<condición>~do}\\
+      \texttt{\linetab<sentencias>}
+      \\
+      
+      Donde \texttt{<condición>} es una expresion que devuelve en un valor logico en cada iteración.
+      \\
+      
+      Esto dice que mientras la \texttt{<condición>} sea cierta se seguirá ejecutando una y otra vez las sentencias \texttt{<sentencias>}.
+      
+      \begin{fxcode}
+         \arrowcode{begin ...}\\
+         \spacecode{~~~~~~~~n~<- 1 ...}\\
+         \spacecode{~~~~~~~~s~<- Input \textquotedbl¿salir?>~\textquotedbl ...}\\
+         \spacecode{~~~~~~~~while s~<>~\textquotedbl si\textquotedbl~ do ...}\\
+         \spacecode{~~~~~~~~n~<- Next n ...}\\
+         \spacecode{~~~~~~~~Print \textquotedbl intente de nuevo\textquotedbl~ ...}\\
+         \spacecode{~~~~~~~~~~~~s~<- Input \textquotedbl ¿salir?>~\textquotedbl ...}\\
+         \spacecode{~~~~~~~~Print (\textquotedbl tuviste~\textquotedbl~++ NumToStr(n)~++~\textquotedbl~intentos\textquotedbl) ...}\\
+         \spacecode{~~~~end}
+      \end{fxcode}
+      
+      En el ejemplo anterior las sentencias del bucle seguirán ejecutándose mientras \texttt{s} no sea \texttt{\textquotedbl si\textquotedbl}.
+      
+      El bucle \texttt{while} al igual que toda sentencia tiene un sangrado y esta marcado por la palabra \texttt{while} para determinar las sentencias que pertenecen al bucle.
+      
+      \begin{fxcode}
+         \layoutcomment{~~~~~}{aquí se marca la columna de sangrado}\\
+         \spacecode{~~~~while C do}
+      \end{fxcode}
+      
+      Por ejemplo en el ejemplo anterior para el bucle \texttt{while} las sentencias\\
+      \texttt{n~<- Next n        }\\     
+      \texttt{Print \textquotedbl intente de nuevo\textquotedbl}\\
+      \texttt{s~<- Input \textquotedbl ¿salir?>~\textquotedbl}\\
+      estan dentro del sangrado por lo que si pertenece al bucle while, en cambio las sentencia\\
+      \texttt{Print (\textquotedbl tuviste~\textquotedbl~++~NumToStr(n)~++~\textquotedbl ~intentos\textquotedbl)}\\
+      no esta dentro del sangrado por lo que no pertenece al bucle.
+      \\
+      
+      No solo las sentencias deben estar dentro del sangrado sino también la expresion de condición y la palabra \texttt{do}.
+      
+      \begin{fxcode}
+         \arrowcode{begin ...}\\
+         \spacecode{~~~~~~~~x <- Random 100 ...}\\
+         \spacecode{~~~~~~~~while x < 50 do ...}\\
+         \spacecode{~~~~~~~~~~~~Print (NumToStr x) ...}\\
+         \spacecode{~~~~~~~~~~~~x~<- Random 100 ...}\\
+         \spacecode{~~~~end}\\
+         \arrowcode{begin ...}\\
+         \spacecode{~~~~~~~~while ...}\\
+         \spacecode{~~~~~~~~true do ...} \codecomment{error aqui}\\
+         \spacecode{~~~~~~~~~~~~Print \textquotedbl error\textquotedbl ...}\\
+         \spacecode{~~~~end}
+      \end{fxcode}
+      
+      En la primera evaluación tiene una sintaxis correcta en cambio en la segunda no se esta respetando la regla de sangrado por lo que es incorrecto.
+      \\
+      
+      Como el bucle \texttt{while} esta formado por sentencias estas también pueden estar anidadas.
+      
+      \begin{fxcode}
+         \arrowcode{begin ...}\\
+         \spacecode{~~~~~~~~s~<- Input \textquotedbl¿salir?>~\textquotedbl ...}\\
+         \spacecode{~~~~~~~~while s~<>~\textquotedbl si\textquotedbl~ do ...}\\
+         \spacecode{~~~~~~~~~~~~x~<- Random 10 ...}\\
+         \spacecode{~~~~~~~~~~~~while x~<~5 do ...}\\
+         \spacecode{~~~~~~~~~~~~~~~~Print(NumToStr x) ...}\\
+         \spacecode{~~~~end}
+      \end{fxcode}
+      
+      Una característica interesante del bucle while es que se puede crear bucles infinitos o bucles que nunca acaben.
+      
+      \begin{fxcode}
+         \arrowcode{begin ...}\\
+         \spacecode{~~~~~~~~while true do ...}\\
+         \spacecode{~~~~~~~~~~~~Output \textquotedbl 0\textquotedbl ...}\\
+         \spacecode{~~~~end}
+      \end{fxcode}
+      
+      En este ejemplo el bucle nunca acabara, para abortar la ejecución por tanto la evaluación se puede presionar la combinación de teclas {\it Ctrl+BREAK}.
+      
+   \section{Bucle for}
+      Otro tipo de bucle es el llamado bucle \texttt{for}, a diferencia del bucle \texttt{while} en el bucle \texttt{for} la iteracion se hace sobre una lista en donde unas variables tomaran los elementos de la lista uno por uno hasta que acabe, el bucle \texttt{for} tiene la forma:
+      \\
+      
+      \texttt{for~<patrón>~in~<lista>~do}\\
+      \texttt{\linetab<sentencias>}
+      \\
+      
+      Donde \texttt{<patrón>} es un patrón y \texttt{<lista>} es una expresion que resulta en una lista.
+      \\
+      
+      Esto dice que para cada elemento de la lista serán encajados con el patrón y las variables del patrón tomaran valores que serán utilizados en las \texttt{<sentencias>}.
+      
+      \begin{fxcode}
+         \arrowcode{begin ...}\\
+         \spacecode{~~~~~~~~s~<- 0 ...}\\
+         \spacecode{~~~~~~~~for i in [1 .. 100] do ...}\\
+         \spacecode{~~~~~~~~~~~~s~<- s + i ...}\\
+         \spacecode{~~~~~~~~return i ...}\\
+         \spacecode{~~~~end}\\
+         \outcode{5050}\\
+      \end{fxcode}
+      
+      En el ejemplo anterior la sentencias del bucle se ejecutaran para cada elemento de la lista \texttt{[1 .. 100]} de uno en uno y en orden.
+      \\
+      
+      El bucle \texttt{for} al igual que toda sentencia tiene un sangrado y esta marcado por la palabra \texttt{for} para determinar las sentencias que pertenecen al bucle.
+      
+      \begin{fxcode}
+         \layoutcomment{~~~~~}{aquí se marca la columna de sangrado}\\
+         \spacecode{~~~~for P in L do}
+      \end{fxcode}
+      
+      Por ejemplo en el ejemplo anterior para el bucle \texttt{for} la sentencia\\
+      \texttt{s <- s + i}\\
+      esta dentro del sangrado por lo que si pertenece al bucle \texttt{for}, en cambio las sentencia\\
+      \texttt{return i}\\
+      no esta dentro del sangrado por lo que no pertenece al bucle.
+      \\
+      
+      No solo las sentencias deben estar dentro del sangrado sino también el patrón la expresion de lista y las palabra \texttt{in} y \texttt{do}.
+      
+      \begin{fxcode}
+         \arrowcode{begin ...}\\
+         \spacecode{~~~~~~~~for (a, b) in [(x, y) | x |<~[1 .. 9], y |<~[1 .. 9]] do ...}\\
+         \spacecode{~~~~~~~~~~~~Print(\textquotedbl(\textquotedbl~ ++ NumToStr(a) ++ \textquotedbl,\textquotedbl~ ++ NumToStr(b) ++ \textquotedbl)\textquotedbl~) ...}\\
+         \spacecode{~~~~end}\\
+         \arrowcode{begin            ...}\\
+         \spacecode{~~~~for n in      ...}\\
+         \spacecode{~~~~[1, 2, 3] do  ...}\\
+         \spacecode{~~~~~~~~Print \textquotedbl .\textquotedbl~ ...}\\
+         \spacecode{~~~~end}\\
+      \end{fxcode}
+      
+      En la primera evaluación tiene una sintaxis correcta en cambio en la segunda no se esta respetando la regla de sangrado por lo que es incorrecto.
+      \\
+      
+      Como el bucle \texttt{for} esta formado por sentencias estas también pueden estar anidadas.
+      
+      \begin{fxcode}
+         \arrowcode{begin ...}\\
+         \spacecode{~~~~~~~~for a in [0 .. 9] do ...}\\
+         \spacecode{~~~~~~~~~~~~for b in [0 .. 9] do ...}\\
+         \spacecode{~~~~~~~~~~~~~~~~Print(NumToStr(a) ++ NumToStr(b)) ...}\\
+         \spacecode{~~~~end}
+      \end{fxcode}
+      
+      Para terminar mostraremos un programa que verifica si un numero es primo o no.
+      
+      \begin{fxcode}
+         \arrowcode{begin ...}\\
+         \spacecode{~~~~s~<- Input \textquotedbl¿salir?>~\textquotedbl ...}\\
+         \spacecode{~~~~while s~<>~\textquotedbl si\textquotedbl~ do ...}\\
+         \spacecode{~~~~~~~~n~<- StrToNum(Input \textquotedbl ingrese un numero>~\textquotedbl) ...}\\
+         \spacecode{~~~~~~~~if IsNat n then ...}\\
+         \spacecode{~~~~~~~~~~~~~~~~if n~<~2 then ...}\\
+         \spacecode{~~~~~~~~~~~~~~~~~~~~Print \textquotedbl no es primo\textquotedbl ...}\\
+         \spacecode{~~~~~~~~~~~~~~~~else ...}\\
+         \spacecode{~~~~~~~~~~~~~~~~~~~~for i in [2 .. Sqrt(n)] do ...}\\
+         \spacecode{~~~~~~~~~~~~~~~~~~~~~~~~if (n Rem i) = 0 then ...}\\
+         \spacecode{~~~~~~~~~~~~~~~~~~~~~~~~~~~~Print \textquotedbl no es primo\textquotedbl ...}\\
+         \spacecode{~~~~~~~~~~~~~~~~~~~~Print \textquotedbl si es primo\textquotedbl ...}\\
+         \spacecode{~~~~~~~~else ...}\\
+         \spacecode{~~~~~~~~~~~~Print \textquotedbl no es un numero natural\textquotedbl  ...}\\
+         \spacecode{~~~~~~~~s <- Input \textquotedbl ¿salir?>~\textquotedbl ...}\\
+         \spacecode{~~~~end}
+      \end{fxcode}
+      
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   

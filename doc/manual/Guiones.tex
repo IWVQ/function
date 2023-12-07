@@ -1,0 +1,112 @@
+
+\titleformat{\subsection}[runin]{\large \bfseries}{\thesubsection.}{10pt}{\bfseries}
+\titlespacing{\subsection}{0pt}{10pt}{0pt}
+
+\chapter{Guiones}
+   Los guiones o scripts son archivos de texto en el que están programados definiciones, sinónimos o incluso hay expresiones del lenguaje Function v0.5, con el fin de guardarlo y reutilizarlo cuando sea necesario, todo lo que se pueda escribir en la consola se puede escribir en un archivo guion.
+   
+   \section{Usar un guion}
+       Para poder utilizar las definiciones o evaluar las expresiones en los guiones se lo debe importar con el comando.
+      \\
+      
+      \texttt{run~<archivo>}   
+      \\
+      
+      Donde \texttt{<archivo>} es una cadena de caracteres e indica la dirección o nombre del archivo de guion, por defecto los guiones tiene extensión ``.fx''.
+      \\
+      
+      Como ejemplo escribamos un guion con un editor de texto cualquiera por ejemplo el bloc de notas de windows.
+      
+      \begin{fxcode}
+         \linecode{... suma y resta de vectores                 }\\
+         \linecode{... vamos a sobrecargar los operadores + y - }\\
+         \linecode{Vector ::= [real]                            }\\
+         \linecode{                                             }\\
+         \linecode{+ :: (Vector, Vector) ->~Vector              }\\
+         \linecode{[] + [] := []                                }\\
+         \linecode{(a~>| as) + (b~>| bs) := (a + b)~>| (as + bs)}\\
+         \linecode{                                             }\\
+         \linecode{- :: (Vector, Vector) ->~Vector              }\\
+         \linecode{[] - [] := []                                }\\
+         \linecode{(a~>| as) - (b~>| bs) := (a - b)~>| (as - bs)}
+      \end{fxcode}
+      
+      {\bf Nota:} En el anterior código se puede ver que no hay puntos suspensivos al final de las lineas esto es valido pues en un guion no es necesario poner puntos suspensivos para ingresar múltiples lineas sino solo para comentarios pues los editores son por defecto multilinea ademas no hay ambigüedad en el uso de la tecla {\it RETURN} pues en un guion esta se utiliza exclusivamente para nuevas lineas en cambio en la consola es para ingresar datos es por eso que en la consola los puntos suspensivos tienen doble función para poder ingresar mas lineas y como comentario en cambio en un guion solo como comentario.
+      \\
+      
+      Ahora guardemos con el nombre \texttt{vector.fx} en cualquier carpeta por ejemplo \texttt{D:\textbackslash}, ahora hemos creado un archivo \texttt{D:\textbackslash vector.fx}, para que Function v0.5 interprete este guion escribimos en la consola \texttt{run \textquotedbl D:\textbackslash\textbackslash vector.fx\textquotedbl} e interpretara cada uno de los comandos escritos en este guion y luego podemos utilizar la definición que hicimos.
+      
+      \begin{fxcode}
+         \arrowcode{run \textquotedbl D:\textbackslash \textbackslash vector.fx\textquotedbl}\\
+         \arrowcode{[13, 46, 3, 24] + [3, 34, 8, 39] - [7, 43, 5, 89]}\\
+         \outcode{[9, 37, 6, -26]}
+      \end{fxcode}
+      
+      Los errores comunes al utilizar guiones es que no exista el archivo o que algún comando no este correcto.
+      \\
+      
+      El editor de texto mas común es el bloc de notas de windows pero también se puede utilizar el editor Notepad++ instalando el resaltador de sintaxis \texttt{FxStyler.xml} ubicado en la carpeta \texttt{...Function v0.5\textbackslash doc\textbackslash}.
+      \\
+      
+      El comando \texttt{run} también puede ir dentro de guiones
+      
+   \section{Comandos}
+      En total existen 8 comandos y se resumen en la siguiente:
+      
+      \subsection*{Ejecutar}: \texttt{run~<archivo>}\\
+      Significa que se interpretara los comandos escritos en el archivo \texttt{<archivo>}.
+      
+      \subsection*{Notaciones}:\\
+      \texttt{infix~<precedencia>~<identificador>~...~<identificador>}\\
+      \texttt{infixl~<precedencia>~<identificador>~...~<identificador>}\\
+      \texttt{infixr~<precedencia>~<identificador>~...~<identificador>}\\
+      \texttt{posfix~<identificador>~...~<identificador>}\\
+      \texttt{prefix~<identificador>~...~<identificador>}
+      \\
+      
+      Define las precedencia, asociatividad y posición de los operadores y funciones.
+      
+      \subsection*{Sinónimo}: \texttt{<identificador>~::=~<tipo>}\\
+      Define un sinónimo para el tipo \texttt{<tipo>} mediante el identificador \texttt{<identificador>}.
+      
+      \subsection*{Tipado heredable}: \texttt{<identificador>~::~<tipo>}\\
+      Significa que las posteriores definiciones de valor de \texttt{<identificador>} tendrán un tipo \texttt{<tipo>}.
+      
+      \subsection*{Definiciones}: \texttt{<aplicación>~:=~<retorno>}\\
+      Define el retorno que tendrá cuando se evalué una expresion de la forma \texttt{<aplicación>}.
+      
+      \subsection*{Asignacion}: \texttt{<identificador>~\texttt{<-}~<expresion>}\\
+      Asigna un valor a un identificador para posterior uso.
+      
+      \subsection*{Limpieza}: \texttt{clear~<identificador>~...~<identificador>}\\
+      Elimina todas las definiciones para los identificadores.
+      
+      \subsection*{Evaluación}: \texttt{<expresion>}\\
+      Evalúa la \texttt{<expresion>} e imprime su resultado.
+      \\
+      
+      En todos estos comandos su primer token marca el sangrado que tendrá.
+      
+      
+   \section{Los guiones predefinidos}
+      Las operaciones matemáticas básicas como muchas otras funciones que no son primitivas están definidas dentro del guion \texttt{prelude.fx} este archivo es interpretado y cargado al momento de iniciar el programa o cuando se reinicia la consola.
+      \\
+      
+      Pero no es el único guion predefinido en Function v0.5 en la siguiente tabla presentamos algunos los guiones predefinidos importantes.
+      
+      \begin{longtable}[c]{ll}
+         \texttt{lib\textbackslash prelude.fx} & Operadores y funciones básicas\\
+         \texttt{lib\textbackslash help.fx} & Entorno de ayuda\\
+         \texttt{lib\textbackslash primitives.fx} & Guion de descripción de las primitivas
+      \end{longtable}
+      
+      Se recomienda que el archivo prelude.fx y help.fx no sean modificados pues al ser los archivos básicos su modificación podría llevar a errores de ejecución, el archivo primitives.fx no es un guion valido, solo es informativo.
+      
+      
+      
+      
+      
+      
+      
+      
+      

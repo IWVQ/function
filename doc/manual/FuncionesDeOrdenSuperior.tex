@@ -1,0 +1,105 @@
+
+\titleformat{\subsection}[runin]{\large \bfseries}{\thesubsection.}{10pt}{\bfseries}
+\titlespacing{\subsection}{0pt}{10pt}{0pt}
+
+\chapter{Funciones de orden superior}
+   Una función de orden superior es una función que toma como argumento funciones y devuelve funciones u otros valores.
+   \\
+   
+   En Function v0.5 se permiten las funciones de orden superior y las funciones y operadores básicos se presentan en las siguientes secciones.
+   
+   \section{Funciones de orden superior básicos}
+      Las funciones y operadores básicos son los siguientes:
+      
+      \subsection*{Composición de funciones}: \texttt{<función> @ <función>}\\
+      Este operador realiza la composición de dos funciones.
+      
+      \begin{fxcode}
+         \arrowcode{(Sin@Cos)(1)}\\
+         \outcode{0.514395258523549}
+      \end{fxcode}
+      
+      \subsection*{Currificación}: \texttt{Curry <función>}\\
+      La currificación convierte una función binaria en una función que toma el primer argumento y devuelve otra función que es la que toma el segundo argumento, es decir si antes la función era \texttt{f(x, y)} la función resultante sera \texttt{g x y} donde \texttt{g} es la forma currificada de \texttt{f}.
+      
+      \begin{fxcode}
+         \arrowcode{ATan2(1, 1)}\\
+         \outcode{0.785398163397448}\\
+         \arrowcode{(Curry ATan2) 1 1}\\
+         \outcode{0.785398163397448}
+      \end{fxcode}
+      
+      \subsection*{Descurrificación}: \texttt{UnCurry <función>}\\
+      La descurrificación es el inverso a la currificación.
+      
+      \begin{fxcode}
+         \arrowcode{(UnCurry Find) (1, [2, 1, 3])}\\
+         \outcode{1}\\
+         \arrowcode{(UnCurry(Curry ATan2))(1, 1)}\\
+         \outcode{0.785398163397448}
+      \end{fxcode}
+      
+   \section{Secuenciación y tubería}
+      La secuenciación y tubería son operadores importantes pues permiten el paso de un valor a lo largo de un trayecto.
+      \\
+      
+      \subsection*{Tubería a la derecha}: \texttt{<valor>~\texttt{>}\texttt{>}=~<función>}\\
+      Esta operación es equivalente a aplicar \texttt{<función>} a su \texttt{<valor>}.
+      
+      \begin{fxcode}
+         \texttt{2~\texttt{>}\texttt{>}=~(\textbackslash x ->~x\^{}2)}\\
+         \outcode{4}
+      \end{fxcode}
+      
+      Pero resulta mas interesante si se le coloca uno seguido de otro
+      \\
+      
+      \texttt{p~\texttt{>}\texttt{>}=~f1~\texttt{>}\texttt{>}=~f2 ...}
+      \\
+      
+      Ya que el operador es asociativo a la derecha esto se puede interpretar como el valor de \texttt{p} pasa a la función \texttt{f1} el valor resultante pasa a la función \texttt{f2} y así sucesivamente pasa por la derecha a través de la tubería transformándose en cada paso.
+      
+      \begin{fxcode}
+         \arrowcode{1~\texttt{>}\texttt{>}=~(\textbackslash x ->~2*x)~\texttt{>}\texttt{>}=~(\textbackslash x ->~3*x)~\texttt{>}\texttt{>}=~(\textbackslash x ->~4*x)~\texttt{>}\texttt{>}=~Sin~\texttt{>}\texttt{>}=~Abs}\\
+         \outcode{0.905578362006624}
+      \end{fxcode}
+      
+      Si ademas incluimos acciones dentro de las expresiones lambda resulta mas interesante pues lo ejecuta paso a paso.
+      
+      \begin{fxcode}
+         \arrowcode{\_~\texttt{>}\texttt{>}=~(\textbackslash \_ ->~Print "1") ...}\\
+         \spacecode{~~\texttt{>}\texttt{>}=~(\textbackslash \_ ->~Print "2") ...}\\
+         \spacecode{~~\texttt{>}\texttt{>}=~(\textbackslash \_ ->~Print "3")}\\
+         \outcode{1}\\
+         \outcode{2}\\
+         \outcode{3}\\
+         \outcode{()}
+      \end{fxcode}
+   
+      \subsection*{Tubería a la izquierda}: \texttt{<función>~=\texttt{<}\texttt{<}~<valor>}\\
+      Este operador es equivalente al operador \texttt{\texttt{>}\texttt{>}=} solo que la tubería va hacia la izquierda.
+      
+      \begin{fxcode}
+         \arrowcode{(\textbackslash x ->~3*x)~=\texttt{<}\texttt{<}~(\textbackslash x ->~2*x)~=\texttt{<}\texttt{<}~1}\\
+         \outcode{6}
+      \end{fxcode}
+      
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   

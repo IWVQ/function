@@ -1,0 +1,159 @@
+
+\titleformat{\subsection}[runin]{\large \bfseries}{\thesubsection.}{10pt}{\bfseries}
+\titlespacing{\subsection}{0pt}{10pt}{0pt}
+
+\chapter{Hora y fecha}
+   Estas funciones son para obtener y establecer la hora y fecha actual de la computadora.
+   
+   \section{Obtener hora y fecha}
+      \texttt{GetDateTime()}
+      \\
+      
+      Devuelve una tupla con la fecha y hora actual en el siguiente orden:
+      \\
+      
+      \texttt{(<año>, <mes>, <día de la semana>, <día>, <hora>, <minuto>, <segundo>, <milisegundos>)}
+      \\
+      
+      \begin{fxcode}
+         \arrowcode{GetDateTime()}\\
+         \outcode{(2019, 12, 1, 2, 18, 50, 58, 988)}
+      \end{fxcode}
+   
+   \section{Funciones de fecha}
+      
+      \subsection*{Fecha actual}: \texttt{Date()}\\
+      Devuelve una tupla con la fecha actual en el siguiente  orden:
+      \\
+      
+      \texttt{(<año>, <mes>, <dia>)}
+      \\
+      
+      \begin{fxcode}
+         \arrowcode{Date()}\\
+         \outcode{(2019, 12, 2)}
+      \end{fxcode}
+      
+      \subsection*{Año}: \texttt{Year()}\\
+      Devuelve el año actual.
+      
+      \begin{fxcode}
+         \arrowcode{Year()}\\
+         \outcode{2019}
+      \end{fxcode}
+      
+      \subsection*{Mes}: \texttt{Year()}\\
+      Devuelve el mes actual.
+      
+      \begin{fxcode}
+         \arrowcode{Month()}\\
+         \outcode{12}
+      \end{fxcode}
+      
+      \subsection*{Día de la semana}: \texttt{DayOfWeek()}\\
+      Devuelve el numero del día de la semana.
+      
+      \begin{fxcode}
+         \arrowcode{DayOfWeek()}\\
+         \outcode{1}
+      \end{fxcode}
+      
+      \subsection*{Día}: \texttt{Day()}\\
+      Devuelve el día actual.
+      
+      \begin{fxcode}
+         \arrowcode{Day()}\\
+         \outcode{2}
+      \end{fxcode}
+      
+   \section{Funciones de hora}
+   
+      \subsection*{Tiempo actual}: \texttt{Time()}\\
+      Devuelve una tupla con la hora, minuto, segundo y milisegundos actual en el siguiente orden:
+      \\
+      
+      \texttt{(<hora>, <minuto>, <segundo>, <milisegundos>)}
+      \\
+      
+      \begin{fxcode}
+         \arrowcode{Time()}\\
+         \outcode{(18, 50, 58, 988)}
+      \end{fxcode}
+      
+      \subsection*{Hora}: \texttt{Hour()}\\
+      Devuelve la hora actual.
+      
+      \begin{fxcode}
+         \arrowcode{Hour()}\\
+         \outcode{18}
+      \end{fxcode}
+      
+      \subsection*{Minuto}: \texttt{Minute()}\\
+      Devuelve el minuto actual.
+      
+      \begin{fxcode}
+         \arrowcode{Minute()}\\
+         \outcode{50}
+      \end{fxcode}
+      
+      \subsection*{Segundo}: \texttt{Second()}\\
+      Devuelve el segundo actual.
+      
+      \begin{fxcode}
+         \arrowcode{Second()}\\
+         \outcode{58}
+      \end{fxcode}
+      
+      \subsection*{Milisegundos}: \texttt{Milliseconds()}\\
+      Devuelve los milisegundos actuales.
+      
+      \begin{fxcode}
+         \arrowcode{Milliseconds()}\\
+         \outcode{988}
+      \end{fxcode}
+      
+   \section{Establecer hora y fecha}
+      \texttt{SetDateTime(<año>, <mes>, <dia de la semana>, <dia>, <hora>, <minuto>, <segundo>, <milisegundos>)}
+      \\
+      
+      Establece la hora y fecha actual en según la tupla argumento y devuelve una tupla vacía.
+      \\
+      
+      \begin{fxcode}
+         \arrowcode{SetDateTime(2019, 12, 1, 2, 18, 50, 58, 988)}\\
+         \outcode{()}
+      \end{fxcode}
+      
+   \section{Establecer hora}
+      \texttt{SetDateTime(<año>, <mes>, <dia de la semana>, <dia>, <hora>, <minuto>, <segundo>, <milisegundos>)}
+      \\
+      
+      Establece la fecha actual manteniendo la hora.
+      \\
+      
+      \begin{fxcode}
+         \arrowcode{SetDate(2019, 12, 2)}\\
+         \outcode{()}
+      \end{fxcode}
+      
+   \section{Establecer fecha}
+      \texttt{SetTime(<hora>, <minuto>, <segundo>, <milisegundos>)}
+      \\
+      
+      Establece la hora actual manteniendo la fecha.
+      \\
+      
+      \begin{fxcode}
+         \arrowcode{SetTime(18, 50, 58, 988)}\\
+         \outcode{()}
+      \end{fxcode}
+      
+   
+   
+   
+   
+   
+   
+   
+   
+   

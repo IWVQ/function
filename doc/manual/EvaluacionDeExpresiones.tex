@@ -1,0 +1,447 @@
+
+\chapter{Evaluación de expresiones}
+   Las expresiones son combinaciones de funciones, operadores, números, valores y otras formas.
+
+   En este capítulo se explicará algunas clases de expresiones útiles como los átomos y las aplicaciones ya en los siguientes capítulos se presentaran mas formas de expresiones y ademas sobre el comando de evaluación de expresiones.
+
+   \section{Evaluación}
+      La evaluación de expresiones es una parte fundamental de Function v0.5, para hacer la evaluación simplemente se escribe una expresion después del puntero en la consola y se presiona {\it RETURN}.
+      
+      \begin{fxcode}
+         \arrowcode{2*(4 + 2)\^{}2 - 12} \codecomment{la expresion esta formada con operadores}\\
+         \outcode{60}\\
+         \arrowcode{Sin(2*Exp(12)) + Cos(1)} \codecomment{la expresion esta formada con funciones}\\
+         \outcode{0.794268198798373}
+      \end{fxcode}
+      
+      Las expresiones deben estar correctamente formadas, por ejemplo en el siguiente código habrá un error al usar los paréntesis.
+      
+      \begin{fxcode}
+         \arrowcode{4*233 + (23} \codecomment{no se a cerrado el paréntesis}
+      \end{fxcode}
+      
+      A veces existen funciones que tiene varios parámetros como la función \texttt{ATan2} que toma dos argumentos \texttt{x} y \texttt{y} devolviendo el arco tangente de $y/x$.
+      
+      \begin{fxcode}
+         \arrowcode{ATan2(1, 1) + Cos(1)}\\
+         \outcode{1.32570046926559}
+      \end{fxcode}
+      
+      En algunos casos no es necesario el uso de paréntesis para las funciones que tienen un solo argumento y se pueden obviar.
+      
+      \begin{fxcode}
+         \arrowcode{Exp 2 + Ln(3 + 4)}\\
+         \outcode{9.33496624798596}
+      \end{fxcode}
+      
+      En este ejemplo vemos que para la exponencial no es necesario el uso de paréntesis pues su argumento es solo el numero 2 en cambio para el logaritmo su argumento esta basado en una expresion por lo que si es necesario agruparlo entre paréntesis.
+      \\
+      
+      Para saber el resultado de una evaluación anterior se puede recurrir al uso de la función \texttt{Ans()}.
+      
+      \begin{fxcode}
+         \arrowcode{Ans()}\\
+         \outcode{9.33496624798596} \codecomment{resultado de $\exp(2) + \ln(3 + 4)$}
+      \end{fxcode}
+      
+      El valor que devuelve la función \texttt{Ans()} cambia cada vez que se ejecuta el comando de evaluación.
+      
+      Los operadores son en realidad funciones al que se a dotado de una notación particular, por ejemplo el operador + de suma es una función que toma dos argumentos y devuelve la suma de esos dos números, en Function v0.5 existen tres tipos de operadores los infijos, posfijos y prefijos aunque este ultimo es equivalente a la notación de una función, ejemplos de operadores infijos son +, -, *, / y de operadores posfijos ! (el operador de factorial) y de prefijos prácticamente todas las funciones pues no hay distinción entre operador prefijo y función.
+      
+      \begin{fxcode}
+         \arrowcode{Abs 1 + 3!} \codecomment{Abs es la funcion de valor absoluto y ! es el factorial} \\
+         \outcode{7}
+      \end{fxcode}
+      
+      Los operadores pueden convertirse en su forma prefija al encerrarsele entre paréntesis.
+      
+      \begin{fxcode}
+         \arrowcode{(+)(Abs 1, (!)3)}\\
+         \outcode{7}
+      \end{fxcode}
+      
+      En el código anterior se puede notar con mas claridad que el operador + (y todos los operadores infijos) es una función con dos argumentos.
+      \\
+      
+      Cuando un operador o función esta "trabajando" sobre su argumento se dice que esa función u operador esta siendo aplicada a su argumento una función u operador aplicado a un argumento se le llama aplicación.
+      \\
+      
+      El comando de evaluación de expresiones al igual que otros comandos tiene la regla de sangrado marcado por el primer token con el cual se inicia el comando, es decir para que un token (que no sea el primero) sea considerado como parte de la expresion a evaluar su columna de inicio debe ser mayor que el de la columna del primer token, en otro caso formaran un nuevo comando.
+      \\
+      
+      \begin{fxcode}
+         \arrowcode{2*(4 + 2)\^{}2 ...} \codecomment{ingresando varias lineas} \\
+         \spacecode{~\texttt{-} 12} \codecomment{estos tokens son parte de la expresion a evaluar}\\
+         \outcode{60}\\
+         \arrowcode{2*(4 + 2)\^{}2 ...} 
+         \spacecode{- 12} \codecomment{estos tokens ya no son parte de la expresion anterior}\\
+         \outcode{72}\\
+         \outcode{-12}
+      \end{fxcode}
+      
+      Function v0.5 realiza evaluación estricta es decir siempre evalúa los argumentos sean o no sean necesarios antes de devolver el retorno.
+      
+   \section{Átomos}
+      Las expresiones atómicas son expresiones que están formados por una sola unidad léxica y pueden ser números, caracteres, cadenas, valores lógicos o {\it booleanos} (también conocidos como valores de verdad)\citar{valores de verdad} y una expresion especial que indica el fallo o fracaso durante una operación.
+      
+      \subsection{Numero decimal}
+      Un numero en base decimal es una secuencia de caracteres numéricos con un punto como separador decimal, en Function v0.5 esta formado como una unidad léxica que empieza por uno o varios caracteres numerales y que puede seguirlo el punto como separador decimal y también con un indicador de desplazamiento del punto decimal\citar{numero decimal}.\\
+      
+      Un {\it numero natural} es representado por una secuencia de caracteres {\bf numerales} ``\texttt{0123456789}''.
+      
+      \begin{fxcode}
+         \arrowcode{3849578} \codecomment{un numero natural en Function v0.5}
+      \end{fxcode}
+      
+      Un {\it numero real} se representa como una secuencia de caracteres numerales separados por un único punto ``\texttt{.}''.
+      
+      \begin{fxcode}
+         \arrowcode{435.12345} \codecomment{este es un numero real en Function v0.5}
+      \end{fxcode}
+      
+      Los numero naturales también son números reales, de hecho el numero $3849578$ se puede representar como $3849578.0$ ambas representaciones son equivalentes.
+      
+      Para representar números con signo se le antepone a un numero el simbolo ``\texttt{-}'' para números negativos o el simbolo ``\texttt{+}'' para números positivos(aunque lo ultimo no es necesario).
+      
+      \begin{fxcode}
+         \arrowcode{-3849578.324}
+      \end{fxcode}
+      
+      Los números también pueden estar en notación científica o coma flotante (punto en nuestro caso) para lo cual simplemente se adjunta por la derecha el carácter ``\texttt{E}'' en mayúscula o minúscula seguido de un número entero con signo o sin signo\citar{coma flotante}.
+      
+      \begin{center}
+         \fcolorbox{consoleback}{consoleback}{\texttt{~~}{\large fE$\pm$d}\texttt{~~}}
+      \end{center}
+      
+      Donde ``f'' es un número real con signo o sin signo llamado {\it mantisa} y ``$\pm$d'' es un número entero con signo o sin signo llamado {\it exponente}.
+      
+      \begin{fxcode}
+         \arrowcode{325.E-4}
+      \end{fxcode}
+      
+      \begin{fxcode}
+         \arrowcode{-341e3}
+      \end{fxcode}
+      
+      \begin{fxcode}
+         \arrowcode{3478.4357e+1}
+      \end{fxcode}
+      
+      Cabe indicar que para que una un numero sea válido su secuencia de caracteres no debe estar separado por espacios en blanco o algún otro carácter que no corresponde.
+      
+      \subsection{Numero hexadecimal}
+      Los números hexadecimales son aquellos que tienen base 16\citar{numero hexadecimal}, Function v0.5 también permite representar números enteros en base hexadecimal como una secuencia de caracteres numerales y caracteres ``\texttt{abcdef}'' en mayúscula o minúscula al cual se le antepone ``\texttt{0x}'' con ``\texttt{x}'' en mayúscula o minúscula.\\
+      
+      \begin{fxcode}
+         \arrowcode{0x41FFeA10} \codecomment{el numero $1107290640$ representado en base hexadecimal}
+      \end{fxcode}
+      
+      \begin{fxcode}
+         \arrowcode{0X4450BbA1}
+      \end{fxcode}
+      
+      De igual manera que en los números decimales en el formato hexadecimal también se puede poner signo anteponiendo el simbolo ``\texttt{-}'' o ``\texttt{+}''.\\
+      
+      \begin{fxcode}
+         \arrowcode{-0x24FFEE12}
+      \end{fxcode}
+      
+      También en los números hexadecimales para que esta sea valida su secuencia de caracteres no debe estar separado por espacios en blanco o por otro carácter que no corresponde.\\
+      
+      Este tipo de representación es útil especialmente para visualizar las secuencias de bits de un número entero o realizar las operaciones a nivel de bits ya que cada dígito hexadecimal representa un nible binario (secuencia de cuatro bits)\citar{nibble y bits en hexadecimal}.\\
+      
+      \subsection{Infinitos y NAN}
+      Un numero infinito es aquel numero que es lo mas grande posible o aquel resultante de la división por cero de un numero distinto de cero\citar{Infinitos} y NAN que significa ``Not A Number'' en ingles y representa el resultado de una operación numérica fallida o indeterminada como cuando se divide 0 entre 0\citar{NAN}, es decir es un átomo numérico invalido, en Function v0.5 los infinitos se representan por la palabra clave ``\texttt{inf}'' y NAN se representa por la palabra clave ``\texttt{nan}''.
+      
+      \begin{fxcode}
+         \arrowcode{inf}
+      \end{fxcode}
+      
+      \begin{fxcode}
+         \arrowcode{inf}
+      \end{fxcode}
+      
+      \begin{fxcode}
+         \arrowcode{nan}
+      \end{fxcode}
+      
+      \begin{fxcode}
+         \arrowcode{1/0}\\
+         \outcode{inf}
+      \end{fxcode}
+      
+      \begin{fxcode}
+         \arrowcode{0/0}\\
+         \outcode{nan}
+      \end{fxcode}
+      
+      Para generar los negativos de los infinitos o incluso de NAN (aunque para este ultimo no es necesario) se adjunta el simbolo ``\texttt{-}'' como a cualquier otro numero.
+      
+      \begin{fxcode}
+         \arrowcode{-inf}
+      \end{fxcode}
+      
+      \begin{fxcode}
+         \arrowcode{-nan}\\
+         \outcode{nan}
+      \end{fxcode}
+      
+      Estos átomos numéricos especiales se puede manipular como a cualquier otro numero en el caso de los infinitos y para el caso de NAN este tiende a propagarlo.
+      
+      \subsection{Caracteres}
+      En Function v0.5 también es posible representar y trabajar con caracteres y se representan como un único carácter unicode encerrado entre comillas simples ``\texttt{\textbackslash}''.
+      
+      \begin{fxcode}
+         \arrowcode{\textquotesingle\texttt{ñ}\textquotesingle}
+      \end{fxcode}
+      
+      Pero no todos los caracteres unicode\citar{unicode} pueden ser encerrados entre comillas simples, por ejemplo, los caracteres de final de linea, caracteres de control ascii\citar{ASCII}, el carácter nulo e incluso la misma comilla simple, para lo cual Function v0.5 proporciona una manera de poder trabajar con estos caracteres utilizando el carácter  de barra invertida ``\texttt{\textbackslash}'' seguido de una secuencia de caracteres a esto se le llama secuencias de escape, las secuencias de escape son secuencias de caracteres que empiezan con la barra invertida \citar{secuencia de escape} y se detallan en la tabla \ref{tb:escsequence}.
+      
+      \begin{longtable}[c]{|l|l|l|l|}
+         \caption{Secuencias de escape}\label{tb:escsequence}\\ \hline
+         Secuencia &
+         \begin{minipage}{1.5cm}
+            Código\\decimal
+         \end{minipage} &
+         \begin{minipage}{2cm}
+            Código\\hexadecimal
+         \end{minipage} &
+         Carácter \\ \hline
+         \texttt{\textbackslash"} & $34$ & $22$ & Comilla doble ``\texttt{"}'' \\ \hline
+         \texttt{\textbackslash\textquotesingle} & $39$ & $27$ & Comilla simple ``\texttt{\textquotesingle}''\\ \hline
+         \texttt{\textbackslash\textbackslash} & $92$ & $5\text{C}$ & Barra invertida ``\texttt{\textbackslash}''\\ \hline
+         \texttt{\textbackslash\texttt{a}} & $7$ & $7$ & \citar{$\backslash a$}\\ \hline
+         \texttt{\textbackslash\texttt{b}} & $8$ & $8$ & \citar{$\backslash b$}\\ \hline
+         \texttt{\textbackslash\texttt{f}} & $12$ & $\text{C}$ &\citar{$\backslash f$} \\ \hline
+         \texttt{\textbackslash\texttt{n}} & $10$ & $\text{A}$ & Retorno de carro \\ \hline
+         \texttt{\textbackslash\texttt{r}} & $13$ & $\text{D}$ & Salto de linea\\ \hline
+         \texttt{\textbackslash\texttt{t}} & $9$ & $9$ & Tabulador \\ \hline
+         \texttt{\textbackslash\texttt{v}} & $11$& $\text{B}$ & Tabulador vertical\\ \hline
+         \texttt{\textbackslash\texttt{x\textit{HHHH}}} & & $HHHH$&
+         \begin{minipage}{7cm}
+            Carácter cuyo código hexadecimal es $HHHH$\\ cuyo rango va desde $0$ hasta $\text{FFFF}$
+         \end{minipage}\\ \hline
+         \texttt{\textbackslash\texttt{X\textit{HHHH}}} & & $HHHH$&
+         \begin{minipage}{7cm}
+            Carácter cuyo código hexadecimal es $HHHH$\\ cuyo rango va desde $0$ hasta $\text{FFFF}$
+         \end{minipage}\\ \hline
+         \texttt{\textbackslash\texttt{\textit{DDDDD}}} & $DDDDD$ & &
+         \begin{minipage}{7cm}
+            Carácter cuyo código decimal es $DDDDD$\\ cuyo rango va desde $0$ hasta $65535$
+         \end{minipage} \\ \hline
+      \end{longtable}
+      
+      Como ejemplo se presentan las siguientes entradas.
+      
+      \begin{fxcode}
+         \arrowcode{\textquotesingle\textbackslash\texttt{n}\textquotesingle} \codecomment{carácter de fin de linea}
+      \end{fxcode}
+      
+      \begin{fxcode}
+         \arrowcode{\textquotesingle\textbackslash\textquotesingle\textquotesingle} \codecomment{comilla simple}
+      \end{fxcode}
+      
+      \begin{fxcode}
+         \arrowcode{\textquotesingle\textbackslash\texttt{9}\textquotesingle} \codecomment{tabulador}
+      \end{fxcode}
+      
+      \begin{fxcode}
+         \arrowcode{\textquotesingle\textbackslash\texttt{xFF}\textquotesingle} \codecomment{último carácter ASCII}
+      \end{fxcode}
+      
+      Cuando se encuentran mas caracteres o secuencias de escape entre las comillas simples, que no se encuentre nada entre comillas o si la secuencia de escape no es valida entonces el sistema lanzara un error.
+      
+      \begin{fxcode}
+         \arrowcode{\textquotesingle\texttt{ca}\textquotesingle}\\
+         \outcode{ERROR - lexical error in command 1 line 1, too long character sequence}
+      \end{fxcode}
+      
+      \begin{fxcode}
+         \arrowcode{\textquotesingle\textquotesingle}\\
+         \outcode{ERROR - lexical error in command 1 line 1, invalid empty character}
+      \end{fxcode}
+      
+      \begin{fxcode}
+         \arrowcode{\textquotesingle\textbackslash\texttt{g}\textquotesingle}\\
+         \outcode{ERROR - lexical error in command 1 line 1, invalid escape sequence "\textbackslash\texttt{g}"}
+      \end{fxcode}
+      
+      \subsection{Cadenas de caracteres}
+      Function v0.5 puede trabajar con secuencias de caracteres y esto es especialmente util cuando se quiere programar mensajes que seran luego mostrados al usuario, en Function v0.5 se representan mediante una secuencia de caracteres unicode encerrados por comillas dobles ``\texttt{"}''\citar{cadenas}.
+      
+      \begin{fxcode}
+         \arrowcode{"Hola mundo"}
+      \end{fxcode}
+      
+      Como en el caso de los caracteres no todos los caracteres unicode pueden ser encerrados entre comillas dobles, tales como, los caracteres de final de linea, caracteres de control ASCII y la misma comilla doble, para lo cual se puede utilizar las secuencias de escape presentados en la tabla \ref{tb:escsequence} de la misma manera que para los caracteres cuando una secuencia de escape es invalida el sistema lanzara un error.
+      
+      \begin{fxcode}
+         \arrowcode{"Hola Mundo\textbackslash\texttt{n}como están"}\\
+         \outcode{"Hola Mundo\textbackslash\texttt{n}como están"}
+      \end{fxcode}
+      
+      \begin{fxcode}
+         \arrowcode{\texttt{"}\texttt{"}}\\
+         \outcode{[]} \codecomment{¿por que devuelve corchetes? eso será explicado en la sección ``Colecciones''}
+      \end{fxcode}
+      
+      Por simplicidad en el resto del manual se llamara simplemente ``cadena'' a la cadena de caracteres, a menos que se indique lo contrario.
+      
+      \subsection{Lógicos}
+      Los valores lógicos o también llamados valores \textit{booleanos} son valores que indican si una afirmación es verdadera o falsa, en Function v0.5 están representados por las palabras clave ``\texttt{true}'' para indicar el valor \textit{verdad} y ``\texttt{false}'' para el valor \textit{falso}.
+      
+      \begin{fxcode}
+         \arrowcode{true}
+      \end{fxcode}
+      
+      \begin{fxcode}
+         \arrowcode{false}
+      \end{fxcode}
+      
+      \subsection{La expresión ``fail''}
+      Para representar un fallo durante la evaluación de una expresion Function v0.5 proporciona una expresion atómica especial que devuelve cuando ocurre dicho fallo, esta representada por la palabra clave ``\texttt{fail}'' y puede ser parte de las expresiones.
+      
+      \begin{fxcode}
+         \arrowcode{fail}
+      \end{fxcode}
+      
+      Si en una aplicación la función o el argumento resulta \texttt{fail} entonces la evaluación resultara también en \texttt{fail}.
+      
+      \begin{fxcode}
+         \arrowcode{2*(4 + fail)}\\
+         \outcode{fail}\\
+         \arrowcode{Sin fail}\\
+         \outcode{fail}\\
+         \arrowcode{fail 1}\\
+         \outcode{fail}
+      \end{fxcode}
+      
+      Como se ve la expresion \texttt{fail} se propaga como expresion resultante pero puede ser detenida con una expresion llamada "captura de fallo" que se explica mas adelante.
+      
+      \subsection{Identificadores}
+      Un identificador es una unidad léxica o token formado por caracteres literales o simbólicos, son de dos tipos:
+      
+      \begin{enumerate}
+         \item Identificadores literales.
+         \item Identificadores simbólicos.
+      \end{enumerate}
+      
+      A los identificadores dependiendo de la situación se les suele llamar variables cuando se encuentran en los argumentos de la definición de una función o nombres cuando se refiere a una función, en la descripción de sintaxis de este manual a los identificadores se les suele nombrar por \texttt {<identificador>} a menos que se diga lo contrario.
+      
+      \subsection{Identificadores literales}
+      Están formados por caracteres literales \texttt{ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz}, el subguión \texttt{\_} y los caracteres numerales \texttt{0123456789} del código ASCII de la siguiente manera:
+      
+      \begin{enumerate}
+         \item Empieza por un carácter literal o subguión.
+         \item Los demás caracteres si los tiene pueden ser literales, numerales o subguión.
+      \end{enumerate}
+      
+      \begin{fxcode}
+         \arrowcode{i} \codecomment{identificador formado por un solo carácter literal}
+      \end{fxcode}
+      
+      \begin{fxcode}
+         \arrowcode{var} \codecomment{identificador que empieza con el literal ``v'' y seguido de literales ``a'' y ``r''}  
+      \end{fxcode}
+      
+      \begin{fxcode}
+         \arrowcode{\_x2} \codecomment{identificador que empieza con subguión seguido del literal ``x'' y luego el numeral ``2''}
+      \end{fxcode}
+      
+      \begin{fxcode}
+         \arrowcode{12v} \codecomment{este no es un identificador literal pues empieza por un numeral y la regla indica que debe empezar por literales o subguión, en realidad aquí se encuentra dos tokens el token 12 y el token v}
+      \end{fxcode}
+      
+      \begin{fxcode}
+         \arrowcode{Sin} \codecomment{este si es un identificador literal}
+      \end{fxcode}
+      
+      \subsection{Identificadores simbólicos}
+      Están formados solo por caracteres simbólicos \texttt{|!\$\%\&/=?\textbackslash\makeatletter @*+\^{}-.:<>\#\~{}\`}.
+      
+      \begin{fxcode}
+         \arrowcode{+} \codecomment{este es un identificador simbólico}
+      \end{fxcode}
+      
+      \begin{fxcode}
+         \arrowcode{<>} \codecomment{este es un identificador simbólico}
+      \end{fxcode}
+      
+      \begin{fxcode}
+         \arrowcode{*.} \codecomment{este es un identificador simbólico}
+      \end{fxcode}
+      
+      \begin{fxcode}
+         \arrowcode{21-} \codecomment{este no es un identificador simbólico, en realidad aquí tenemos dos tokens el token ``c'' y el token ``12''}
+      \end{fxcode}
+      
+   \section{Palabras reservadas}
+      No todos los identificadores pueden ser utilizados para todo, algunos están reservados para ciertas situaciones o expresiones especiales.
+      
+      Los identificadores que tienen un uso reservado son los siguientes:
+      
+      \subsection{Palabras clave}
+      
+      \begin{longtable}[c]{lllllll}
+         fail   & true   & false  & \_     & let    & in  & where  \\
+         run    & clear  & infix  & infixl & infixr & posfix & prefix \\ 
+         begin  & if     & elif   & then & else & while & do \\
+         for & return & end & nan & inf & real & int \\
+         nat & bool & char & & & & \\  
+      \end{longtable}
+      
+      La palabra reservada \_ es también llamado simbolo {\it anónimo}.
+      
+      \subsection{Símbolos clave}
+      
+      \begin{longtable}[c]{lllllll}
+         ::=   & ::   & :=  & $\backslash$     & <-    & ->  & |<  \\
+         >|    & ..  & |  & : & ? & & \\
+      \end{longtable}
+      
+      \subsection{Identificadores de primitivas}
+      
+      \begin{longtable}[c]{lllll}
+         PrimAdd   & PrimSub   & PrimMul  & PrimDiv     & PrimPow    \\ 
+         PrimEqual  & PrimLess  & PrimGreater    & PrimIsNaN  & PrimTrunc \\
+         PrimFrac & PrimSin & PrimCos & PrimTan & PrimASin \\
+         PrimACos & PrimATan   & PrimLn & PrimExp & PrimRem \\
+         PrimQuot & PrimBitNot & PrimBitAnd & PrimBitOr & PrimBitShl \\
+         PrimBitShr & PrimRandom & PrimEncodeChar & PrimDecodeChar & PrimLength \\
+         PrimGet & PrimSet & PrimArity & PrimSelect & PrimPut \\
+         PrimInput & PrimOutput & PrimClearScreen & PrimGetDateTime & PrimSetDateTime \\
+         PrimAnswer & PrimError & PrimTryStrToNum & PrimValueToStr & PrimTypeToStr \\ 
+         PrimValueToStrFull & PrimIsAnonymous & PrimIsFreeIdentifier & PrimIsTuple & PrimIsLambda \\ 
+         PrimQuit & PrimInterrupt & PrimRestart &  &  \\
+      \end{longtable}
+      
+   \section{Expresiones con identificadores}
+      Los identificadores y la palabra reservada anónima pueden ser utilizados como expresiones atómicas dentro de las expresiones.
+      
+      Al encontrarse un identificador en una expresion a ser evaluada suceden tres casos:
+      
+      \begin{enumerate}
+         \item Son reemplazados antes de que sean evaluados.
+         \item Si no han sido reemplazados pueden tener una definición o valor guardado en memoria en ese caso se reemplaza por esa definición o valor.
+         \item Si no sucede ninguno de los anteriores simplemente queda intacto, en ese caso se le llama identificadores libres o variables libres y pueden ser utilizados como valores en este caso como un valor ``simbólico'' para posible ``manipulación simbólica''
+      \end{enumerate}
+      
+      \begin{fxcode}
+         \arrowcode{v}\\
+         \outcode{v}
+      \end{fxcode}
+      
+      Cuando se tiene la palabra anónima \_ en una expresion a ser evaluada esta se mantiene intacta y pueden ser utilizados como valores en este caso como una especie de ``valor indefinido genérico''.
+   
+      \begin{fxcode}
+         \arrowcode{\_}\\
+         \outcode{\_}
+      \end{fxcode}
+   
+   
+   
+   
+   
+   
+   
+   

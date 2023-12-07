@@ -1,0 +1,116 @@
+
+\titleformat{\subsection}[runin]{\large \bfseries}{\thesubsection.}{10pt}{\bfseries}
+\titlespacing{\subsection}{0pt}{10pt}{0pt}
+
+\chapter{Tuplas}
+   Una tupla es una secuencia finita de cualquier valor encerrado entre paréntesis y separados por comas.
+   \\
+   
+   La cantidad de elementos de la tupla también llamado aridad puede ser cero o mas pero no 1 pues habría un conflicto con el uso de los paréntesis para asociar y agrupar expresiones, en caso de que la aridad sea 0 se le llama tupla vacía o trivial.
+   
+   \begin{fxcode}
+      \arrowcode{(2, 3, false, \textquotesingle b\textquotesingle)}\\
+      \outcode{(2, 3, false, \textquotesingle b\textquotesingle)}\\
+      \arrowcode{()}\\
+      \outcode{()}\\
+      \arrowcode{(true || false, 3 + 4, \textquotedbl hola \textquotedbl~++ \textquotedbl mundo\textquotedbl)}\\
+      \outcode{(true, 7, \textquotedbl hola mundo\textquotedbl)}
+   \end{fxcode}
+   
+   Las tuplas tienen su origen en las n-tuplas matemáticas y representan eso, son usados como pares ordenados, n-tuplas o como los argumentos de funciones.
+   
+   \section{Funciones sobre tuplas}
+      \subsection*{Aridad}: \texttt{Arity <tupla>}\\
+      Donde \texttt{<tupla>} debe ser una tupla, esta función devuelve la aridad de la \texttt{<tupla>}.
+         
+      \begin{fxcode}
+         \arrowcode{Arity(1, \textquotesingle2\textquotesingle, true, 43)}\\
+         \outcode{4}
+      \end{fxcode}
+      
+      \subsection*{Tupla trivial}: \texttt{Trivial <tupla>}\\
+      Donde \texttt{<tupla>} es una tupla, esta función verifica si la tupla es vacía o no.
+      
+      \begin{fxcode}
+         \arrowcode{Trivial ()}\\
+         \outcode{true}\\
+         \arrowcode{Trivial (4, 5)}\\
+         \outcode{false}
+      \end{fxcode}
+   
+   \section{Elementos en la tupla}
+      \subsection*{Elemento i-ésimo} \texttt{<tupla>\{<indice>\}}\\
+      Donde \texttt{<tupla>} es una tupla e \texttt{<indice>} es un número que indica un indice, esta función obtiene el \texttt{<indice>}-ésimo elemento de la tupla \texttt{<tupla>}.
+      
+      \begin{fxcode}
+         \arrowcode{(\textquotedbl hola\textquotedbl, \textquotedbl mundo\textquotedbl, 1, 2)\{0\}}\\
+         \outcode{\textquotedbl hola\textquotedbl}
+      \end{fxcode}
+      
+      El indice de una tupla se cuenta en base a cero, es decir el primer elemento sera el 0-ésimo elemento, el segundo el 1-ésimo elemento y así sucesivamente
+      
+      \subsection*{Notación multi-indice} \texttt{<tupla>\{<indice>, ..., <indice>\}}\\
+      Dentro de las llaves se puede colocar cualquier cantidad de indices y obtienen el \texttt{(<indice>, ..., <indice>)}-ésimo elemento de la tupla.
+      
+      \begin{fxcode}
+         \arrowcode{((1, 2, 3), (4, 5, 6), (7, 8, 9))\{1, 2\}}\\
+         \outcode{6}
+      \end{fxcode}
+      
+      Si la cantidad de indices es cero entonces devolverá el mismo valor.
+      
+      \begin{fxcode}
+         \arrowcode{((1, 2, 3), (4, 5, 6), (7, 8, 9))\{\}}\\
+         \outcode{((1, 2, 3), (4, 5, 6), (7, 8, 9))}\\
+         \arrowcode{12\{\}}\\
+         \outcode{12}
+      \end{fxcode}
+      
+      Los indices siempre tienen que ser números naturales.
+      
+   \section{Pares ordenados}
+      Los pares ordenados son tuplas de dos elementos, como en toda tupla los elementos pueden ser cualquier valor.
+      
+      \subsection*{Comprobar si una tupla es par}: \texttt{IsPair <tupla>}\\
+      Donde \texttt{<tupla>} es una tupla, esta función verifica si la tupla es un par ordenado.
+      
+      \begin{fxcode}
+         \arrowcode{IsPair(3, \textquotesingle4\textquotesingle)}\\
+         \outcode{true}
+      \end{fxcode}
+      
+      \subsection*{Abscisa}: \texttt{PairX <par>}\\
+      Donde \texttt{<par>} es un par ordenado, obtiene el primer elemento del par.
+      
+      \begin{fxcode}
+         \arrowcode{PairX(3, \textquotesingle4\textquotesingle)}\\
+         \outcode{3}
+      \end{fxcode}
+      
+      \subsection*{Ordenada}: \texttt{PairY <par>}\\
+      Donde \texttt{<par>} es un par ordenado, obtiene el segundo elemento del par.
+      
+      \begin{fxcode}
+         \arrowcode{PairY(3, \textquotesingle4\textquotesingle)}\\
+         \outcode{\textquotesingle4\textquotesingle}
+      \end{fxcode}
+      
+      \subsection*{Igualdad}: \texttt{<par>~=~<par>}\\
+      Donde \texttt{<par>} son pares ordenados, verifica si dos pares ordenados son iguales.
+      
+      \begin{fxcode}
+         \arrowcode{(3, 4) = (3, \textquotesingle4\textquotesingle)}\\
+         \outcode{false}
+      \end{fxcode}
+      
+      \subsection*{Desigualdad}: \texttt{<par>~<>~<par>}\\
+      Donde \texttt{<par>} son pares ordenados, verifica si dos pares ordenados son diferentes.
+      
+      \begin{fxcode}
+         \arrowcode{(3, 4) <>~(3, \textquotesingle4\textquotesingle)}\\
+         \outcode{true}
+      \end{fxcode}
+      
+   
+   
+   

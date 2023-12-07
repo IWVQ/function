@@ -1,0 +1,481 @@
+ESQUEMAS DE TRADUCCION
+======================
+Definiciones
+------------
+    TD[[ I := E]] == TE[[ E ]]
+    TD[[ I P1 ... Pn := E ]] ==
+        I := (\x1 ... xn ->
+                TE[[ (\P1 ... Pn -> E) ]] x1 ... xn ) ; fail
+    TD[[ I := E1
+         .
+         .
+         .
+         I := Em
+        ]] ==
+        I := TE[[ E1 ]] ; ... ; TE[[ Em ]] ; fail
+        
+    TD[[ I P11 ... P1n := E1
+         .
+         .
+         .
+         I Pm1 ... Pmn := Em
+        ]] ==
+        I := (\x11 ... x1n ->
+                TE[[ (\P11 ... P1n -> E) ]] x11 ... x1n ) ;
+             .
+             .
+             . ;
+             (\xm1 ... xmn ->
+                TE[[ (\Pm1 ... Pmn -> E) ]] xm1 ... xmn ) ;
+            fail
+    
+    En todos los casos xij son identificadores generados internamente estos identificadores tienen la forma "varD" donde D es un entero positivo de 1 a 999999999
+    
+Expresion de tipo
+-----------------
+    
+    TT[[ (T) ]] == TT[[ T ]]
+    TT[[ T ]] == T
+
+Expresion de valor
+------------------
+Vacio
+    TE[[ ]] ==
+Anonimo
+    TE[[ _ ]] == _
+Identificador
+    TE[[ V ]] == V ; como un numero positivo
+Constantes
+    Numero, Logico, Caracter, Fallo, Infinito y Nan:
+        TE[[ C ]] == C 
+    Cadena
+        TE[[ "c0...cn" ]] == c0 >| ... >| cn >| []
+Identificadores negativos
+    TE[[ nid n ]] == -n; como un numero negativo
+Primitivas
+    TE[[ p ]] == p; como un numero
+Tipado
+    TE[[ I: T ]] == TE[[ I ]] : TT[[ T ]]
+Parentesis
+    TE[[ (E) ]] == TE[[ E ]]
+Aplicacion
+    TE[[ E F ]] == TE[[ E ]] TE[[ F ]]
+    TE[[ E o F ]] == TE[[ o ]] TE[[ (E, F) ]]
+    TE[[ p E ]] == TE[[ p ]] TE[[ E ]]
+    TE[[ E q ]] == TE[[ q ]] TE[[ E ]]
+Abstraccion lambda
+    TE[[ \ P1 ... Pn -> E ]] == 
+        \TE[[ P1 ]] -> (\ ... ->(\ TE[[ Pn ]] -> TE[[ E ]])...)
+Tupla
+    TE[[ () ]] == ()
+    TE[[ (E) ]] == TE[[ E ]]
+    TE[[ (E1, ..., En) ]] == (TE[[ E1 ]], ..., TE[[ En ]])
+Lista
+    TE[[ [E1, ..., En] ]] == TE[[ E1 ]] >| ... >| TE[[ En ]] >| []
+    TE[[ [] ]] == []
+Constructor de lista
+    TE[[ E >| F ]] == TE[[ E ]] >| TE[[ F ]]
+Listas por sucesion
+    TE[[ [E .. F] ]] == TE[[ ListFromTo E F ]]
+    TE[[ [E, F .. G] ]] == TE[[ ListFromThenTo E F G ]]
+Listas por comprension
+    TE[[ [E | P |< L, Q2, ..., Qn] ]] ==
+        TE[[ FlatMap (\P -> [E | Q2, ..., Qn]) L ]]
+    TE[[ [E | B, Q2, ..., Qn] ]] ==
+        TE[[ IfFalse B [] ; [E | Q2, ..., Qn] ]]
+    TE[[ [E | ] ]] == TE[[ E >| [] ]]
+Listas con indice
+    TE[[ E{I0, ..., In} ]] == TE[[ GetElm [I0, ..., In] E ]]
+Expresion let
+    TE[[ let P <- E in F ]] == TE[[ (\P -> F) E ]]
+Expresion where
+    TE[[ F where P <- E ]] == TE[[ let P <- E in F ]]
+Captura de fallo
+    TE[[ E ; F ]] == TE[[ E ]] ; TE[[ F ]]
+Guarda
+    TE[[ E ? F ]] == TE[[ IfThenElse(B, \_ -> E, \_ -> fail)() ]]
+Numero con signo
+    TE[[ +- N ]] == +-N; como numero
+Imperativo
+    
+    Vacio
+        TE[[
+            begin
+            
+            end
+        ]] == ()
+    
+    Retorno
+        TE[[
+            begin
+                return E
+                S1
+                ...
+                Sn
+            end
+        ]] == TE[[ E ]]
+        
+    Asignacion
+        TE[[
+            begin
+                P <- E
+                S1
+                ...
+                Sn
+            end
+        ]] == TE[[
+                let P <- E in
+                    begin
+                        S1
+                        ...
+                        Sn
+                    end
+                ]]
+    
+    Llamada
+        TE[[
+            begin
+                E
+                S1
+                ...
+                Sn
+            end
+        ]] == TE[[
+                let _ <- E in
+                    begin
+                        S1
+                        ...
+                        Sn
+                    end
+                ]]
+    
+    Bicondicional
+        TE[[
+            begin
+                if IC then
+                    TS0
+                    ...
+                    TSn
+                else
+                    ES0
+                    ...
+                    ESn
+                S1
+                ...
+                Sn
+            end
+        ]] == TE[[
+                IfThenElse(
+                    IC,
+                    \_ ->
+                        begin
+                            TS0
+                            ..
+                            TSn
+                            S1
+                            ..
+                            Sn
+                        end,
+                    \_ ->
+                        begin
+                            ES0
+                            ..
+                            ESn
+                            S1
+                            ..
+                            Sn
+                        end
+                    )
+                ()
+                ]]
+    
+    Condicional
+        TE[[
+            begin
+                if IC then
+                    TS0
+                    ...
+                    TSn
+                S1
+                ...
+                Sn
+            end
+        ]] == TE[[
+                    begin
+                        if IC then
+                            TS0
+                            ..
+                            TSn
+                        else
+                            
+                        S1
+                        ..
+                        Sn
+                    end
+                ]]
+                
+    Multicondicional con cola
+        TE[[
+            begin
+                if IC0 then
+                    T0S0
+                    ...
+                    T0Sn
+                elif IC1 then
+                    T1S0
+                    ...
+                    T1Sn
+                ...
+                elif ICm then
+                    TmS0
+                    ...
+                    TmSn
+                else
+                    ES0
+                    ...
+                    ESn
+                S1
+                ...
+                Sn
+            end
+        ]] == TE[[
+                    begin
+                        if IC0 then
+                            T0S0
+                            ...
+                            T0Sn
+                        else
+                            if IC1 then
+                                T1S0
+                                ...
+                                T1Sn
+                            elif IC2 then
+                                T2S0
+                                ...
+                                T2Sn
+                            ...
+                            elif ICm then
+                                TmS0
+                                ...
+                                TmSn
+                            else
+                                ES0
+                                ...
+                                ESn
+                        S1
+                        ...
+                        Sn
+                    end
+                ]]
+        
+    Multicondicional sin cola
+        TE[[
+            begin
+                if IC0 then
+                    T0S0
+                    ...
+                    T0Sn
+                elif IC1 then
+                    T1S0
+                    ...
+                    T1Sn
+                ...
+                elif ICm then
+                    TmS0
+                    ...
+                    TmSn
+                S1
+                ...
+                Sn
+            end
+        ]] == TE[[
+                    begin
+                        if IC0 then
+                            T0S0
+                            ...
+                            T0Sn
+                        else
+                            if IC1 then
+                                T1S0
+                                ...
+                                T1Sn
+                            elif IC2 then
+                                T2S0
+                                ...
+                                T2Sn
+                            ...
+                            elif ICm then
+                                TmS0
+                                ...
+                                TmSn
+                        S1
+                        ...
+                        Sn
+                    end
+                ]]
+        
+    Bucle while
+        TE[[  
+            begin
+                while LC do
+                    LS0
+                    ...
+                    LSn
+                S1
+                ...
+                Sn
+            end
+            ]] == TE[[
+                    WhileSkeleton( \V ->(
+                            LC,
+                            \_w ->
+                                begin
+                                    LS0
+                                    ..
+                                    LSn
+                                    return _w V
+                                end,
+                            \_ ->
+                                begin
+                                    S1
+                                    ..
+                                    Sn
+                                end
+                            )
+                        )
+                    V
+                    ]]
+        Aqui V son todas las variables que aparecen desde la estructura while (Quizas solo se necesite de variables libres pero por ahora esta asi)
+    
+    Bucle for
+        TE[[
+            begin
+                for P in L do
+                    FS0
+                    ...
+                    FSn
+                S1
+                ...
+                Sn
+            end
+            ]] == TE[[
+                        begin
+                            l <- L
+                            while NotEmpty l do
+                                P >| l <- l
+                                FS0
+                                ...
+                                FSn
+                            S1
+                            ...
+                            Sn
+                        end
+                    ]]
+        
+Definiciones requeridas
+
+...............
+...............
+...............
+
+IfThenElse :: (bool, _, _) -> _
+IfThenElse(true, y, _) := y
+IfThenElse(false, _, n) := n
+
+GetElm :: [nat] -> _ -> _
+GetElm [] a := a
+GetElm :: [nat] -> [_] -> _
+GetElm (i >| is) xs := GetElm is (PrimGet(xs, i))
+
+GetElm :: [nat] -> _ -> _ ... para tuplas
+GetElm (i >| is) xt := GetElm is (PrimSelect(xt, i))
+
+ListFromTo :: real -> real -> [real]
+ListFromTo a b := GenerateUntil a b 1 (>)
+
+ListFromThenTo :: real -> real -> real -> [real]
+ListFromThenTo a b c := GenerateUntil a c (b-a) ((a < b)?(>); (<))
+
+IfFalse :: bool -> _ -> _
+IfFalse true _ := fail
+IfFalse false x := x
+
+FlatMap :: (_ -> [_]) -> [_] -> [_]
+FlatMap f [] := []
+FlatMap f (x >| xs) := (f x) ++ (FlatMap f xs)
+
+NotEmpty :: [_] -> bool
+NotEmpty [] := false
+NotEmpty _  := true
+
+WhileSkeleton vt := InsertLambda((\w -> w (WhileSkeleton vt)), InsertLambda(IfThenElse, vt))
+
+... Required for required definitions
+
+++ :: ([_], [_]) -> [_]
+[] ++ ys := ys
+(x >| xs) ++ ys:= x >| (xs ++ ys)
+
+SetElm :: _ -> [nat] -> _ -> [_]
+SetElm a [] _ := a
+SetElm :: _ -> [nat] -> [_] -> [_]
+SetElm a (i >| is) xs := PrimSet(SetElm a is (PrimGet(xs, i)), xs, i)
+
+GenerateUntil :: real -> real -> real -> ((_, _) -> bool) -> [real]
+GenerateUntil a b s f := (f(a, b))? []; a >| (GenerateUntil (a+s) b s f)
+
+InsertLambda(f, l) := \x -> f(l x)
+
+IfThenElse :: (bool, _, _) -> _
+IfThenElse(true, y, _) := y
+IfThenElse(false, _, n) := n
+
+GetElm :: [nat] -> _ -> _
+GetElm [] a := a
+GetElm :: [nat] -> [_] -> _
+GetElm (i >| is) xs := GetElm is (PrimGet(xs, i))
+
+GetElm :: [nat] -> _ -> _ ... para tuplas
+GetElm (i >| is) xt := GetElm is (PrimSelect(xt, i))
+
+ListFromTo :: real -> real -> [real]
+ListFromTo a b := GenerateUntil a b 1 (>)
+
+ListFromThenTo :: real -> real -> real -> [real]
+ListFromThenTo a b c := GenerateUntil a c (b-a) ((a < b)?(>); (<))
+
+IfFalse :: bool -> _ -> _
+IfFalse true _ := fail
+IfFalse false x := x
+
+FlatMap :: (_ -> [_]) -> [_] -> [_]
+FlatMap f [] := []
+FlatMap f (x >| xs) := (f x) ++ (FlatMap f xs)
+
+NotEmpty :: [_] -> bool
+NotEmpty [] := false
+NotEmpty _  := true
+
+WhileSkeleton vt := InsertLambda((\w -> w (WhileSkeleton vt)), InsertLambda(IfThenElse, vt))
+
+... Required for required definitions
+
+++ :: ([_], [_]) -> [_]
+[] ++ ys := ys
+(x >| xs) ++ ys:= x >| (xs ++ ys)
+
+SetElm :: _ -> [nat] -> _ -> [_]
+SetElm a [] _ := a
+SetElm :: _ -> [nat] -> [_] -> [_]
+SetElm a (i >| is) xs := PrimSet(SetElm a is (PrimGet(xs, i)), xs, i)
+
+GenerateUntil :: real -> real -> real -> ((_, _) -> bool) -> [real]
+GenerateUntil a b s f := (f(a, b))? []; a >| (GenerateUntil (a+s) b s f)
+
+InsertLambda(f, l) := \x -> f(l x)
+
++ :: (Real, Real) -> Real
+a + b := PrimAdd(a, b)
+
+- :: (Real, Real) -> Real
+a - b := PrimSub(a, b)

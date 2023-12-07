@@ -1,0 +1,285 @@
+
+\titleformat{\subsection}[runin]{\large \bfseries}{\thesubsection.}{10pt}{\bfseries}
+\titlespacing{\subsection}{0pt}{10pt}{0pt}
+
+\chapter{Listas}
+   Una lista es una secuencia de valores encerrados entre corchetes y separados por comas.
+   \\
+   
+   la cantidad de elementos de la lista también llamado longitud puede ser cero o mas, en caso de que sea cero se le llama lista vacía o nula.
+   
+   \begin{fxcode}
+      \arrowcode{[1, 23, 45, \textquotesingle a\textquotesingle, \textquotedbl hola\textquotedbl]}\\
+      \outcode{[1, 23, 45, \textquotesingle a\textquotesingle, \textquotedbl hola\textquotedbl]}\\
+      \arrowcode{[]}\\
+      \outcode{[]}\\
+      \arrowcode{[EncodeChar 32, 1, 23*12, 4 = 3]}\\
+      \outcode{[\textquotesingle~\textquotesingle, 1, 276, false]}
+   \end{fxcode}
+   
+   Las listas son mas versátiles en el manejo ademas su uso es distinto al de otras colecciones (como las tuplas) aunque sean similares, representan a una secuencia o arreglo dinámico y pueden ser utilizadas como vectores, matrices o tensores.
+   
+   \section{Funciones básicas sobre listas}
+      
+      \subsection*{Longitud}: \texttt{Length <lista>}\\
+      Donde \texttt{<lista>} es una lista, esta función calcula la longitud de la lista.
+      
+      \begin{fxcode}
+         \arrowcode{Length[\textquotesingle~\textquotesingle, 1, 276*12, false]}\\
+         \outcode{4}
+      \end{fxcode}
+      
+      \subsection*{Lista vacía}: \texttt{Null <lista>}\\
+      Donde \texttt{<lista>} es una lista, esta función verifica si la lista es vacía.
+      
+      \begin{fxcode}
+         \arrowcode{Null []}\\
+         \outcode{true}
+      \end{fxcode}
+      
+   \section{Elementos en la lista}
+      
+      \subsection*{Elemento i-ésimo} \texttt{<lista>\{<indice>\}}\\
+      Donde \texttt{<lista>} es una lista e \texttt{<indice>} es un número que indica un indice, esta función obtiene el \texttt{<indice>}-ésimo elemento de la lista \texttt{<lista>}.
+      
+      \begin{fxcode}
+         \arrowcode{[\textquotedbl hola\textquotedbl, 12, 3]\{0\}}\\
+         \outcode{\textquotedbl hola\textquotedbl}
+      \end{fxcode}
+      
+      El indice de una lista se cuenta en base a cero, es decir el primer elemento sera el 0-ésimo elemento, el segundo el 1-ésimo elemento y así sucesivamente
+      
+      \subsection*{Notación multi-indice}: \texttt{<lista>\{<indice>, ..., <indice>\}}\\
+      Dentro de las llaves se puede colocar cualquier cantidad de indices y obtienen el \texttt{(<indice>, ..., <indice>)}-ésimo elemento de la lista.
+      
+      \begin{fxcode}
+         \arrowcode{[[1, 2, 3], [4, 5, 6], [7, 8, 9]]\{1, 2\}}\\
+         \outcode{6}
+      \end{fxcode}
+      
+      Si la cantidad de indices es cero entonces devolverá el mismo valor.
+      
+      \begin{fxcode}
+         \arrowcode{[[1, 2, 3], [4, 5, 6], [7, 8, 9]]\{\}}\\
+         \outcode{[[1, 2, 3], [4, 5, 6], [7, 8, 9]]}\\
+         \arrowcode{12\{\}}\\
+         \outcode{12}
+      \end{fxcode}
+      
+      Los indices siempre tienen que ser números naturales.
+      
+      \subsection*{Agregar un elemento (constructores)}: \texttt{<elemento>~\texttt{>|} <lista>}\\
+      Esta expresion especial agrega el elemento \texttt{<elemento>} a la cabecera de la lista \texttt{<lista>}, ``\texttt{>|}'' no es un operador sino una notación especial llamada constructor de lista para indicar que el \texttt{<elemento>} sera de ahora en adelante el primer elemento de la \texttt{<lista>}.
+      
+      \begin{fxcode}
+         \arrowcode{3 >| [1, 2]}\\
+         \outcode{[3, 1, 2]}\\
+         \arrowcode{true >| []}\\
+         \outcode{[true]}
+      \end{fxcode}
+      
+      \subsection*{Pertenencia de un elemento}: \texttt{<elemento>~Elm <lista>}\\
+      Este operador indica si el elemento \texttt{<elemento>} esta en la lista \texttt{<lista>}.
+      
+      \begin{fxcode}
+         \arrowcode{2 Elm [1, 2, 3]}\\
+         \outcode{true}\\
+         \arrowcode{\textquotesingle a\textquotesingle~Elm [true, \textquotedbl hola\textquotedbl]}\\
+         \outcode{[false]}
+      \end{fxcode}
+      
+      Para que esta función devuelva valores correctos el elemento a verificar debe ser un elemento comparable.
+      
+      \subsection*{Pertenencia de un elemento}: \texttt{Find <elemento>~<lista>}\\
+      Esta función busca el elemento \texttt{<elemento>} en la lista \texttt{<lista>} y devuelve la posición donde se encuentra, si no lo encuentra devolverá la longitud de la lista.
+      
+      \begin{fxcode}
+         \arrowcode{Find (EncodeChar \textquotesingle~\textquotesingle) [true, \textquotesingle~\textquotesingle]}\\
+         \outcode{1}\\
+         \arrowcode{Find 3 [\textquotesingle a\textquotesingle, \textquotesingle b\textquotesingle, \textquotesingle c\textquotesingle]}\\
+         \outcode{[3]}
+      \end{fxcode}
+      
+      Para que esta función devuelva valores correctos el elemento a buscar debe ser un elemento comparable.
+      
+   \section{Comparación de listas}
+      Para las siguientes operaciones los elementos de la lista deben ser comparables.
+      
+      \subsection*{Igualdad}: \texttt{<lista>~= <lista>}\\
+      Esta función determina si dos listas son iguales o no, dos listas son iguales si tienen la misma longitud y los mismos elementos.
+      
+      \begin{fxcode}
+         \arrowcode{[1, 2] = []}\\
+         \outcode{false}\\
+         \arrowcode{[\textquotesingle a\textquotesingle, 1] = [\textquotesingle a\textquotesingle, 1]}\\
+         \outcode{false}
+      \end{fxcode}
+      
+      \subsection*{Desigualdad}: \texttt{<lista>~<>~<lista>}\\
+      Esta función determina si dos listas son diferentes o no.
+      
+      \begin{fxcode}
+         \arrowcode{[1, 2] <>~[]}\\
+         \outcode{true}\\
+         \arrowcode{[\textquotesingle a\textquotesingle, 1] <>~[\textquotesingle a\textquotesingle, 1]}\\
+         \outcode{false}
+      \end{fxcode}
+      
+      \subsection*{Menor que}: \texttt{<lista A>~\texttt{<}~<lista B>}\\
+      Esta función determina si la \texttt{<lista A>} es menor que la \texttt{<lista B>}, para la desigualdad menor que de listas se utiliza el orden del diccionario.
+      
+      \begin{fxcode}
+         \arrowcode{[1, 2] <~[3, 4]}\\
+         \outcode{true}\\
+         \arrowcode{[1, 2, 1] <~[1, 1, 2]}\\
+         \outcode{false}
+      \end{fxcode}
+      
+      \subsection*{Mayor que}: \texttt{<lista A>~\texttt{>}~<lista B>}\\
+      Esta función determina si la \texttt{<lista A>} es mayor que la \texttt{<lista B>}, para la desigualdad mayor que de listas se utiliza el orden del diccionario.
+      
+      \begin{fxcode}
+         \arrowcode{[1, 2] >~[3, 4]}\\
+         \outcode{false}\\
+         \arrowcode{[1, 2, 1] >~[1, 1, 2]}\\
+         \outcode{true}
+      \end{fxcode}
+      
+      \subsection*{Menor o igual que}: \texttt{<lista A>~\texttt{<=}~<lista B>}\\
+      Esta función determina si la \texttt{<lista A>} es menor o igual que la \texttt{<lista B>}.
+      
+      \begin{fxcode}
+         \arrowcode{[1, 2] <= [3, 4]}\\
+         \outcode{true}\\
+         \arrowcode{[1, 2, 1] <= [1, 2, 1]}\\
+         \outcode{true}
+      \end{fxcode}
+      
+      \subsection*{Mayor o igual que}: \texttt{<lista A>~\texttt{>=}~<lista B>}\\
+      Esta función determina si la \texttt{<lista A>} es mayor o igual que la \texttt{<lista B>}.
+      
+      \begin{fxcode}
+         \arrowcode{[1, 2] >= [3, 4]}\\
+         \outcode{false}\\
+         \arrowcode{[1, 2, 1] >= [1, 2, 1]}\\
+         \outcode{true}
+      \end{fxcode}
+      
+   \section{Listas a partir de listas}
+      
+      \subsection*{Concatenación}: \texttt{<lista>~++~<lista>}\\
+      Donde \texttt{<lista>} es una lista, esta función concatena dos listas en el mismo orden en el que aparecen.
+      
+      \begin{fxcode}
+         \arrowcode{[1, 2, \textquotesingle a\textquotesingle] ++ [4 = 4, \textquotedbl hola\textquotedbl]}\\
+         \outcode{[1, 2, \textquotesingle a\textquotesingle, true, \textquotedbl hola\textquotedbl]}
+      \end{fxcode}
+      
+      Al ser este un operador binario tiene asociatividad por la izquierda.
+      
+      \begin{fxcode}
+         \arrowcode{[1, 2] ++ [3, 4] ++ [4, 5]}\\
+         \outcode{[1, 2, 3, 4, 4, 5]}
+      \end{fxcode}
+      
+      \subsection*{Reverso}: \texttt{Reverse <lista>}\\
+      Esta función toma la lista \texttt{<lista>} y revierte el orden de sus elementos.
+      
+      \begin{fxcode}
+         \arrowcode{Reverse [1, 2, \textquotesingle a\textquotesingle, true, \textquotedbl hola\textquotedbl]}\\
+         \outcode{[\textquotedbl hola\textquotedbl, true, \textquotesingle a\textquotesingle, 2, 1]}
+      \end{fxcode}
+      
+      \subsection*{Tomar los primeros elementos}: \texttt{Take <cantidad N>~<lista>}\\
+      Esta función toma los primeros N de elementos de la \texttt{<lista>}.
+      
+      \begin{fxcode}
+         \arrowcode{Take 4 [\textquotesingle~\textquotesingle, 1, 2, \textquotesingle a\textquotesingle, true, \textquotedbl hola\textquotedbl, 1, 276, false]}\\
+         \outcode{[\textquotesingle~\textquotesingle, 1, 2, \textquotesingle a\textquotesingle]}
+      \end{fxcode}
+      
+      \subsection*{Eliminar los primeros elementos}: \texttt{Drop <cantidad N>~<lista>}\\
+      Esta función elimina los primeros N de elementos de la \texttt{<lista>}.
+      
+      \begin{fxcode}
+         \arrowcode{Drop 4 [\textquotesingle~\textquotesingle, 1, 2, \textquotesingle a\textquotesingle, true, \textquotedbl hola\textquotedbl, 1, 276, false]}\\
+         \outcode{[true, \textquotedbl hola\textquotedbl, 1, 276, false]}
+      \end{fxcode}
+      
+      \subsection*{Ordenamiento}: \texttt{Sort <lista>}\\
+      Esta función ordena los elementos de una lista.
+      
+      \begin{fxcode}
+         \arrowcode{Sort [4, 2, 6, 1, 1, 3, 6, 0]}\\
+         \outcode{[0, 1, 1, 2, 3, 4, 6, 6]}
+      \end{fxcode}
+      
+   \section{Sublistas}
+      Las sublistas son secuencias que son subsecuencias dentro de listas.
+      \\
+      
+      Por ejemplo, en la lista \texttt{[4, 2, 6, 1, 1, 3, 6, 0]} la lista \texttt{[6, 1, 1]} es una sublista pues \texttt{6}, \texttt{1}, \texttt{1} se encuentran consecutivamente en la lista \texttt{[4, 2, 6, 1, 1, 3, 6, 0]}.
+      \\
+      
+      La lista vacía es sublista de cualquier lista.
+      
+      \subsection*{Posición de sublistas}: \texttt{Pos <lista A>~<lista B>}\\
+      Esta función devuelve la posición por donde empieza la \texttt{<lista A>} como sublista de \texttt{<lista B>} si la \texttt{<lista A>} no es una sublista de \texttt{<lista B>} entonces devuelve la longitud de \texttt{<lista B>}.
+      
+      \begin{fxcode}
+         \arrowcode{Pos [6, 1, 1] [4, 2, 6, 1, 1, 3, 6, 0]}\\
+         \outcode{2}\\
+         \arrowcode{Pos [\textquotesingle a\textquotesingle, \textquotesingle~\textquotesingle, 10] [\textquotesingle~\textquotesingle, 1, 2, \textquotesingle a\textquotesingle, true, \textquotedbl hola\textquotedbl, 1, 276, false]}\\
+         \outcode{9}\\
+         \arrowcode{Pos [] [\textquotesingle~\textquotesingle, \textquotedbl g\textquotedbl]}\\
+         \outcode{0}
+      \end{fxcode}
+      
+      \subsection*{Copiar sublistas}: \texttt{Copy <lista>~<posición>~<cantidad>}\\
+      Esta función extrae una sublista de la lista \texttt{<lista>} empezando desde la \texttt{<posición>} y con \texttt{<cantidad>} de elementos.
+      
+      \begin{fxcode}
+         \arrowcode{Copy [\textquotesingle~\textquotesingle, 1, 2, \textquotesingle a\textquotesingle, true, \textquotedbl hola\textquotedbl, 1, 276, false] 3 5}\\
+         \outcode{[\textquotesingle a\textquotesingle, true, \textquotedbl hola\textquotedbl, 1, 276]}
+      \end{fxcode}
+      
+      \subsection*{Eliminar sublistas}: \texttt{Delete <lista>~<posición>~<cantidad N>}\\
+      Esta función elimina una porción de longitud N de la lista \texttt{<lista>} desde la \texttt{<posicion>}.
+      
+      \begin{fxcode}
+         \arrowcode{Delete [\textquotesingle~\textquotesingle, 1, 2, \textquotesingle a\textquotesingle, true, \textquotedbl hola\textquotedbl, 1, 276, false] 2 3}\\
+         \outcode{[\textquotesingle~\textquotesingle, 1, \textquotedbl hola\textquotedbl, 1, 276, false]}
+      \end{fxcode}
+      
+      \subsection*{Insertar sublistas}: \texttt{Insert <lista A>~<lista B>~<posición>}\\
+      Esta función inserta la \texttt{<lista A>} para que sea una sublista de \texttt{<lista B>}.
+      
+      \begin{fxcode}
+         \arrowcode{Insert [true, \textquotedbl hola\textquotedbl] [4, 2, 6, 1, 1, 3, 6, 0] 3}\\
+         \outcode{[4, 2, 6, true, \textquotedbl hola\textquotedbl, 1, 1, 3, 6, 0]}
+      \end{fxcode}
+      
+      \subsection*{Reemplazar sublistas}: \texttt{Replace <lista A>~<lista B>~<lista C>}\\
+      Esta función reemplaza la sublista \texttt{<lista B>} de la \texttt{<lista A>} por la \texttt{<lista C>} como nueva sublista.
+      
+      \begin{fxcode}
+         \arrowcode{Replace [4, 2, 6, 1, 1, 3, 6, 0] [6, 1] [\textquotesingle a\textquotesingle, true, \textquotedbl hola\textquotedbl]}\\
+         \outcode{[4, 2, \textquotesingle a\textquotesingle, true, \textquotedbl hola\textquotedbl, 1, 3, 6, 0]}
+      \end{fxcode}
+      
+   \section{Cadenas como listas}
+      Una cadena de caracteres no es mas que una forma simplificada de escribir una lista de caracteres, por lo que \texttt{[\textquotesingle h\textquotesingle, \textquotesingle o\textquotesingle, \textquotesingle l\textquotesingle, \textquotesingle a\textquotesingle]} es equivalente a \texttt{\textquotedbl hola\textquotedbl}, y es por eso también que cuando se evalúa una cadena vacía devuelve una lista vacía como resultado.
+      
+      \begin{fxcode}
+         \arrowcode{\textquotedbl\textquotedbl}\\
+         \outcode{[]}\\
+         \arrowcode{[\textquotesingle h\textquotesingle, \textquotesingle o\textquotesingle, \textquotesingle l\textquotesingle, \textquotesingle a\textquotesingle]}\\
+         \outcode{\textquotedbl hola\textquotedbl}
+      \end{fxcode}
+      
+      Todas las operaciones sobre listas son validas en cadenas de caracteres.
+      \\
+      
+      Las sublistas de la lista de caracteres recibe el nombre de subcadenas, por ejemplo en \texttt{\textquotedbl hola mundo\textquotedbl} la cadena \texttt{\textquotedbl mundo\textquotedbl} es una subcadena de \texttt{\textquotedbl hola mundo\textquotedbl}.
+      
+   

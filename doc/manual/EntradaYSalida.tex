@@ -1,0 +1,124 @@
+
+\titleformat{\subsection}[runin]{\large \bfseries}{\thesubsection.}{10pt}{\bfseries}
+\titlespacing{\subsection}{0pt}{10pt}{0pt}
+
+\chapter{Entrada y salida}
+   Para escribir y leer datos Function v0.5 utiliza unas funciones especiales que ademas de devolver cierto valor realiza la acción de lectura/escritura.
+   
+   \section{Entrada}
+      La lectura de datos o valores es una acción en el cual el usuario ingresa una cadena y esta es usada por la función o programa.
+      
+      \subsection*{Leer una cadena}: \texttt{Input[() | <cadena>]}\\
+      Esta función detiene por un momento la ejecución del programa o la evaluación de una expresion y espera que el usuario ingrese una cadena y al presionar la tecla {\it RETURN} lee esa cadena devolviendo la cadena leída y continuando con la ejecución.
+      \\
+      
+      Tiene dos tipos de argumentos uno puede ser una tupla vacía y otro una cadena.
+      
+      \begin{fxcode}
+         \arrowcode{Input()}\\
+         \outcode{hola}\\
+         \outcode{\textquotedbl hola\textquotedbl}\\
+         \arrowcode{Input \textquotedbl Presione enter para continuar...\textquotedbl}\\
+         \outcode{Presione enter para continuar...}\\
+         \outcode{[]}
+      \end{fxcode}
+      
+      \subsection*{Otras formas de lectura}\texttt{}\\
+      También es posible leer directamente números con las funciones \texttt{ReadNum}, \texttt{ReadChar} y \texttt{ReadBool} que toman como argumento una tupla vacía y devuelven el valor leído.
+      
+      \begin{fxcode}
+         \arrowcode{ReadNum()}\\
+         \outcode{12}\\
+         \outcode{12}\\
+         \arrowcode{ReadBool()}\\
+         \outcode{true}\\
+         \outcode{true}\\
+         \arrowcode{ReadChar()}\\
+         \outcode{c}\\
+         \outcode{\textquotesingle c\textquotesingle}
+      \end{fxcode}
+      
+   \section{Salida}
+      La escritura de datos o valores se realiza mediante las funciones de escritura que son las siguientes.
+      
+      \subsection*{Imprimir cadenas}: \texttt{Output <cadena>}\\
+      Esta función escribe la \texttt{<cadena>} en la consola y devuelve la tupla vacía como resultado.
+      
+      \begin{fxcode}
+         \arrowcode{Output \textquotedbl hola mundo\textquotedbl}\\
+         \outcode{hola mundo()}
+      \end{fxcode}
+      
+      \subsection*{Imprimir lineas}: \texttt{Print <cadena>}\\
+      Esta función es similar a la función \texttt{Output} pero que después de escribir la \texttt{<cadena>} mueve el carrito al inicio de la siguiente linea.
+      
+      \begin{fxcode}
+         \arrowcode{Print \textquotedbl hola mundo\textquotedbl}\\
+         \outcode{hola mundo}\\
+         \outcode{()}
+      \end{fxcode}
+      
+      \subsection*{Escribir valores}: \texttt{Write <argumento>}\\
+      Esta función imprime el valor del \texttt{<argumento>} y devuelve la tupla vacía como resultado.
+      
+      \begin{fxcode}
+         \arrowcode{Write [1, 2]}\\
+         \outcode{[1, 2]()}
+      \end{fxcode}
+      
+      \subsection*{Limpiar la consola}: \texttt{ClrScr()}\\
+      Esta función borra todos los escritos de la consola y devuelve una tupla vacía.
+      
+      \begin{fxcode}
+         \arrowcode{ClrScr()}
+      \end{fxcode}
+      
+   \section{Mensajes}
+      
+      \subsection*{Lanzamiento de mensajes}: \texttt{Message <cadena>}\\
+      Esta función imprime un mensaje en la consola y devuelve una tupla vacía.
+      
+      \begin{fxcode}
+         \arrowcode{Message \textquotedbl Esto es un nuevo mensaje\textquotedbl}\\
+         \outcode{Message: Esto es un nuevo mensaje}\\
+         \outcode{()}
+      \end{fxcode}
+      
+      \subsection*{Mensaje de fallo}: \texttt{Failure <cadena>}\\
+      Similar a la anterior pero que devuelve el valor fail como resultado.
+      
+      \begin{fxcode}
+         \arrowcode{Failure \textquotedbl La operación es invalida\textquotedbl}\\
+         \outcode{Failure: La operación es invalida}\\
+         \outcode{fail}
+      \end{fxcode}
+      
+   \section{Errores}
+      Las funciones de lanzado de errores genera un error, escribe un mensaje en la consola y paraliza la evaluación o ejecución.
+      \\
+      
+      Un error a diferencia de un fallo es una acción lanzada para que la evaluación se paralice por completo y nos indique el error cometido, un fallo es una expresion que se va propagando a través de las evaluaciones pero que es evitable, es decir un fallo se puede arreglar pero un error no.
+      \\
+      
+      \subsection*{Lanzamiento de errores}: \texttt{Error <cadena>}\\
+      Esta función genera un error de usuario y escribe un mensaje.
+      
+      \begin{fxcode}
+         \arrowcode{Error \textquotedbl nuevo error\textquotedbl}\\
+         \outcode{ERROR - performing error in command 1 line 1, nuevo error}
+      \end{fxcode}
+      
+      
+      
+      
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   

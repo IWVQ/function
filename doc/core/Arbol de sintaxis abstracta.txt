@@ -1,0 +1,118 @@
+
+Arboles de sintaxis abstracta
+=============================
+
+Expresiones
+-----------
+    Este arbol es la representacion de la sintaxis como arbol de sintaxis abstracta
+    
+    Se utilizara la notacion
+        <nombre> ::: <nodo>[<rama>, <rama>, ..., <rama>]
+    
+    donde <nombre> es el nombre del arbol o subarbol y <nodo> es la etiqueta del nodo y <rama> es una rama del arbol, si la etiqueta <nodo> no existe se supondra que el arbol no tiene etiqueta
+    
+    
+Hojas
+    Constante ::: CONSTANTE[]; numeros con o sin signo, caracteres, booleanos y fallo
+    Cadena    ::: CADENA[]
+    Anonimo   ::: ANONIMO[]
+    Ident     ::: IDENT[]
+    TBasico   ::: REAL[] | INT[] | NAT[] | CHAR[] | BOOL
+    Primitiva ::: PRIMITIVE[]
+    
+Expresion de tipo
+    Tupla   ::: TUPLA[Tipo ... Tipo]
+    Lista   ::: LISTA[Tipo]
+    Funcion ::: FUNCION[Tipo, Tipo]
+    
+    Tipo   ::: Anonimo | Tupla | Lista | Funcion | Ident | TBasico
+    
+Patron
+    Tipado ::: TIPADO[Ident, Tipo]
+    Tupla  ::: TUPLA[Patron ... Patron]
+    Lista  ::: LISTA[Patron ... Patron]
+    ConsLista ::: CONS_LISTA[Patron, Patron]
+    
+    Patron ::: Anonimo | Ident | Constante | Cadena | Tipado |
+        Tupla | Lista | ConsLista
+
+Expresion de valor
+
+    
+    Lambda ::: LAMBDA[Patron ... Patron, Expr]
+    Tupla  ::: TUPLA[Expr ... Expr]
+    
+    Guarda ::: GUARDA[Expr, Expr]
+    Lista ::: LISTA[Expr ... Expr]; 
+    ListaSucc ::: LISTA_SUCC[Expr, Expr] | LISTA_SUCC[Expr, Expr, Expr]
+    Generador ::: GENERADOR[Patron, Expr]
+    Calificador ::: Expr | Generador
+    ListaComp ::: LISTA_COMPRESION[Expr, Calificador ... Calificador]
+    
+    Asignacion ::: ASIGNACION[Patron, Expr]
+    Let ::: LET[Asignacion, Expr]
+    
+    If ::: 
+        IF[ Expr, [Instruccion ... Instruccion]] |
+        IF[ Expr, [Instruccion ... Instruccion], [Instruccion ... Instruccion]] |
+        IF[ Expr, [Instruccion ... Instruccion],
+            Expr, [Instruccion ... Instruccion],
+            ...,
+            [Instruccion ... Instruccion]]
+    For ::: FOR[Patron, Expr, [Instruccion ... Instruccion]]
+    While ::: WHILE[Expr, [Instruccion ... Instruccion]]
+    Return ::: RETURN[Expr]
+    
+    Instruccion ::: Asignacion | If | For | While | Return | Expr
+    
+    Imperativo ::: IMPERATIVO[Instruccion ... Instruccion]
+    
+    Indice ::: INDEX[Expr, [Expr ... Expr]]
+    Aplicacion ::: APPLICATION[Expr, Expr]
+    ConsLista ::: CONS_LISTA[Expr, Expr]
+    Intento ::: INTENTAR[Expr, Expr]
+    Where ::: WHERE[Expr, Asignacion]
+    
+    
+    Expr ::: Anonimo | Ident | Constante | Cadena | Primitiva | Aplicacion |
+        Lambda | Tupla | Intento | Guarda | ConsLista | Lista | ListaSucc | ListaComp
+        Let | Where | Indice | Imperativo
+
+Comandos
+--------
+
+Ejecutar
+    Run ::: RUN[Cadena]
+    
+Limpiar
+    Clear ::: CLEAR[Ident ... Ident]
+    
+Notacion
+    Infijo ::: (INFIX | INFIXR | INFIXL)[Numero, Ident ... Ident]
+    Posfijo ::: POSFIX[Ident ... Ident]
+    Prefijo ::: PREFIX[Ident ... Ident]
+    
+    Notacion ::: Infijo | Posfijo | Prefijo
+    
+Sinonimo de tipo
+    Sinonimo ::: SINONIMO[Ident, Tipo]
+    
+Heredable
+    Heredable ::: HEREDABLE[Ident, Tipo]
+    
+Definicion
+    DefValor ::: DEFINICION[AppPattern, Expr]
+    
+Asignacion
+    Assignment ::: ASIGNMENT[Ident, Expr]
+    
+Entrada
+    Input ::: Import | Clear | Notacion | Sinonimo | Heredable | DefValor | Assignment | Expr
+    
+    
+Memoria
+=======
+La memoria es una lista de todos los identificadores(positivos)
+con sus respectivos sinonimos o definiciones si tiene
+
+

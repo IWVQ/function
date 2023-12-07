@@ -1,0 +1,73 @@
+
+\titleformat{\subsection}[runin]{\large \bfseries}{\thesubsection.}{10pt}{\bfseries}
+\titlespacing{\subsection}{0pt}{10pt}{0pt}
+
+\chapter{Control del sistema}
+   Las funciones presentadas aquí son funciones que ademas de devolver algo realizan una acción para controlar el sistema.
+   
+   \section{Salir del programa}
+      \texttt{Quit()}
+      \\
+      
+      Devuelve una tupla vacía y cierra el software.
+      
+      \begin{fxcode}
+         \arrowcode{Quit()}
+      \end{fxcode}
+      
+   \section{Interrumpir una tarea}
+      \texttt{Interrupt()}
+      \\
+   
+      Devuelve una tupla vacía y aborta la ejecución de una tarea.
+   
+      \begin{fxcode}
+         \arrowcode{Interrupt()}\\
+         \outcode{\{Interrupted!\}}
+      \end{fxcode}
+   
+   \section{Reiniciar el sistema}
+      \texttt{Restart()}
+      \\
+      
+      Devuelve una tupla vacía y reinicia la consola.
+      
+      \begin{fxcode}
+         \arrowcode{Restart()}\\
+         \outcode{---- SHELL RESTARTED ----}
+      \end{fxcode}
+      
+   \section{Resultado anterior}
+      \texttt{Ans()}
+      \\
+      
+      Devuelve el resultado de la evaluación anterior.
+      
+      \begin{fxcode}
+         \arrowcode{2 + 3}\\
+         \outcode{5}\\
+         \arrowcode{Ans()}\\
+         \outcode{5}
+      \end{fxcode}
+      
+   \section{Ayuda}
+      \texttt{Ans()}
+      \\
+      
+      Despliega el entorno de ayuda y devuelve una tupla vacía.
+      
+      \begin{fxcode}
+         \arrowcode{Help()}\\
+         \outcode{} \codecomment{aquí despliega el entorno}
+      \end{fxcode}
+      
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   

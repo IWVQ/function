@@ -1,0 +1,9 @@
+CONSOLA DE COMANDOS
+===================
+
+La consola de comandos es el único lugar por donde se puede ejecutar el código.
+
+Es posible ingresar múltiples líneas de la siguiente manera:
+    
+    - Si la entrada no es vacía entonces se puede ingresar mas líneas.
+    - Si la entrada es vacía ejecuta todo el código ingresado.

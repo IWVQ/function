@@ -1,0 +1,93 @@
+
+\titleformat{\subsection}[runin]{\large \bfseries}{\thesubsection.}{10pt}{\bfseries}
+\titlespacing{\subsection}{0pt}{10pt}{0pt}
+
+\chapter{Representación interna}
+   Las expresiones escritas son traducidas a una forma interna para que puedan ser manipuladas y entendidas por el interprete de manera fácil, estas formas internas es una variante de las llamadas ``expresiones lambda puras'' y se representan como arboles.
+   
+   \section{Una expresion lambda extendida}
+      La forma que tienen las expresiones en Function v0.5 están basadas en expresiones lambda, las expresiones lambda son objetos diseñados para describir y estudiar el comportamiento de las funciones, estas expresiones lambda pertenecen a la rama de las matemáticas y la lógica llamada calculo lambda.
+      \\
+      
+      En Function v0.5 todas las expresiones están formadas por expresiones lambda puras a la que se le agregaron algunos elementos como las tuplas, constructores de listas, la captura de fallos, patrones y el tipado de identificadores, estas expresiones están formadas como arboles para garantizar una manipulación sencilla.
+      \\
+      
+      En resumen la expresion básica y nativa en Function v0.5 es una expresion formada unicamente por:
+      
+      \begin{enumerate}
+         \item Números(negativos, infinitos y nan incluido).
+         \item Lógicos.
+         \item Caracteres.
+         \item Lista vacía.
+         \item Fallo.
+         \item Captura de fallo.
+         \item Tuplas.
+         \item Constructor de lista.
+         \item Abstracción lambda de un solo patrón.
+         \item Aplicaciones.
+         \item Identificadores.
+         \item Anónimo.
+         \item Primitivas.
+      \end{enumerate}
+      
+      Y los patrones estan formados unicamente por:
+      
+      \begin{enumerate}
+         \item Números(negativos, infinitos y nan incluido).
+         \item Lógicos.
+         \item Caracteres.
+         \item Lista vacía.
+         \item Fallo.
+         \item Tuplas.
+         \item Constructor de lista.
+         \item Identificadores.
+         \item Anónimo.
+      \end{enumerate}
+      
+   \section{Convertir valores a cadenas}
+      Para convertir cualquier valor a una cadena se puede utilizar las siguientes funciones.
+      
+      \subsection*{ValueToStr}: \texttt{ValueToStr~<argumento>}\\
+      Esta función convierte cualquier valor en una cadena en una forma estilizada.
+      
+      \begin{fxcode}
+         \arrowcode{ValueToStr (\textbackslash x ->~x)}\\
+         \outcode{\textquotedbl(\textbackslash \textbackslash ~x ->~x)\textquotedbl}\\
+         \arrowcode{ValueToStr (2, [0, 4, \textquotesingle e\textquotesingle])}\\
+         \outcode{\textquotedbl(2, [0, 4, \textbackslash\textquotesingle e\textbackslash\textquotesingle])\textquotedbl}\\
+         \arrowcode{ValueToStr (\textbackslash(y: real) ->~y\^{}3 + y\^{}2 + y + 1)}\\
+         \outcode{\textquotedbl(\textbackslash\textbackslash (y : real) ->~((y \^{} 3 + y \^{} 2) + y) + 1)\textquotedbl}\\
+         \arrowcode{Print(ValueToStr (\textbackslash x y -> ~x + y))}\\
+         \outcode{(\textbackslash~ x y ->~x + y)}\\
+         \outcode{()}
+      \end{fxcode}
+
+      \subsection*{ValueToStrFull}: \texttt{ValueToStrFull~<argumento>}\\
+      Esta función convierte un valor en cadena mostrando su forma interna tal como es.
+      
+      \begin{fxcode}
+         \arrowcode{ValueToStrFull (\textbackslash x ->~x)}\\
+         \outcode{\textquotedbl(\textbackslash\textbackslash~ x ->~x)\textquotedbl}\\
+         \arrowcode{ValueToStrFull (2, [0, 4, \textquotesingle e\textquotesingle])}\\
+         \outcode{\textquotedbl(2,0~>| 4~>| \textbackslash\textquotesingle e\textbackslash\textquotesingle~>| [])\textquotedbl}\\
+         \arrowcode{ValueToStrFull (\textbackslash(y: real) ->~y\^{}3 + y\^{}2 + y + 1)}\\
+         \outcode{\textquotedbl(\textbackslash\textbackslash (y : real) ->~(+) ((+) ((+) ((\^{}) (y,3),(\^{}) (y,2)),y),1))\textquotedbl}\\
+         \arrowcode{Print(ValueToStrFull (\textbackslash x y ->~x + y))}\\
+         \outcode{(\textbackslash~ x ->~(\textbackslash~ y ->~(+) (x,y)))}\\
+         \outcode{()}
+      \end{fxcode}
+      
+      \subsection*{TypeToStr}: \texttt{TypeToStr~<argumento>}\\
+      Esta función lo que hace es inferir el tipo de dato de un valor y devolverla en forma de cadena.
+      
+      \begin{fxcode}
+         \arrowcode{TypeToStr (\textbackslash x ->~x)}\\
+         \outcode{\textquotedbl \_ ->~\_\textquotedbl}\\
+         \arrowcode{TypeToStr (\textbackslash(x: int) ->~\textquotesingle a\textquotesingle)}\\
+         \outcode{\textquotedbl int ->~char\textquotedbl}\\
+         \arrowcode{TypeToStr (v: ([int], real) ->~char)}\\
+         \outcode{\textquotedbl([int], real) ->~char\textquotedbl}\\
+         \arrowcode{TypeToStr ([1, 2, 3] ++ [4, 5], [\textquotesingle a\textquotesingle, \textquotesingle b\textquotesingle], [2, \textquotesingle a\textquotesingle])}\\
+         \outcode{\textquotedbl([nat], [char], [\_])\textquotedbl}
+      \end{fxcode}
+      

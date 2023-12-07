@@ -1,0 +1,98 @@
+\documentclass[openany]{book}
+
+\usepackage[total={18cm,21cm}, top=2cm, left = 2cm]{geometry}
+\parindent=0mm
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish, es-tabla]{babel}
+\usepackage{xcolor}
+\usepackage{pstricks}
+\usepackage{graphicx}
+\usepackage{tikz, tkz-tab}
+\usepackage{setspace}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{tcolorbox}
+\usepackage{textcomp}
+\usepackage{courier}
+\usepackage{tocloft}
+\usepackage{titlesec}
+\usepackage{multirow}
+\usepackage{multicol}
+\usepackage{longtable}
+
+
+\definecolor{consoleback}{RGB}{245, 245, 245}
+\definecolor{consoleprompterback}{RGB}{225, 225, 225}
+
+\newcommand{\fx}{$f(x)$}
+\newcommand{\arrowprompter}{\tcbox[colback=consoleprompterback,left=0pt,right=0pt,top=5pt,bottom=2pt,boxsep=0pt,arc=0pt,boxrule=0pt, on line]{{\black \texttt{>}}}}
+\newcommand{\spaceprompter}{\tcbox[colback=consoleprompterback,left=0pt,right=0pt,top=10pt,bottom=2pt,boxsep=0pt,arc=0pt,boxrule=0pt, on line]{{\black \texttt{~}}}}
+
+\newcommand{\arrowcode}[1]{\arrowprompter\texttt{#1}}
+\newcommand{\spacecode}[1]{\spaceprompter\texttt{#1}}
+\newcommand{\outcode}[1]{\texttt{#1}}
+\newcommand{\linecode}[1]{\texttt{#1}}
+\newcommand{\codecomment}[1]{{\it {\gray $\leftarrow$ #1}}}
+\newcommand{\layoutcomment}[2]{{\it {\gray\texttt{#1}$\downarrow$ #2}}}
+\newcommand{\linetab}{\texttt{\gray ~~~~}}
+
+\newtcolorbox{fxcode}{colback=consoleback, arc=0pt, boxrule=0pt,boxsep=0pt,left=0pt,top=0pt,right=0pt,bottom=0pt}
+
+\newtheorem{example}{Ejemplo}
+\renewcommand{\theexample}{\arabic{chapter}.\arabic{section}.\arabic{example}}
+
+\newtheorem{observation}{Observación}
+\renewcommand{\theobservation}{\arabic{chapter}.\arabic{section}.\arabic{observation}}
+
+\newcommand{\citar}[1]{{\red (citar: #1)}}
+\newcommand{\backslashchar}{\char`\\}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+
+\begin{document}
+   \title{\Huge \fx\\Manual de Function 0.5}
+   \author{Ivar Wiligran Vilca Quispe}
+   \date{Diciembre de 2019}
+   \maketitle
+   
+   \addtocontents{toc}{\hfill \textbf{Pág.} \par}
+   \tableofcontents
+   \decimalpoint{.}
+   
+   \titleformat{\chapter}[hang]{\Large\bfseries}{\thechapter.}{10pt}{\bf}
+   \titlespacing{\chapter}{0pt}{10pt}{20pt}
+   
+   \titleformat{\section}[hang]{\large\bfseries}{\thesection.}{10pt}{\bfseries}
+   \titlespacing{\section}{0pt}{10pt}{10pt}
+%--------------------
+   \include{Introduccion}
+   \include{PrimerosPasosConFunction}
+   \include{Comandos}
+   \include{EvaluacionDeExpresiones}
+   \include{FuncionesYOperadoresBasicos}
+   \include{Tuplas}
+   \include{Listas}
+   \include{HoraYFecha}
+   \include{EntradaYSalida}
+   \include{ControlDelSistema}
+   \include{FuncionesAnonimas}
+   \include{ListasEspeciales}
+   \include{FuncionesDeOrdenSuperior}
+   \include{EvaluacionCondicional}
+   \include{Asignaciones}
+   \include{EstructurasDeControl}
+   \include{RepresentacionInterna}
+   \include{ProgramacionDeFunciones}
+   \include{Guiones}
+   \include{CasosDeEstudio}
+   \include{Contenido}
+%--------------------
+   \addcontentsline{toc}{chapter}{Bibliografía}
+   \begin{thebibliography}{99}
+   \end{thebibliography}
+\end{document}

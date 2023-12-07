@@ -1,0 +1,6 @@
+SISTEMA DE ERRORES
+==================
+
+Detecta el error cometido en el guion o entrada a la consola. Es posible ver la informacion completa de los errores activando una variable en el código fuente de la unidad fxError.pas.
+
+

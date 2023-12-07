@@ -1,0 +1,336 @@
+PRIMITIVAS
+==========
+
+Las primitivas son funciones que no necesitan ser definidas (ya estan definidas internamente) y son los bloques fundamentales para la construccion de todas las demas funciones.
+
+A continuacion se presentan cada una de las funciones primitivas, el tipo de dato que tienen, el valor que devuelven y una descripcion concisa de lo que representan.
+
+Primitivas matematicas
+----------------------
+
+Estas primitivas son funciones que toman argumentos numericos y devuelven un argumento numerico
+
+PrimAdd.- "PrimAdd"
+    >>> PrimAdd :: (real, real) -> real
+    >>> PrimAdd(<numero A>, <numero B>)
+    Devuelve la SUMA de los numeros A y B
+    Si alguno de los argumentos es NAN devuelve NAN
+    
+PrimSub.- "PrimSub"
+    >>> PrimSub :: (real, real) -> real
+    >>> PrimSub(<numero A>, <numero B>)
+    Devuelve la RESTA de los numeros A y B
+    Si alguno de los argumentos es NAN devuelve NAN
+    
+PrimMul.- "PrimMul"
+    >>> PrimMul :: (real, real) -> real
+    >>> PrimMul(<numero A>, <numero B>)
+    Devuelve la MULTIPLICACION de los numeros A y B
+    Si alguno de los argumentos es NAN devuelve NAN
+    
+PrimDiv.- "PrimDiv"
+    >>> PrimDiv :: (real, real) -> real
+    >>> PrimDiv(<numero A>, <numero B>)
+    Devuelve la DIVISION de los numeros A y B
+    Si alguno de los argumentos es NAN devuelve NAN
+    
+PrimPow.- "PrimPow"
+    >>> PrimPow :: (real, real) -> real
+    >>> PrimPow(<numero A>, <numero B>)
+    Devuelve la POTENCIACION de los numeros A y B
+    Si alguno de los argumentos es NAN devuelve NAN
+    
+PrimEqual.- "PrimEqual"
+    >>> PrimEqual :: (real, real) -> bool
+    >>> PrimEqual(<numero A>, <numero B>)
+    Devuelve la IGUALDAD de los numeros A y B
+    Si alguno de los argumentos es NAN devuelve false
+    
+PrimLess.- "PrimLess"
+    >>> PrimLess :: (real, real) -> bool
+    >>> PrimLess(<numero A>, <numero B>)
+    Devuelve la DESIGUALDAD MENOR QUE de los numeros A y B
+    Si alguno de los argumentos es NAN devuelve false
+    
+PrimGreater.- "PrimGreater"
+    >>> PrimGreater :: (real, real) -> bool
+    >>> PrimGreater(<numero A>, <numero B>)
+    Devuelve la DESIGUALDAD MAYOR QUE de los numeros A y B
+    Si alguno de los argumentos es NAN devuelve false
+    
+PrimIsNaN.- "PrimIsNaN"
+    >>> PrimIsNaN :: real -> bool
+    >>> PrimIsNaN <numero A>
+    Devuelve true SI A ES NAN y false si no lo es
+    
+PrimTrunc.- "PrimTrunc"
+    >>> PrimTrunc :: real -> int
+    >>> PrimTrunc <numero A>
+    Devuelve la PARTE ENTERA del numero A
+    Si el argumento es NAN devuelve NAN
+    
+PrimFrac.- "PrimFrac"
+    >>> PrimFrac :: real -> real
+    >>> PrimFrac <numero A>
+    Devuelve la PARTE FRACCIONARIA del numero A
+    Si el argumento es NAN devuelve NAN
+    
+PrimSin.- "PrimSin"
+    >>> PrimSin :: real -> real
+    >>> PrimSin <numero A>
+    Devuelve el SENO del angulo A en radianes
+    Si el argumento es NAN devuelve NAN
+    
+PrimCos.- "PrimCos"
+    >>> PrimCos :: real -> real
+    >>> PrimCos <numero A>
+    Devuelve el COSENO del angulo A en radianes
+    Si el argumento es NAN devuelve NAN
+    
+PrimTan.- "PrimTan"
+    >>> PrimTan :: real -> real
+    >>> PrimTan <numero A>
+    Devuelve la TANGENTE del angulo A en radianes
+    Si el argumento es NAN devuelve NAN
+    
+PrimASin.- "PrimASin"
+    >>> PrimASin :: real -> real
+    >>> PrimASin <numero A>
+    Devuelve el ARCO SENO del numero A en radianes
+    Si el argumento es NAN devuelve NAN
+
+PrimACos.- "PrimACos"
+    >>> PrimACos :: real -> real
+    >>> PrimACos <numero A>
+    Devuelve el ARCO COSENO del numero A en radianes
+    Si el argumento es NAN devuelve NAN
+    
+PrimATan.- "PrimATan"
+    >>> PrimATan :: real -> real
+    >>> PrimATan <numero A>
+    Devuelve el ARCO TANGENTE del numero A en radianes
+    Si el argumento es NAN devuelve NAN
+    
+PrimLn.- "PrimLn"
+    >>> PrimLn :: real -> real
+    >>> PrimLn <numero A>
+    Devuelve el LOGARITMO NATURAL del numero A
+    Si el argumento es NAN devuelve NAN
+    
+PrimExp.- "PrimExp"
+    >>> PrimExp :: real -> real
+    >>> PrimExp <numero A>
+    Devuelve el EXPONENCIAL del numero A
+    Si el argumento es NAN devuelve NAN
+    
+PrimRem.- "PrimRem"
+    >>> PrimRem :: (int, int) -> int
+    >>> PrimRem (<entero A>, <entero B>)
+    Devuelve el RESIDUO de la division entera entre A y B
+    
+PrimQuot.- "PrimQuot"
+    >>> PrimQuot :: (int, int) -> int
+    >>> PrimQuot (<entero A>, <entero B>)
+    Devuelve el COCIENTE de la division entera entre A y B
+    
+PrimBitNot.- "PrimBitNot"
+    >>> PrimBitNot :: int -> int
+    >>> PrimBitNot <entero A>
+    Devuelve la NEGACION a nivel de BITS del entero A
+    Supone la representacion de los enteros en complemento a 2
+    
+PrimBitAnd.- "PrimBitAnd"
+    >>> PrimBitAnd :: (int, int) -> int
+    >>> PrimBitAnd (<entero A>, <entero B>)
+    Devuelve la CONJUNCION a nivel de BITS de los enteros A y B
+    Supone la representacion de los enteros en complemento a 2
+    
+PrimBitOr.- "PrimBitOr"
+    >>> PrimBitOr :: (int, int) -> int
+    >>> PrimBitOr (<entero A>, <entero B>)
+    Devuelve la DISYUNCION a nivel de BITS de los enteros A y B
+    Supone la representacion de los enteros en complemento a 2
+    
+PrimBitShl.- "PrimBitShl"
+    >>> PrimBitShl :: (int, int) -> int
+    >>> PrimBitShl (<entero A>, <entero B>)
+    Devuelve el DESPLAZAMIENTO A LA IZQUIERDA a nivel de BITS del entero A en B digitos binarios
+    Supone la representacion de los enteros en complemento a 2
+    
+PrimBitShr.- "PrimBitShr"
+    >>> PrimBitShr :: (int, int) -> int
+    >>> PrimBitShr (<entero A>, <entero B>)
+    Devuelve el DESPLAZAMIENTO A LA DERECHA a nivel de BITS del entero A en B digitos binarios
+    Supone la representacion de los enteros en complemento a 2
+    
+PrimRandom.- "PrimRandom"
+    >>> PrimRandom :: int -> int
+    >>> PrimRandom <entero A>
+    Si A > 0 devuelve el NUMERO ALEATORIO entre 0 y A - 1
+    Si A = 0 devuelve 0
+    Si A < 0 devuelve el NUMERO ALEATORIO entre A + 1 y 0
+    En realidad devuelve un numero pseudo-aleatorio
+    
+Primitivas varias
+-----------------
+Estas primitivas son funciones diversas que devuelven ciertos valores
+
+PrimEncodeChar.- "PrimEncodeChar"
+    >>> PrimEncodeChar :: nat -> char
+    >>> PrimEncodeChar <natural A>
+    Devuelve el CARACTER UNICODE CORRESPONDIENTE al numero natural A
+    Si A es mayor que la cantidad de caracteres devuelve el caracter correspondiente al residuo de A entre la cantidad de caracteres(es decir el caracter correspondiente "rota" de manera ciclica para los numeros naturales).
+    
+PrimDecodeChar.- "PrimDecodeChar"
+    >>> PrimDecodeChar :: char -> nat
+    >>> PrimDecodeChar <caracter C>
+    Devuelve el ORDINAL DEL CARACTER UNICODE C, es decir el codigo numerico del caracter C
+    
+PrimLength.- "PrimLength"
+    >>> PrimLength :: [_] -> nat
+    >>> PrimLength <lista L>
+    Devuelve la longitud de la lista L
+    
+PrimGet.- "PrimGet"
+    >>> PrimGet :: ([_], nat) -> _
+    >>> PrimGet (<lista L>, <indice I>)
+    Devuelve el I-ESIMO ELEMENTO DE LA LISTA L
+    
+PrimSet.- "PrimSet"
+    >>> PrimSet :: (_, [_], nat) -> _
+    >>> PrimSet (<elemento E>, <lista L>, <indice I>)
+    Devuelve una lista identica a L EXCEPTO QUE EL I-ESIMO ELEMENTO ES E
+    
+PrimArity.- "PrimArity"
+    >>> PrimArity :: _ -> nat
+    >>> PrimArity <tupla T>
+    Devuelve la ARIDAD o cantidad de elementos de la tupla T
+    Si el indice esta fuera del rango lanzara un error
+    
+PrimSelect.- "PrimSelect"
+    >>> PrimSelect :: (_, nat) -> _
+    >>> PrimSelect(<tupla T>, <indice I>)
+    Devuelve el I-ESIMO ELEMENTO de la tupla T
+    
+PrimPut.- "PrimPut"
+    >>> PrimPut :: (_, nat) -> _
+    >>> PrimPut(<elemento E>, <tupla T>, <indice I>)
+    Devuelve una tupla identica a T EXCEPTO QUE EL I-ESIMO ELEMENTO ES E
+    
+Primitivas con acciones
+----------------------
+Son funciones que devuelven cierto valor pero que ademas realizan una determinada accion en el sistema
+    
+PrimInput.- "PrimInput"
+    >>> PrimInput :: () -> [char]
+    >>> PrimInput()
+    LEE UNA CADENA DESDE LA CONSOLA y devuelve la cadena leida
+    
+PrimOutput.- "PrimOutput"
+    >>> PrimOutput :: [char] -> ()
+    >>> PrimOutput <cadena S>
+    ESCRIBE LA CADENA S EN LA CONSOLA y devuelve una tupla vacia
+    
+PrimClearScreen.- "PrimClearScreen"
+    >>> PrimClearScreen :: () -> ()
+    >>> PrimClearScreen()
+    BORRA LA CONSOLA y devuelve una tupla vacia
+    
+PrimGetDateTime.- "PrimGetDateTime"
+    >>> PrimGetDateTime :: () -> (nat, nat, nat, nat, nat, nat, nat, nat)
+    >>> PrimGetDateTime()
+    Devuelve la HORA Y FECHA actual del sistema en el siguiente orden:
+        (<año>, <mes>, <dia de la semana>, <dia>, <hora>, <minuto>, <segundo>, <milisegundos>)
+    
+PrimSetDateTime.- "PrimSetDateTime"
+    >>> PrimSetDateTime :: (nat, nat, nat, nat, nat, nat, nat, nat) -> ()
+    >>> PrimSetDateTime(<año>, <mes>, <dia de la semana>, <dia>, <hora>, <minuto>, <segundo>, <milisegundos>)
+    Establece la HORA Y FECHA actual del sistema y devuelve una tupla vacia
+    
+PrimAnswer.- "PrimAnswer"
+    >>> PrimAnswer :: () -> _
+    >>> PrimAnswer()
+    Devuelve el RESULTADO de la ULTIMA EVALUACION
+    Si no ha habido evaluacion de expresiones lanzara un error
+    
+PrimError.- "PrimError"
+    >>> PrimError :: [char] -> _
+    >>> PrimError <cadena S>
+    LANZA UN ERROR personalizado con la cadena S como mensaje y devuelve "fail"
+    Al momento de lanzar el error se detiene la ejecucion de la tarea
+    
+Primitivas de conversion con cadenas
+------------------------------------
+Estas primitivas permiten convertir cadenas en valores y viceversa
+
+PrimTryStrToNum.- "PrimTryStrToNum"
+    >>> PrimTryStrToNum :: [char] -> (real, bool)
+    >>> PrimTryStrToNum <cadena S>
+    INTENTA CONVERTIR la cadena S EN NUMERO y devuelve el par (<numero N>, <logico B>) donde N es el numero y B indica si se a logrado la conversion, en caso de no lograrse la conversion N sera "nan"
+    
+PrimValueToStr.- "PrimValueToStr"
+    >>> PrimValueToStr :: _ -> [char]
+    >>> PrimValueToStr <argumento E>
+    CONVIERTE el argumento E EN CADENA y devuelve esa cadena
+    
+PrimTypeToStr.- "PrimTypeToStr"
+    >>> PrimTypeToStr :: _ -> [char]
+    >>> PrimTypeToStr <argumento E>
+    CONVIERTE el TIPO del argumento E EN CADENA y devuelve esa cadena
+    Esta primitiva hace una inferencia de tipo del argumento, es decir deduce que tipo tiene el argumento
+    
+PrimValueToStrFull.- "PrimValueToStrFull"
+    >>> PrimValueToStrFull :: _ -> [char]
+    >>> PrimValueToStrFull <argumento E>
+    CONVIERTE el argumento E EN CADENA mostrando su estructura interna y devuelve esa cadena
+
+Primitivas de testeo
+--------------------
+Estas primitivas indican si un argumento tiene determinada forma o es de algun tipo.
+    
+PrimIsAnonymous.- "PrimIsAnonymous"
+    >>> PrimIsAnonymous :: _ -> bool
+    >>> PrimIsAnonymous <argumento E>
+    Devuelve true SI E ES LA PALABRA CLAVE ANONIMA "_" y false si no lo es
+    
+PrimIsFreeIdentifier.- "PrimIsFreeIdentifier"
+    >>> PrimIsFreeIdentifier :: _ -> bool
+    >>> PrimIsFreeIdentifier <argumento E>
+    Devuelve true SI E ES UN IDENTIFICADOR INDEFINIDO y false si no lo es
+    
+PrimIsTuple.- "PrimIsTuple"
+    >>> PrimIsTuple :: _ -> bool
+    >>> PrimIsTuple <argumento E>
+    Devuelve true SI E ES UNA TUPLA y false si no lo es
+    
+PrimIsLambda.- "PrimIsLambda"
+    >>> PrimIsLambda :: _ -> bool
+    >>> PrimIsLambda <argumento E>
+    Devuelve true si E ES UNA EXPRESION LAMBDA y false si no lo es
+    
+PrimLanguage.- "PrimLanguage"
+    >>> PrimLanguage :: () -> nat
+    >>> PrimLanguage ()
+    Devuelve el IDIOMA(como numero) utilizado
+    
+Primitivas de sistema
+---------------------    
+
+Estas primitivas realizan acciones utiles para que el sistema pueda ser controlado desde la consola
+    
+PrimQuit.- "PrimQuit"
+    >>> PrimQuit :: () -> ()
+    >>> PrimQuit()
+    Devuelve una tupla vacia, aborta la ejecucion y cierra el sistema
+    Es decir la primitiva al ser evaluada cierra y sale del programa
+    
+PrimInterrupt.- "PrimInterrupt"
+    >>> PrimInterrupt :: () -> ()
+    >>> PrimInterrupt()
+    Devuelve una tupla vacia y aborta la ejecucion del interprete
+    
+PrimRestart.- "PrimRestart"
+    >>> PrimRestart :: () -> ()
+    >>> PrimRestart()
+    Reinicia el sistema y la consola
+    

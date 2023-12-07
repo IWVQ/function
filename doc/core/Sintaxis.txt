@@ -1,0 +1,1094 @@
+SINTAXIS
+========
+    Esto corresponde a una descripcion de la sintaxis de la secuencia de tokens y son analizados en el parser
+    
+    Se utilizara una extension de la notacion de Backus-Naur al cual se le a agregado los simbolos # y $ como indicadores de sangrado
+    
+    Cuando se hable de variables o identificadores no se hara distincion especifica de cada uno ya que sintacticamente son lo mismo
+
+Tokens requeridos
+-----------------
+    Para describir las unidades sintacticas posteriores se necesitara del uso de los siguientes tokens
+    
+    <number> ::= ; definido en Lexemas.txt
+    <character> ::= ; definido en Lexemas.txt
+    <string> ::= ; definido en Lexemas.txt
+    <identifier> ::= ; definido en Lexemas.txt
+    <anonymous> ::= <SG> ; donde <SG> esta definido en Lexemas.txt
+    <primitives> ::= ; que represena todas las primitivas descritas en Lexemas.txt
+    
+Constantes
+----------
+    Las constantes son las expresiones atomicas basicas del lenguaje y representan  numeros, caracteres, cadenas y otros valores que se describen a continuacion
+    
+Logicos.- <bool>
+    Las constantes logicas son palabras reservadas que representan los valores logicos o booleanos verdad o falso
+    
+    Se denotan por las palabras clave
+        true        valor logico de verdad
+        false       valor logico de falso
+    
+    En notacion de Backus-Naur
+    <bool> ::= "true" | "false"
+    
+Fallo.- <fail>
+    Esta constante representa el resultado de una operacion fallida, implicitamente se genera al no lograr encajar los patrones en una expresion lambda
+    
+    Se denota por la palabra clave: fail
+    
+    En notacion de Backus-Naur
+    <fail> ::= "fail"
+    
+Infinitos.- <inf>
+    Esta constante representa al numero infinito positivo, se genera implicitamente al hacer una division por cero de un numero distinto de cero
+    
+    Se denota por la palabra clave: inf
+    
+    En notacion de Backus-Naur
+    <inf> ::= "inf"
+    
+    Para el infinito negativo se debe adjuntar el simbolo menos - por la izquierda, como en los demas numeros la formacion de los infinitos con signo (con + o -) es en realidad una operacion simplificada de suma o resta
+    
+NaN.- <nan>
+    Esta constante es el resultado de una operacion numerica indefinida, implicitamente se genera haciendo la division 0/0
+    
+    Se denota por la palabra clave: nan
+    
+    En notacion de Backus-Naur
+    <nan> ::= "nan"
+    
+    El valor NaN tambien puede ser dotado de signo (aunque no es util) de la misma manera que en los infinitos o demas numeros
+    
+Expresion constante.- <constant>
+    Una constante es un token de numero, caracter, cadena o cualquiera de los descritos anteriormente
+    
+    En notacion de Backus-Naur
+    <constant> ::= <number> | <bool> | <character> | <fail> | <inf>
+        | <nan> | <string>
+    
+Tipo de dato
+------------
+    Tambien llamados expresiones de tipo representan el tipo de dato que tiene o debe tener una variable, funcion o valor
+    Los tipos de dato se pueden dividir en dos clases los tipos atomicos(basicos e identificadores) y los tipos compuestos
+    
+Tipos basicos.- <type basic>
+    Estos tipos son los tipos basicos desde el cual se construye los demas tipos
+    
+    Representan el tipo de dato de las constantes
+    
+    Estan formados por las palabras clave
+    
+        real     numeros reales extendidos (es decir con infinitos y NaN)
+        int      numeros enteros
+        nat      numeros naturales(desde el cero)
+        bool     valores logicos o booleanos
+        char     caracteres unicode
+        
+    En notacion de Backus-Naur
+    <type basic> ::= "real" | "int" | "nat" | "bool" | "char"
+    
+Tipo tupla.- <type tuple>
+    Este tipo compuesto es una secuencia de expresiones de tipo encerrados entre parentesis y separados por comas, la cantidad(tambien llamado aridad) de expresiones de tipos entre los parentesis puede ser cero o mas pero no 1 y permanece fijo
+    
+    Representan el tipo de dato de las tuplas, los tipos entre parentesis son los tipos de dato que deben tener los elementos de la tupla respectivamente
+    
+    Tiene la siguiente forma
+        (T1, T2, ..., Tn) donde T1, T2, ..., Tn son tipos de dato
+    
+    En notacion de Backus-Naur
+    <type tuple> ::= "(" [<type> {"," <type>}] ")"
+    
+    No se permiten tipos tupla de aridad 1 ya que habria un conflicto con el uso de los parentesis para agrupar o asociar expresiones de tipo por lo que el tipo (T) es equivalente al tipo T
+    
+Tipo lista.- <type list>
+    Este tipo compuesto esta formado por una(y solo una) expresion de tipo encerrado entre corchetes
+    
+    Representa el tipo de dato de las listas, el tipo encerrado entre corchetes es el tipo que deben tener cada uno de los elementos de la lista
+    
+    Tiene la siguiente forma
+        [T] donde T es una expresion de tipo y es el tipo que debe tener cada uno de los elementos de la lista
+    
+    En notacion de Backus-Naur
+    <type list> ::= "[" <type> "]"
+    
+Tipo funcion.- <type function>
+    Este tipo compuesto esta formado por dos expresiones de tipo separados por una flecha(->)
+    
+    Representa el tipo de dato de las funciones
+    
+    Tiene la siguiente forma
+        TA -> TR donde TA y TR son expresiones de tipo y son llamados tipo de argumento y tipo de retorno respectivamente
+    
+    En notacion de Backus-Naur
+    <type function> ::= <type> "->" <type>
+    
+    Al tener una sintaxis infija la flecha -> tambien llamada mapeo es asociativa por la derecha
+        T1 -> T2 -> T3 es equivalente a T1 -> (T2 -> T3)
+    por ello no es necesario asociar explicitamente por la derecha en cambio si se quiere asociar por la izquierda se debe utilizar el parentesis para asociar
+    
+    Las funciones tipadas no necesariamente deben retornar un valor del tipo de retorno pero si es necesario que el argumento sea del tipo de argumento
+    
+Expresiones de tipo.- <type>
+    Las expresiones de tipo estan formados por el simbolo anonimo, identificadores, tipos basicos y tipos compuestos
+    
+    En notacion de Backus-Naur
+    <type> ::= <anonymous> | <identifier> | <type basic>
+        | <type tuple> | <type list> | <type function>
+    
+    El simbolo anonimo o tipo anonimo representa el tipo de dato de cualquier valor(un tipo polimorfico)
+    
+    El identificador es el nombre o sinonimo de alguna expresion de tipo se usa para simplificar la escritura de las expresiones de tipo
+    
+Patrones
+--------
+Los patrones son ciertas expresiones que indican la forma y el tipo que deben tener ciertos valores como los argumentos de una funcion o los elementos de una lista, en caso de el valor tenga la forma del patron entonces se dice que encaja con el patron en otro caso no encaja
+
+Tipado de variable.- <typing pattern>
+    Este patron es una variable al cual se le a asignado un tipo de dato.
+    
+    Representa un valor o argumento que debe tener el tipo de dato asignado
+    
+    Tiene la siguiente forma
+        v : T donde v es una variable o identificador y T es un tipo de dato
+    
+    En notacion de Backus-Naur
+    <typing pattern> ::=
+        <identifier> ":" <type>
+    
+Patron de tupla.- <tuple pattern>
+    El patron tupla es una secuencia de patrones encerrados entre parentesis y separados por comas, la aridad del patron tupla puede ser 0 o mas pero no 1 y permanece fijo
+    
+    Representan a un valor o argumento tupla
+    
+    Tiene la siguiente forma
+        (P1, P2, ..., Pn) donde P1, P2, ..., Pn son patrones
+    
+    En notacion de Backus-Naur
+    <tuple pattern> ::= "(" [<pattern> {"," <pattern>}] ")"
+    
+    No se permiten patrones tupla de aridad 1 ya que habria un conflicto con el uso de los parentesis para agrupar o asociar patrones, por lo que el patron (P) es equivalente al patron P
+    
+Patron de lista.- <list pattern>
+    El patron lista es una secuencia de patrones encerrados entre corchetes y separados por comas, la cantidad (tambien llamado longitud) de patrones encerrados entre los parentesis puede ser 0 o mas y es dinamico.
+    
+    Representan a un valor o argumento lista
+    
+    Tiene la siguiente forma
+        [P1, P2, ..., Pn] donde P1, P2, ..., Pn son patrones
+    
+    En notacion de Backus-Naur
+    <list pattern> ::= "[" [<pattern> {"," <pattern>}] "]"
+    
+Patron de constructor de lista.- <list constructor pattern>
+    El patron de constructor de lista esta formado por dos patrones y el token >| entre los dos
+    
+    Representa a un valor o argumento lista
+    
+    Tiene la siguiente forma
+        PE >| PL donde PE y PL son patrones llamados patron cabeza y patron cola respectivamente, es mas PL es una lista
+    
+    En notacion de Backus-Naur
+    <list constructor pattern> ::= <pattern> ">|" <pattern>
+    
+    Al tener una sintaxis infija el token >| tambien llamada empujar es asociativa por la derecha
+        P1 >| P2 >| P3 es equivalente a P1 >| (P2 >| P3)
+    por ello no es necesario asociar explicitamente por la derecha en cambio si se quiere asociar por la izquierda se debe utilizar el parentesis para asociar
+    
+Patron de numero con signo.- <signed pattern>
+    Es el patron de los numeros con signo y estan formados por un numero o NaN precedidos por + o -
+    
+    Representa a un valor o argumento numerico o NaN con signo
+    
+    Tiene la forma
+        + N
+        - N
+        Donde N es un numero o NaN
+    
+    En notacion de Backus-Naur
+    <signed pattern> := ("+" | "-")(<number> | <inf> | <nan>)
+    
+    Es el patron de los numeros con signo y sirve especialmente para poder tener patrones de numeros o infinitos negativos, ya que al ser un valor con signo en realidad una operacion y una operacion no puede ser un patron es necesario tener este tipo de patrones
+    
+Expresion de patron.- <pattern>
+    Por ultimo la expresion de patron puede ser anonimo, identificadores, constantes o cualquier patron descrito anteriormente
+    
+    En notacion de Backus-Naur
+    <pattern> ::= <anonymous> | <identifier>
+        | <constant> | <typing pattern> | <tuple pattern> 
+        | <list pattern> | <list constructor pattern>
+        | <signed pattern>
+    
+    Los patrones constantes representan a los valores constantes
+    
+    Los patrones variable o identificador representan a cualquier valor o argumento (a excepcion de las variables tipadas) y son usados como receptores y contenedores de los valores o argumentos que luego seran usados
+    
+    El patron anonimo representa a cualquier valor o argumento e indica que dicho valor o argumento es ignorado
+    
+    En el caso de que el patron constante sea NaN ningun patron encajara (eso incluye al mismo NaN) ya que NaN no es comparable o mas bien dicho al compara con cualquier numero el resultado siempre sera false por lo que no encaja, pero si de todos modos se quiere trabajar con NaN se puede recurrir al uso de patrones variable y a la primitiva PrimIsNaN
+    
+Expresiones
+-----------
+    Las expresiones de valor son expresione formadas por funciones, operadores y otras notaciones, estas a ser evaluadas devuelven un valor
+    
+Aplicaciones.- <application>
+    Una aplicacion puede entenderse como una operacion o funcion que "este trabajando" sobre sus argumentos (ej: 2 + 3, Sin(0)), segun el tipo de aplicacion puede ser una expresion u operador prefijo seguido de otra expresion, un operador infijo entre dos expresiones o un operador posfijo antecedido de una expresion
+    
+    Representa a una aplicacion u operacion matematica
+    
+    Tiene la siguiente forma
+        Aplicacion de dos expresiones(en secuencia)
+        E F     donde E y F son expresiones
+                E es la funcion y F el argumento
+        Operacion infija
+        E o F   donde E y F son expresiones y o es un identificador
+                E y F son los argumentos y o el operador
+        Operacion prefija
+        p E     donde E es una expresion y p es un identificador 
+                E es el argumento y p el operador
+        Operacion posija
+        E q     donde E es una expresion y q es un identificador 
+                E es el argumento y q el operador
+    
+    En notacion de Backus-Naur
+    <sequence application> ::= <expression> <expression>
+    <infix application> ::= <expression> <identifier> <expression>
+    <prefix application> ::= <identifier> <expression>
+    <posfix application> ::= <expression> <identifier>
+    
+    <application> ::= <sequence application> | <infix application> | <posfix application> | <prefix application>
+    
+    Las aplicaciones en secuencia, prefijos y posfijos son asociativos por la izquierda, por lo que
+        E F G es equivalente a (E F) G
+        p p E es equivalente a (p p) E
+        E q q es equivalente a (E q) q
+    La sintaxis de los operadores prefijos es la misma que de las aplicaciones en secuencia
+    Los operadores infijos tienen cada uno su propia precedencia y asociatividad programables
+    
+    La sintaxis indica que no es necesario colocar el argumento de una funcion entre parentesis, por lo que
+        Sin(0) es equivalente a Sin 0
+    Esta simplificacion del uso del parentesis sucede por que no se permiten tuplas unarias(de aridad 1) y son usados solo como agrupadores
+    
+    Las operaciones pueden ser convertidas en aplicaciones en secuencia para el cual se debe encerrar entre parentesis al operador y aplicarlo a su argumento, por lo que
+        2 + 3 es equivalene a (+)(2, 3)
+        4! es equivalente a (!)4
+    Esto sucede por que los operadores son tambien funciones y al estar encerrados entre parentesis se convierten en una expresion como cualquier otra
+    
+    A los operadores o expresion de funcion se les llama tambien elemento funcion de la aplicacion y al o los argumentos como elemento argumento de la aplicacion, en resumen el elemento argumento son los siguientes
+        F       para la aplicacion en secuencia
+        E       para los operadores posfijo y prefijo
+        (E, F)  para el operador infijo
+    Se puede ver que para un operador infijo al ser tambien una funcion su argumento es en realidad un par ordenado
+    
+    Si algun elemento de la aplicacion(funcion, operador o argumentos) devuelven fail entonces la evaluacion de la aplicacion siempre devolvera fail
+    Si la funcion u operador tiene un patron y el argumento no encaja entonces devolvera fail
+    Si la funcion u operador devuelve un valor que no es funcional es decir no es aplicable a ningun argumento(ej: constantes) entonces lanzara un error
+    
+Abstracciones lambda.- <lambda>
+    Las abstracciones lambda son objetos matematicos que describen el comportamiento de una funcion, estan formados por la barra invertida seguida de patrones y luego su expresion de retorno, la cantidad de patrones puede ser 1 o mas pero no cero
+    
+    Representan las abstracciones lambda del calculo lambda
+    
+    Tienen la siguiente forma
+        \P1 P2 ... Pn -> E  donde P1, P2, ..., Pn son patrones y E es una expresion llamado expresion de retorno
+    
+    En notacion de Backus-Naur
+    <lambda> ::= "\" <pattern> {<pattern>} "->" <expression>
+    
+    Estas expresiones trabajan como funciones sin nombre ya que solo describe su comportamiento y cuando se aplican a cualquier otra expresion se encaja los patrones y se reemplazan todas las variables de la expresion de retorno que aparezcan en el patron por los argumentos encajados y devuelve la expresion de retorno evaluada
+    
+    Si la expresion lambda no esta aplicada a ningun valor su evaluacion devolvera la misma expresion lambda
+    
+Tuplas.- <tuple>
+    Una tupla es una secuencia de expresiones encerrados entre parentesis y separados por comas, la aridad de la tupla puede ser 0 o mas pero no 1 y permanece fijo
+    
+    Representan a una n-tupla matematica, elementos de algun producto cartesiano
+    
+    Tiene la siguiente forma
+        (E1, E2, ..., En) donde E1, E2, ..., En son expresiones
+    
+    En notacion de Backus-Naur
+    <tuple> ::= "(" [<expression> {"," <expression>}] ")"
+    
+    No se permiten tuplas de aridad 1 ya que habria un conflicto con el uso de los parentesis para agrupar o asociar expresiones, por lo que la expresion (E) es equivalente a la expresion E
+    
+    Las tuplas son usadas con diferentes motivos como para describir pares ordenados, multiples argumentos de una funcion o como elementos de un producto cartesiano
+    
+Lista.- <list>
+    Una lista es una secuencia de expresiones encerrados entre corchetes y separados por comas, la longitud de la lista puede ser 0 o mas y es dinamico
+    
+    Representan a una secuencia o array dinamico
+    
+    Tienen la siguiente forma
+        [E1, E2, ..., En] donde E1, E2, ..., En son expresiones
+    
+    En notacion de Backus-Naur
+    <list> ::= "[" [<expression> {"," <expression>}] "]"
+    
+    Las listas son usadas especialmente para describir una coleccion de objetos de diferente longitud, vectores o hasta incluso matrices
+    
+    La lista de longitud cero se llama lista vacia o nula, internamente es una constante
+    
+    Una cadena de caracteres es en realidad una forma simplificada de una lista de caracteres, por lo que 
+        "hola" es equivalente a ['h', 'o', 'l', 'a']
+    De ahi que al evaluar cadenas vacias el resultado sea una lista vacia
+    
+Constructor de lista.- <list constructor>
+    Un constructor de lista ese una expresion que toma un elemento por la izquierda y lo coloca en la cabeza de la lista, esta formado por dos expresiones con el token >| entre los dos
+    
+    Representa la construccion de una lista agregando un elemento al inicio de esta
+    
+    Tiene la siguiente forma
+        E >| L donde E y L son expresiones llamados cabeza y cola respectivamente, L debe ser una lista
+                significa que devuelve la lista donde su primer elemento es E y los demas elementos son los elementos de L
+    
+    En notacion de Backus-Naur
+    <list constructor> ::= <expression> ">|" <expression>
+    
+    Al tener una sintaxis infija el token >| tambien es asociativa por la derecha
+        E1 >| E2 >| E3 es equivalente a E1 >| (E2 >| E3)
+    por ello no es necesario asociar explicitamente por la derecha en cambio si se quiere asociar por la izquierda se debe utilizar el parentesis para asociar
+    
+    Todas las listas pueden ser construidas por medio de este constructor iniciando con la lista vacia
+    
+Listas por sucesion.- <sequence list>
+    Son un tipo especial de lista formado por expresiones entre corchetes separados por el token ..
+    
+    Representan una lista que contiene un rango de valores
+    
+    Tiene la siguiente forma
+        [E .. F]    Secuencia de 1 en 1
+                    Donde E y F son expresiones, E es el inicio y F el maximo(los elementos no pueden ser mayor a F)
+        [E, F .. G] Secuencia de n en n donde n = F - E
+                    Donde E, F y G son expresiones, E es el inicio y G el final, si n < 0 entonces G es el minimo(los elementos no pueden ser menor que G) y si n >= 0 entonces G es el maximo(los elementos no pueden ser mayor que G)
+    
+    En notacion de Backus-Naur
+    <sequence list> ::=
+        "[" <expression>["," <expression>] ".." <expression> "]"
+    
+    Los elementos pueden ser numeros, caracteres u otros valores ordinales
+    
+Listas por comprension.- <list comprehension>
+    Estas listas especiales son una adaptacion de la notacion de conjuntos llamados conjuntos por comprension, tienen una notacion y comportamiento similar a excepcion de que esta encerrado entre corchetes, los calificadores separados por comas y con el token | como separador entre la expresion base y los calificadores, la cantidad de calificadores puede ser 0 o mas
+    
+    Representan la construccion de una lista a partir de otras listas, es decir sus elementos estan formados utilizando elementos de otras listas que cumplan ciertas condiciones
+    
+    Tienen la siguiente forma
+        [E | Q1, Q2, ..., Qn]   donde E es una expresion y Q1, Q2, ..., Qn son calificadores
+                                Significa que la lista es una lista de elementos de la forma E donde sus variables toman valores de los generadores en los calificadors y con las condiciones o filtros en los calificadores
+    
+    Los calificadores pueden ser filtros o generadores
+    
+    La expresion E es la forma que tiene cada uno de los elementos de la lista
+        
+    Los filtros son expresiones que devuelven valores logicos y son las condiciones que deben cumplir los elementos de la lista
+    
+    Los generadores indican los valores que van tomando las variables en E y por lo tanto los elementos en la lista
+    
+    Los generadores tienen la siguiente forma
+        P |< L donde P es un patron y L es una expresion que devuelve una lista
+    
+    En notacion de Backus-Naur
+    <generator> ::= <pattern> "|<" <expression>
+    <qualifier> ::= <expression> | <generator>
+    <list comprehension> ::=
+        "[" <expression> "|" [<qualifier> {"," <qualifier>}] "]"
+    
+    El orden de los calificadores es importante al momento de generar la lista
+    A los generadores tambien se le llama selectores
+    Si no hay calificadores el resultado sera una lista de un solo elemento
+    
+Lista con indice.- <indexed list>
+    Esta formado por una expresion seguida por los indices encerrados entre llaves y separados por comas, la cantidad de indices puede ser cero o mas.
+    
+    Representa a extraer un elemento en la lista o lista de listas ubicado en la posicion indicada por los indices
+    
+    Tiene la siguiente forma
+        L{I1, I2, ..., In}  donde L, I1, I2, ..., In son expresiones
+                            L es una expresion
+                            Los I1, I2, ..., In encerrados entre llaves se le llama indices
+                            Significa que devuelve el (I1, I2, ..., In)-esimo elemento de lista de L y si no hay indices devolvera L
+    
+    En notacion de Backus-Naur
+    <index> ::= "{"[ <expression> {"," <expression>} ]"}"
+    <indexed list> ::= <expression> <index>
+    
+    La notacion de indice es asociativa por la izquierda, por lo que
+        L{I1, I2, ..., In}{J1, J2, ..., Jm} es equivalente a (L{I1, I2, ..., In}){J1, J2, ..., Jm}
+    Para asociar por la derecha se debe hacerlo explicitamente usando parentesis
+    
+    Los indices deben ser expresiones que devuelvan numeros naturales
+    
+    La expresion L del cual se extrae un elemento puede ser un valor cualquiera, una lista, una lista de listas, una lista de listas de listas y asi sucesivamente segun la cantidad de indices
+    
+    Para indices de longitud cero devuelve el mismo valor
+    
+Asignacion.- <assignment>
+    Una asignacion en realidad no es una expresion, pero es necesario explicarlo antes de seguir describiendo las demas expresiones
+    
+    Representa una asignacion de variables
+    
+    Tiene la siguiente forma
+        P <- E  donde P es un patron y E es una expresion en el cual el sangrado se inicia con el primer token de P
+                Significa que las variables en P seran reemplazadas por los valores de E que encajen con ella
+    
+        
+    En notacion de Backus-Naur
+    <assignment> ::= #<pattern> "<-" <expression>
+    
+    NOTA: El simbolo # en la notacion formal anterior representa el sangrado que debe tener esta notacion, el sangrado de un simbolo no terminal indica que para que un token(a excepcion del primero) pueda ser considerado como parte del mismo simbolo es necesario que su columna de comienzo sea mayor que el del primer token del simbolo este primer token es el que marca o traza el sangrado
+    
+    Las asignaciones no son asociativas
+    
+    Son usadas como partes de diversas expresiones especialmente en los modelos imperativos
+    
+Expresiones let.- <let>
+    Una expresion let esta formado por una asignacion u una expresion en el cual tiene efecto la asignacion
+    
+    Representa el reemplazo de variables en una expresion
+    
+    Tiene la siguiente forma
+        let P <- A in E donde P <- A es una asignacion y E es una expresion
+                        significa que los valores de las variables P surgidas de la asignacion seran reemplazados en E
+    
+    En notacion de Backus-Naur
+    <let> ::= "let" <assignment> "in" <expression>
+    
+Expresiones where.- <where>
+    Similar a la expresion let pero con escritura en reversa(primero la expresion luego la asignacion)
+    
+    Representa las definiciones locales en las expresiones
+    
+    Tiene la forma
+        E where P <- A donde E es una expresion y P <- A es una asignacion
+                        significa que los valores de las variables P surgidas de la asignacion seran reemplazados en E
+                        
+    En notacion de Backus-Naur
+    <where> ::= <expression> "where" <assignment>
+    
+    Las expresiones where son asociativas por la derecha, por lo que
+        E where P <- A where Q <- B es equivalente a E where P <- (A where Q <- B)
+    Por lo cual para tener una asociacion por la izquierda es necesario usar los parentesis
+    
+Captura de fallos.- <try>
+    Es una expresion formada por dos expresiones y el token ; entre los dos
+    
+    Representa una estructura que captura el fallo durante una evaluacion para evitar que esta siga propagandose
+    
+    Tiene la forma
+        E ; F   donde E, F son expresiones
+                Significa que se evalua E primero y si esta evaluacion falla entonces evalua F y devuelve su valor, pero si no falla entonces devuelve el valor de E e ignora F(es decir no evalua F)
+    
+    En notacion de Backus-Naur
+    <try> ::= <expression> ";" <expression>
+    
+    Al tener una notacion infija la captura de fallos por defecto se asocia por la derecha, es decir
+        E ; F ; G es equivalente a E ; (F ; G)
+    Aunque dicha asociatividad no importa ya que la captura de fallos es asociativo por ambos lados
+    
+    Esta notacion es especialmente usada en combinacion con lanzamiento de errores para lanzar un error si una condicion se cumple
+    
+Guardas.- <guard>
+    Es una expresion formada por dos expresiones y el token ? entre los dos
+    
+    Representa una estructura que evalua y devuelve un valor si y solo si una condicion se cumple
+    
+    Tiene la forma
+        E ? F   donde E, F son expresiones
+                Significa que primero evalua E y si el resultado es verdadero entonces evalua F y devuelve su valor en otro caso devuelve fail
+    
+    En notacion de Backus-Naur
+    <guard> ::= <expression> "?" <expression>
+    
+    Al tener una notacion infija las guardas por defecto se asocian por la derecha, es decir
+        E ? F ? G es equivalente a E ? (F ? G)
+    Aunque dicha asociatividad no importa ya que las guardas son asociativas por ambos lados
+    
+    En combinacion con la captura de fallo es usada en la definicion de funciones por partes y tambien como una especie de "operador ternario de desicion"
+        ejm: 
+            Sign x := x > 0? 1;
+                      x = 0? 0;
+                      x < 0? -1
+                      
+            E ? F ; G si E es verdad devuelve F y si no devuelve G
+    
+Estructuras imperativas.- <imperative>
+    Tambien llamadas expresiones imperativas, estas son estructuras que se comportan igual que las estructuras de control de los lenguajes imperativos, estan divididas en varias subestructuras, cada subestructura se ejecuta en orden de uno en uno
+    
+    Llamadas.- <call>
+        las llamadas es una subestructura formada por una expresion que ha de ser evaluada antes de pasar al siguiente paso
+        
+        Tiene la forma
+            E   donde E es una expresion
+                Significa que E sera evaluada pero que su valor de retorno no es tomado en cuenta
+            
+        En notacion de Backus-Naur
+            <call> ::= #<expression>
+        
+        Es util para programar acciones en las cuales no importan su valor de retorno(ej: imprimir en la consola)
+        
+    Condicionales.- <conditional>
+        Las condicionales son una subestructura formada por condiciones y una secuencia de sentencias a ser ejecutadas si se cumplen o no la condicion, son de cuatro tipos
+        
+        Representa a la estructura condicional de la programacion imperativa
+        
+        Condicional unico 
+            if B then
+                Sentencias C
+            
+            Donde B es una expresion que devuelve un valor logico y Sentencias C son sentencias
+            Significa que si B es verdadero entonces se ejecutaran las Sentencias C y si es falso entonces no
+        
+        Bi-condicional
+            if B then
+                Sentencias C
+            else
+                Sentencias E
+            
+            Donde B es una expresion que devuelve un valor logico y Sentencias C y Sentencis E son sentencias
+            Significa que si B es verdadero entonces se ejecutaran las Sentencias C y si es falso entonces se ejecutaran las Sentencias E
+        
+        Multi-condicional sin cola
+            if B1 then
+                Sentencias C1
+            elif B2 then
+                Sentencias C2
+            .
+            .
+            .
+            elif Bn then
+                Sentencias Cn
+            
+            Donde los Bi son expresiones que devuelven un valor logico y las Sentencias Ci son sentencias
+            
+            Significa que si B es el primero de los Bi en ser verdadero entonces se ejecuta su respectiva Sentencias C en otro caso si no existen Bi que sean verdaderos no ejecuta nada
+            
+        Multi-condicional con cola
+            if B1 then
+                Sentencias C1
+            elif B2 then
+                Sentencias C2
+            .
+            .
+            .
+            elif Bn then
+                Sentencias Cn
+            else
+                Sentencias E
+            
+            Donde los Bi son expresiones que devuelven un valor logico y las Sentencias Ci y Sentencias E son sentencias
+            
+            Significa que si B es el primero de los Bi en ser verdadero entonces se ejecuta su respectiva Sentencias C en otro caso si no existen Bi que sean verdaderos se ejecuta Sentencias E
+            
+        En notacion de Backus-Naur
+        <conditional> ::=
+            #"if" <expression> "then" <statements>
+            {$"elif" <expression> "then" <statements>}
+            [$"else" <statements>]
+            
+        Esta sintaxis indica que los tokens elif y else (y solo ellos) si pueden tener (aunque no es obligatorio) la misma columna de comienzo que del token if
+        
+        NOTA: el simbolo $ en la notacion formal anterior significa que el token que le sigue puede tener la misma columna de comienzo que del token donde se encuentra #
+        
+    Bucle while.- <while loop>
+        Un bucle while es una subestructura conformada por una expresion de condicion y unas sentencias e indica que las sentencias seguiran ejecutandos una y otra vez mientras la condicion sea verdadera
+        
+        Representa a la estructura de bucle while de la programacion imperativa
+        
+        Tiene la forma
+            while B do
+                Sentencias S
+            
+            Donde B es una expresion que devuelve un valor logico y Sentencias S son sentencias
+            
+            Significa que Sentencias S se ejecutaran una y otra vez mientras B siga devolviendo verdadero
+            
+        En notacion de Backus-Naur
+            #"while" <expression> "do" <statements>
+            
+        Si B nunca va a ser falso entonces se llevara a un bucle infinito
+            
+    Bucle for .- <for loop>
+        Un bucle for es una subestructura conformada por un selector de valores de una lista y unas sentencias e indica que para cada valor de la lista se ejecutara las sentencias
+        
+        Representa a la estructura de bucle for de la programacion imperativa
+        
+        Tiene la forma
+            for P in L do
+                Sentencias S
+            
+            donde P es un patron, L una expresion que devuelve una lista y Sentencias S son sentencias
+            
+            Significa que para cada valor de L(en orden) P tomara el respectivo valor y se ejecutara las Sentencias S
+        
+        En notacion de Backus-Naur
+            #"for" <pattern> "in" <expression> "do" <statements>
+        
+    Retorno.- <return>
+        Esta es una subestructura que indica el valor que devolvera la expresion imperativa como resultado de su evaluacion
+        
+        Representa a la estructura de retorno de la programacion imperativa
+        
+        Tiene la forma
+            return E donde E es una expresion
+                     significa que E sera el valor resultante de la expresion imperativa y ademas que ahi termina la ejecucion de las sentencias
+        
+        En notacion de Backus-Naur
+            #"return" <expression>
+        
+    Sentencias.- <statements>
+        Las sentencias son una secuencia de cada una de las subestructuras presentadas anteriormente y que en singular se llaman "sentencia"
+        
+        Representa a la estructura secuencial de la programacion imperativa
+        
+        Tiene la forma
+            S1
+            .
+            .
+            .
+            Sn
+            
+            Donde las Si es una sentencia
+            Significa que primero se ejecuta S1 luego S2 y asi sucesivamenet hasta Sn, si no existen alguna sentencia se dice que las sentencias (en plural) esta vacia y que no ejecuta nada
+        
+        En notacion de Backus-Naur
+        <statements> ::=
+            {<statement>}
+        <statement> ::= <assignment> | <call> | <conditional>
+            | <while loop> | <for loop> | <return>
+    
+    La expresion imperativa
+        Finalmente la expresion imperativa es el analogo de los programas imperativos o estructurados
+        
+        Representa a los programas imperativos o estructurados de la programacion imperativa
+        
+        Tiene la forma
+            begin
+                Sentencias S
+            end
+            
+            Donde Sentencias S son sentencias y son ejecutadas en orden, si no hay ninguna estructura de retorno dentro de esta expresion o no hay sentencias el resultado es por defecto una tupla vacia
+        
+        En notacion de Backus-Naur
+            <imperative> ::=
+                "begin" <statements>
+                "end"
+        
+        A excepcion de sus subestructuras de esta expresion esta no tiene un sangrado definido y eso es util ya que impide que un token sea marcador de dos sangrados a la vez como se vera mas adelante, de hecho ninguna expresion tiene un sangrado a su inicio sino solo en sus subestructuras(como las asignaciones en las expresiones let y where)
+    
+Tipado.- <typing>
+    Esta como en los patrones es un identificador o variable tipadas
+    
+    Representa una variable o identificador tipado
+    
+    Tiene la forma
+        v : T donde v es una variable o identificador y T es un tipo de dato
+    
+    En notacion de Backus-Naur
+    <typing> ::= <identifier> ":" <type>
+    
+Expresion de valor.- <expression>
+    habiendo descrito cada clase de expresiones es necesario unificar todas en una sola sintaxis, ademas de incluir el anonimo, identificadores, primitivas y constantes
+    
+    En notacion de Backus-Naur
+    <expression> ::= <anonymous> | <identifier> 
+        | <primitive> | <constant> 
+        | <application> | <lambda> | <tuple> | <list>
+        | <list constructor> | <sequence list> | <list comprehension>
+        | <indexed list> | <let> | <where> | <try> | <guard> 
+        | <imperative> | <typing>
+    
+    Las constantes al hacer encaje de patrones solo encajan con el mismo valor constante, con identificadores o anonimos a excepcion de NaN que solo encaja con los identificadores y anonimo, otra excepcion a esta regla es el valor fail que nunca encajara ya que la evaluacion siempre devolvera fail
+    
+    Los identificadores anque suelen reemplazarse antes de ser evaluados son como variables y funcionan como nombres de valores, en caso de encontrarse con un identificador o variable que aun no a sido reemplazado entonces se reemplaza por un valor definido y guardado en memoria(a estos se les llaman definiciones) pero si incluso dicho valor no existe entonces se trata como una variable o identificador libre con valor idenfinido y devuelven la misma variable al ser evaluados, estos identificadores libres encajan solo con identificadores o anonimos y pueden usarse como argumentos dotando a Function de un pequeño grado de manipulacion simbolica
+    
+    Las primitivas son identificadores reservados por lo que el valor que devuelven son ellos mismos y tambien pueden ser usados como argumentos
+    
+    El simbolo anonimo tambien puede ser utilizado como expresion o valor
+    
+    Se puede notar que las variables o identificadores tipados y el anonimo aunque propios de los patrones son tambien expresiones, esto se debe a que en Function los patrones se consideran una subclase de las expresiones, es decir, un patron sintacticamente es tambien una expresion aunque con diferentes usos
+    
+Comandos
+--------
+    Los comandos son las ordenes o tareas que interpreta Function ya sea desde la consola o escrito en archivos o guiones(scripts en ingles)
+    
+Ejecutar.- <run>
+    Este es un comando que interpreta comandos escritos en otros guiones
+    
+    Tiene la forma
+        run F    donde F es una cadena e indica la direccion y 
+                 nombre del archivo
+                 Significa que se intepretara los comandos escritos en el guion F
+                 
+    En notacion de Backus-Naur
+    <run> ::= #"run" <string>
+    
+    Si el archivo no existe lanzara un error
+    Por defecto los scripts tienen extension *.fx
+    
+Notacion.- <notation>
+    Este comando indica la notacion que debe tener un operador
+    
+    Tiene la forma
+        
+        infix P O1 O2 ... On    Los operadores O1, O2, ..., On son 
+                                operadores infijos no asociativos con prioridad P
+        infixl P O1 O2 ... On   Los operadores O1, O2, ..., On son 
+                                operadores infijos asociativos por la izquierda con prioridad P
+        infixr P O1 O2 ... On   Los operadores O1, O2, ..., On son 
+                                operadores infijos asociativos por la derecha con prioridad P
+        posfix O1 O2 ... On     Los operadores O1, O2, ..., On son 
+                                operadores posfijos
+        prefix O1 O2 ... On     Los operadores O1, O2, ..., On son 
+                                operadores prefijos
+        
+        Donde P es un numero entero no negativo(>= 0) y O1, O2, ..., On son identificadores, la cantidad de identificadores puede ser cero o mas
+        
+    En notacion de Backus-Naur
+    <infix> ::=
+        ("infix"|"infixl"|"infixr") <priority number> {<identifier>}
+    <posfix> ::= "posfix" {<identifier>}
+    <prefix> ::= "prefix" {<identifier>}
+    <notation> ::= #(<infix> | <posfix> | <prefix>)
+    
+    Donde <priority number> es un numero entre 0 y 255 (8 bits) y representa la prioridad de evaluacion de los operadores infijos
+        
+    Cuando un operador no es asociativo para asociarlo se debe utilizar explicitamente los parentesis, en otro caso lanzara un error por la ambiguedad que se genera
+    
+    Si para un operador ya a sido declarado su notacion al volver a declararse este cambiara su notacion por la nueva notacion
+    
+    Si no se declaran ninguna notacion por defecto sera prefija(lo mismo sucede con las funciones)
+    
+Sinonimo de tipo.- <type synonymous>
+    Este comando esta formado por un identificador y una expresion de tipo
+    
+    Es asignarle un nombre a un determinado tipo para poder usar en nuevas expresiones de tipo
+    
+    Tiene la forma
+        I ::= T     donde I es un identificador y T es una expresion de tipo
+                    Significa que I sera un sinonimo del tipo T y en cada expresion de tipo donde aparezca I esta sera reemplazada por T
+    
+    En notacion de Backus-Naur
+    <type synonymous> ::= #<identifier> "::=" <type>
+    
+    Los sinonimos de tipo no pueden ser recursivos, es decir el identificador I no puede volver a aparecer en T ni en otro sinonimo que aparezca en T
+    
+    Los sinonimos de tipo permiten simplificar y aclarar la escritura de las expresiones de tipo
+    
+    Al volver a declarar un sinonimo con un identificador ya declarado anteriormente el tipo al que se refiera cambiara por el nuevo
+    
+Tipado heredable.- <inheritable typing>
+    Este comando esta formado por un identificador y una expresion de tipo
+    
+    Representa el tipo de dato que deben tener las posteriores declaraciones de una definicion
+    
+    Tiene la forma
+        F :: T  donde F es un identificador y T es un tipo
+                Significa que en las posteriores definiciones de F las variables y patrones de los argumentos y el retorno tendran un tipo que encaje con T es decir que sea un subtipo de T, en algunas expresiones de retorno no siempre es posible encajar los tipos (en aplicaciones por ejemplo no siempre es posible saber el tipo que retornara especialmente si se tiene funciones sobrecargadas) en ese caso no se hereda nada y se considera que encaja
+    
+    Los subtipos se definen recursivamente como
+        >>> cualquier tipo es subtipo de si mismo
+        >>> cualquier tipo es un subtipo de _
+        >>> nat <: int <: real
+        >>> si T <: S entonces [T] <: [S]
+        >>> si T1 <: S1 y T2 <: S2 entonces T1 -> S1 <: T2 -> S2
+        >>> si T1 <: S1, ..., Tn <: Sn entonces (T1, ..., Tn) <: (S1, ..., Sn)
+        
+        donde <: significa "es un subtipo de"
+    
+    En notacion de Backus-Naur
+    <inheritable typing> ::= #<identifier> "::" <type>
+    
+    Al volver a declarar el tipado heredable para un identificador este cambiara por el nuevo tipo como tipo a ser heredado
+    
+    El tipado heredable permite simplificar el tipado de las variables argumento de las definiciones eliminando la necesidad de estar tipando a cada rato, ademas aporta una elegancia matematica bien apreciada
+    
+Definiciones.- <definition>
+    Este comando indica la definicion de una funcion, operacion o constante
+    
+    Tiene la forma
+        AP := E     donde AP es un "patron de aplicacion" y E es una expresion
+                    Significa que al evaluar una expresion de la forma AP resultara en E
+    
+    En notacion de Backus-Naur
+    <application pattern> ::=
+        (<pattern> | "(" <application pattern>")") {<pattern>}
+    <definition> ::= "<application pattern> ":=" <expression>
+    
+    Un <application pattern> o "patron de aplicacion" es una expresion de aplicacion en donde el aplicador o elemento funcion es o un identificador u otro "patron de aplicacion" mientras que el elemento argumento es un patron (notese que tambien esta incluida los operadores) ejm: (f@g)(x) := f(g(x)), si el o los argumentos no encajan con los patrones de la <application pattern> entonces devolvera fail
+    
+    Al volver a declarar una definicion para un mismo identificador esta no reemplaza a la anterior sino que se agrega como una opcion mas en la lista de definiciones para el encaje de patrones, es decir si I es un identificador de una definicion al evaluar I se prueba con su primera definicion si esta falla entonces se prueba la segunda y asi sucesivamente si todos fallan esto devolvera fail
+    
+    El hecho de no reemplazar las anteriores definiciones ayuda para definir funciones por partes o por encaje de patrones
+    
+    Se define como la aridad de una definicion a la cantidad de patrones argumento en el patron de aplicacion, todas las definiciones posteriores del mismo identificador deben tener la misma aridad en otro caso lanzara un error
+    
+Limpieza.- <clear>
+    Este comando elimina notaciones, sinonimos, tipados heredables y definiciones de los identificadores
+    
+    Tiene la forma
+        clear I1 I2 ... In  donde I1, I2, ..., In son identificadores
+                            Significa que borrara toda informacion asociada a estos identificadores como las notaciones, sinonimos, tipados, definiciones y desde ese momento seran tratados como simples identificadores
+    
+    En notacion de Backus-Naur
+    <clear> ::= #"clear" {<identifier>}
+    
+    Por la forma como actua el comando de definicion, este comando se utiliza para poder redefinir funciones que de otro modo no serian posibles
+    
+Asignacion global.- <global assignment>
+    La asignacion global es un comando que cambia el valor de un identificador, no cambia la lista de definiciones ni el tipado heredable solo el valor que esta devuelve
+    
+    Tiene la forma
+        I <- E          Donde I es un identificador y E es una expresion de valor, significa que el valor que devuelva el identificador sera cambiado por el valor evaluado de E
+    
+    En notacion de Backus-Naur
+    <global assignment> ::= #<identifier> "<-" <expression>
+    
+    Este comando se utiliza especialmente para el guardado de datos en memoria
+    
+    Por defecto no muestra el valor de la evaluacion solo lo guarda
+    
+Evaluacion.- <evaluation>
+    Este comando consiste simplemente de una expresion de valor que es evaluado
+    
+    Tiene la forma
+        E   donde E es una expresion
+            Significa que E sera evaluado e imprimira el resultado de la evaluacion
+    
+    En notacion de Backus-Naur
+    <evaluation> ::= #expression
+    
+    Explicamos aqui porque las expresiones no deben tener marcadores de sangrado en su primer token, pues habria un conflicto con el marcador que aparece en este comando(habria dos marcadores en un solo token)
+    
+    Una vez evaluado muestra el valor de la evaluacion y guarda ese valor en en memoria
+    
+Comandos.- <command>
+    Los comandos aceptados por Function son todos los descritos anteriormente
+    
+    <command> ::= <run> | <notation> | <type synonymous>
+        | <inheritable typing> | <definition> | <clear>
+        | <evaluation>
+    
+    Function analiza y ejecuta uno a uno los comandos proporcionados
+    
+    Dado que las expresiones de valor y las expresiones de tipo son dos cosas totalmente diferentes y usados en situaciones claramente diferenciables Function tiene la capacidad de poder usar un mismo identificador para sinonimos y definiciones sin que exista ambiguedad
+    
+Orden de evaluacion
+-------------------
+    El orden de evaluacion presentado es el siguiente
+    
+    Expresion               Prioridad   Asociatividad
+    
+    Expresion lambda        -7          -
+    Expresion let           -7          -
+    Expresion where         -6          D
+    Captura de fallo        -5          D
+    Guarda                  -4          D
+    Constructor de lista    -3          I
+    Indice de lista         -2          I
+    Tipado                  -1          -
+    Operador infijo minimo  0           D/I
+    Operador infijo maximo  255         D/I
+    Operador posfijo        256         I
+    Operador prefijo        257         I
+    Aplicacion              258         I
+    Parentesis              259         -
+    
+    En una aplicacion siempre evalua su elemento argumento y su elemento funcion (evaluacion estricta) pero no hay un orden para para decidir si evaluar primero su elemento argumento o elemento funcion
+    
+Curiosidades
+------------
+    El identificador anonimo en las expresiones puede ser utilizado como una especie de valor indeterminado generico
+    
+    Las variables libres tipadas en las expresiones puede ser utilizada para guardar informacion de tipo, es decir como contenedores de tipo
+    
+    Las variables libres pueden utilizarse como medio para realizar operaciones simbolicas aunque con una eficacia menor pues Function no esta diseñado para eso
+    
+    Un problema comun con las expresiones lambda es que existe el llamado problema de la captura de variables, en el cual un identificador que se encontraba libre en el argumento se convierte en un identificador no libre en el retorno
+    ejm: (\s -> \Sin -> s 3)(\_ -> Sin 2) ==> (\Sin -> (\_ -> Sin 2) 3)
+    En este caso incluso se hizo la captura del identificador Sin que normalmente es usado como el identificador de la funcion seno, para evitar estas capturas se prefiere que los nombres de las definiciones inicien con mayuscula y las variables con minuscula pero que no es una regla general pues ambos tipos de identificadores podrian ser utiles para ambos casos
+    
+    El lugar mas ideal para programar acciones paso a paso son las expresiones imperativas, pues en otras expresiones no se garantiza que puedan ejecutarse en un determinado orden
+    
+Resumen
+-------
+Anonimo
+    <anonymous> ::= "_"
+
+Constante
+    <bool> ::= "true" | "false"
+    <fail> ::= "fail"
+    <inf> ::= "inf"
+    <nan> ::= "nan"
+
+    <constant> ::= <number> | <bool> | <character> | <fail> 
+        | <inf> | <nan> | <string>
+        
+Tipo de dato
+    
+    <type basic> ::= "real" | "int" | "nat" | "bool" | "char"
+    <type tuple> ::= "(" [<type> {"," <type>}] ")"
+    <type list> ::= "[" <type> "]"
+    <type function> ::= <type> "->" <type>
+    
+    <type> ::= <anonymous> | <identifier> | <type basic>
+        | <type tuple> | <type list> | <type function>
+    
+Patrones
+    
+    <typing pattern> ::=
+        <identifier> ":" <type>
+    <tuple pattern> ::= "(" [<pattern> {"," <pattern>}] ")"
+    <list pattern> ::= "[" [<pattern> {"," <pattern>}] "]"
+    <list constructor pattern> ::= <pattern> ">|" <pattern>
+    <signed pattern> ::= ("+" | "-")(<number> | <inf> | <nan>)
+    
+    <pattern> ::= <anonymous> | <identifier> 
+        | <constant> | <typing pattern> | <tuple pattern> 
+        | <list pattern> | <list constructor pattern>
+        | <signed pattern>
+    
+Expresiones
+    
+    <sequence application> ::= <expression> <expression>
+    <infix application> ::= <expression> <identifier> <expression>
+    <prefix application> ::= <identifier> <expression>
+    <posfix application> ::= <expression> <identifier>
+    <application> ::= <sequence application> | <infix application>
+        | <prefix application> | <posfix application>
+    
+    <lambda> ::= "\" <pattern> {<pattern>} "->" <expression>
+    
+    <tuple> ::= "(" [<expression> {"," <expression>}] ")"
+    
+    <list> ::= "[" [<expression> {"," <expression>}] "]"
+    
+    <list constructor> ::= <expression> ">|" <expression>
+    
+    <sequence list> ::=
+        "[" <expression>["," <expression>] ".." <expression> "]"
+        ; sequence of 1 step [E .. F]
+        ; sequence of n step [E, F .. G]
+    
+    <generator> ::= <pattern> "|<" <expression>
+    <qualifier> ::= <expression> | <generator>
+    <list comprehension> ::=
+        "[" <expression> "|" [<qualifier> {"," <qualifier>}] "]"
+    
+    <index> ::= "{"[ <expression> {"," <expression>} ]"}"
+    <indexed list> ::= <expression> <index>
+    
+    <assignment> ::= #<pattern> "<-" <expression>
+    <let> ::= "let" <assignment> "in" <expression>
+    <where> ::= <expression> "where" <assignment>
+    
+    <try> ::= <expression> ";" <expression>
+    
+    <guard> ::= <expression> "?" <expression>
+    
+    <call> ::= #<expression>
+    <conditional> ::=
+        #"if" <expression> "then" <statements>
+        {$"elif" <expression> "then" <statements>}
+        [$"else" <statements>]
+    <while loop> ::=
+        #"while" <expression> "do" <statements>
+    <for loop> ::=
+        #"for" <pattern> "in" <expression> "do" <statements>
+    <return> ::= #"return" <expression>
+    <statements> ::=
+        {<statement>}
+    <statement> ::= <assignment> | <call> | <conditional>
+        | <while loop> | <for loop> | <return>
+    <imperative> ::=
+        "begin" <statements>
+        "end"
+    
+    <typing> ::= <identifier> ":" <type>
+    
+    <expression> ::= <anonymous> | <identifier> 
+        | <primitive> | <constant> 
+        | <application> | <lambda> | <tuple> | <list>
+        | <list constructor> | <sequence list> | <list comprehension>
+        | <indexed list> | <let> | <where> | <try> | <guard> 
+        | <imperative> | <typing>
+    
+Comandos
+    
+    <run> ::= #"run" <string>
+    
+    <priority number> ::= ; numero entero entre 0 y 255 (8 bits)
+    <infix> ::=
+        ("infix"|"infixl"|"infixr") <priority number> {<identifier>}
+    <posfix> ::= "posfix" {<identifier>}
+    <prefix> ::= "prefix" {<identifier>}
+    <notation> ::= #(<infix> | <posfix> | <prefix>)
+    
+    <type synonymous> ::= #<identifier> "::=" <type>
+    
+    <inheritable typing> ::= #<identifier> "::" <type>
+    
+    <application pattern> ::=
+        (<pattern> | "(" <application pattern>")") {<pattern>}
+    <definition> ::= "<application pattern> ":=" <expression>
+    
+    <clear> ::= #"clear" {<identifier>}
+    
+    <global assignment> ::= #<identifier> "<-" <expression>
+    
+    <evaluation> ::= #expression
+    
+    <command> ::= <run> | <notation> | <type synonymous>
+        | <inheritable typing> | <definition> | <clear>
+        | <global assignment> | <evaluation>
+    
+Orden de evaluacion
+    
+    +-------------------------+-------------+---------------+
+    | Expresion               | Prioridad   | Asociatividad |
+    |-------------------------+-------------+---------------+
+    | Expresion lambda        | -7          | -             |
+    | Expresion let           | -7          | -             |
+    | Expresion where         | -6          | D             |
+    | Captura de fallo        | -5          | D             |
+    | Guarda                  | -4          | D             |
+    | Constructor de lista    | -3          | I             |
+    | Indice de lista         | -2          | I             |
+    | Tipado                  | -1          | -             |
+    | Operador infijo minimo  | 0           | D/I           |
+    | Operador infijo maximo  | 255         | D/I           |
+    | Operador posfijo        | 256         | I             |
+    | Operador prefijo        | 257         | I             |
+    | Aplicacion              | 258         | I             |
+    | Parentesis              | 259         | -             |
+    +-------------------------+-------------+---------------+
+    
+    -Evaluacion estricta en las aplicaciones
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    

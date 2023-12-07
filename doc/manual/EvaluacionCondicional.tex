@@ -1,0 +1,151 @@
+
+\titleformat{\subsection}[runin]{\large \bfseries}{\thesubsection.}{10pt}{\bfseries}
+\titlespacing{\subsection}{0pt}{10pt}{0pt}
+
+\chapter{Evaluación condicional}
+   La evaluación condicional es evaluar una expresion o algún termino de esta solo si una condición ocurre, en este capitulo presentamos dos formas de de evaluación condicional y como pueden ser utilizadas.
+   
+   \section{La captura de fallos}
+      Los fallos generados al evaluar un termino de una expresion pueden ser capturados para parar su propagación por medio de la captura de fallos y tiene la siguiente forma:
+      \\
+      
+      \texttt{<expresion A>~; <expresion B>}
+      \\
+      
+      Al evaluar esta captura de fallos si la expresion A no falla entonces devuelve ese valor e ignora la expresion B, pero si falla entonces y solo entonces se evalúa la expresion B y devuelve el valor resultante, en resumen:
+      
+      \begin{longtable}[c]{ll}
+         A ; B = A & no evalúa B\\
+         fail ; B = B & recién evalúa B\\
+         fail ; fail = fail & ambos fallan\\
+      \end{longtable}
+      
+      \begin{fxcode}
+         \arrowcode{(\textbackslash (x: real) ->~x) \textquotesingle a\textquotesingle ; (\textbackslash (c: char) ->~c) \textquotesingle b\textquotesingle}\\
+         \outcode{\textquotesingle b\textquotesingle}\\
+         \arrowcode{fail ; 3*3}\\
+         \outcode{9}\\
+         \arrowcode{2 + \textquotesingle c\textquotesingle ; 3 * \textquotesingle a\textquotesingle}\\
+         \outcode{fail}\\
+         \arrowcode{(\textbackslash n -> 2*n)3 ; Print \textquotedbl hola\textquotedbl}\\
+         \outcode{6}\\
+         \arrowcode{(\textbackslash n -> 2*n)\textquotesingle c\textquotesingle ; Print \textquotedbl hola\textquotedbl}\\
+         \outcode{hola}\\
+         \outcode{()}
+      \end{fxcode}
+      
+      En la ultima evaluación se puede ver que \texttt{(\textbackslash n ->~2*n)\textquotesingle c\textquotesingle} devuelve \texttt{fail} a pesar de que encajan los patrones, pues bien para la expresion lambda si encaja el patrón y resulta \texttt{2*\textquotesingle c\textquotesingle} aquí es cuando ya no encaja pues el operador \texttt{*} solo recibe valores reales y \texttt{\textquotesingle c\textquotesingle} es un carácter y no encaja con el tipo de dato que recibe \texttt{*} por lo que la evaluación falla.
+      \\
+      
+      Los valores de fallo solo pueden ser generados implícitamente mediante el encaje de patrones o explícitamente haciendo uso del valor \texttt{fail}.
+      \\
+      
+      Por defecto la captura de fallos es asociativo por la derecha aunque eso no importa pues asociando por la derecha o por la izquierda siempre da el mismo resultado.
+      \\
+      
+      \texttt{E ; F ; G} es equivalente a \texttt{E ; (F ; G)}
+      \\
+      
+      En resumen la captura de fallos evalúa B solamente si A falla para evitar la propagación del fallo.
+      
+   \section{Las guardas}
+      Otra forma de hacer evaluación condicional es mediante las guardas, estas tiene la forma:
+      \\
+      
+      \texttt{<condición C>~? <expresion E>}
+      \\
+      
+      donde C es una expresion que devuelve un valor logico y E puede devolver cualquier valor, la evaluación de la guarda dice si C resulta verdadero entonces se evalúa E y devuelve el valor de E si C es falso devuelve \texttt{fail} ignorando E(que ya no evalúa E), si C no es un valor booleano entonces devolverá \texttt{fail}.
+      
+      \begin{fxcode}
+         \arrowcode{3~<~10 ? 2*3}\\
+         \outcode{6}\\
+         \arrowcode{4~>~4 ? 10 + 4}\\
+         \outcode{fail}\\
+         \arrowcode{(\textbackslash x ->~x~>=~18 ? Print \textquotedbl Bienvenido ya eres mayor de edad\textquotedbl) 13}\\
+         \outcode{fail}\\
+         \arrowcode{(\textbackslash x ->~x~>=~18 ? Print \textquotedbl Bienvenido ya eres mayor de edad\textquotedbl) 18}\\
+         \outcode{Bienvenido ya eres mayor de edad}\\
+         \outcode{()}\\
+         \arrowcode{4 ? 3} \codecomment{4 no es un valor logico}\\
+         \outcode{fail}
+      \end{fxcode}
+      
+      Por defecto las guardas son asociativos por la derecha aunque eso no importa pues asociando por la derecha o por la izquierda siempre da el mismo resultado.
+      \\
+      
+      \texttt{E ? F ? G} es equivalente a \texttt{E ? (F ? G)}
+      
+   \section{El ``operador'' ternario de decisión}
+      Al combinar las guardas con la captura de fallos resulta en una notación interesante conocida informalmente como ``el operador ternario de decisión'' pues según la condición permite evaluar y devolver el valor de una u otra expresion, tiene la forma:
+      \\
+      
+      \texttt{<condición C> ? <expresion Y>~;~<expresion N>}
+      \\
+      
+      Donde C es una expresion que devuelve un valor logico y Y y N son expresiones cualquiera, dice si C es verdadero entonces evalúa y devuelve el valor de Y ignorando N y sino evalúa y devuelve el valor de N ignorando Y.
+      \\
+      
+      Esta combinación es posible pues las guardas tienen mayor prioridad que la captura de fallos por lo que no necesitan de paréntesis.
+      \\
+      
+      \texttt{C ? E ; F} es equivalente a \texttt{(C ? E) ; F}
+      \\
+      
+      \begin{fxcode}
+         \arrowcode{true ? Print \textquotedbl Yes\textquotedbl ; Print \textquotedbl No\textquotedbl}\\
+         \outcode{Yes}\\
+         \outcode{()}\\
+         \arrowcode{(\textbackslash(x: nat) ->~x~<~18 ? Print \textquotedbl Eres menor de edad\textquotedbl~; ...}\\
+         \spacecode{~~~~~x~<~100? Print \textquotedbl Eres mayor de edad\textquotedbl~; ...}\\
+         \spacecode{~~~~~Print \textquotedbl Ya eres centenario\textquotedbl) 20}\\
+         \outcode{Eres mayor de edad}\\
+         \outcode{()}
+      \end{fxcode}
+      
+      En la anterior expresion lambda se puede utilizar la constante \texttt{Otherwise} para darle mas elegancia, esta constante siempre es verdadera.
+      
+      \begin{fxcode}
+         \arrowcode{Otherwise}\\
+         \outcode{true}\\
+         \arrowcode{(\textbackslash(x: nat) ->~x~<~18 ? Print \textquotedbl Eres menor de edad\textquotedbl~; ...}\\
+         \spacecode{~~~~~x~<~100? Print \textquotedbl Eres mayor de edad\textquotedbl~; ...}\\
+         \spacecode{~~~~~Otherwise ? Print \textquotedbl Ya eres centenario\textquotedbl) 100}\\
+         \outcode{Ya eres centenario}\\
+         \outcode{()}
+      \end{fxcode}
+      
+   \section{Lanzamiento condicional de errores}
+      La evaluación condicional puede también ser utilizada para generar errores solo si una condición se cumple, por ejemplo.
+      
+      \begin{fxcode}
+         \arrowcode{2 * \textquotedbl d\textquotedbl ; Error \textquotedbl La evaluación falló\textquotedbl}\\
+         \outcode{ERROR - performing error in command 1 line 1, La evaluación falló}\\
+         \arrowcode{3 * 4\^{}5 ; Error \textquotedbl no hay error\textquotedbl}\\
+         \outcode{3072}\\
+         \arrowcode{-1 >= 0 ? 1! ; Error \textquotedbl el numero debe ser mayor que cero\textquotedbl}\\
+         \outcode{ERROR - performing error in command 1 line 1, el numero debe ser mayor que cero}\\
+         \arrowcode{(\textbackslash x ->~IsNum x ? Trunc x ; ...}\\
+         \spacecode{~~~~~Otherwise ? Error \textquotedbl se esperaba un numero\textquotedbl) \textquotedbl\textquotedbl}\\
+         \outcode{ERROR - performing error in command 1 line 1, se esperaba un numero}\\
+         \arrowcode{(\textbackslash x ->~IsNum x ? Trunc x ; ...}\\
+         \spacecode{~~~~~Otherwise ? Error \textquotedbl se esperaba un numero\textquotedbl)12.3}\\
+         \outcode{12}
+      \end{fxcode}
+      
+      Como se puede ver la combinación entre la captura de fallos y las guardas permite programar errores que solo se lancen cuando una condición se cumple.
+      
+      
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   

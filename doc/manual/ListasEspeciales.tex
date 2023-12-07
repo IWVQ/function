@@ -1,0 +1,112 @@
+
+\titleformat{\subsection}[runin]{\large \bfseries}{\thesubsection.}{10pt}{\bfseries}
+\titlespacing{\subsection}{0pt}{10pt}{0pt}
+
+\chapter{Listas especiales}
+   Para garantizar elegancia y compacidad en la construcción de listas Function v0.5 proporciona dos clases de listas: las listas por sucesión y las listas por comprensión.
+   
+   \section{Listas por sucesión}
+      Estas listas representan una lista cuyos elementos pertenecen a alguna secuencia, tienen la siguiente forma:
+      \\
+      
+      \texttt{[E .. F]}\\
+      \texttt{[E, F .. G]}
+      \\
+      
+      La primera es una lista en el que los elementos están de uno en uno empezando por \texttt{E} y teniendo como máximo a \texttt{F}.
+      \\
+      
+      En la segunda lista los elementos están de n en n donde $n = F - E$, si $n \geq 0$ la lista empezara por \texttt{E} teniendo como maximo a \texttt{G}, si $n < 0$ la lista empezara por \texttt{E} teniendo como mínimo a \texttt{G}.
+      \\
+      
+      Los elementos pueden ser números, caracteres o lógicos.
+      
+      \begin{fxcode}
+         \arrowcode{[1 .. 10.3]}\\
+         \outcode{[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}\\
+         \arrowcode{[\textquotesingle a\textquotesingle .. \textquotesingle z\textquotesingle]}\\
+         \outcode{\textquotedbl abcdefghijklmnopqrstuvwxyz\textquotedbl}\\
+         \arrowcode{[1, 3 .. 20]}\\
+         \outcode{[1, 3, 5, 7, 9, 11, 13, 15, 17, 19]}\\
+         \arrowcode{[1, 0 .. -5]}\\
+         \outcode{[1, 0, -1, -2, -3, -4, -5]}\\
+         \arrowcode{[7, 7 .. 100]} \codecomment{esta evaluación nunca acabara o tal vez habrá un desborde de pila, para poder abortar la evaluación puede presionar {\it Ctrl+BREAK}}
+      \end{fxcode}
+      
+   \section{Listas por comprensión}
+      Las listas por comprensión son una adaptación de la notación de conjuntos llamado conjuntos por comprensión y de la misma manera que en los conjuntos se pueden crear nuevos conjuntos seleccionando elementos de otro conjunto que cumplan ciertas condiciones en las listas por comprensión también se puede hacer algo parecido, las listas por comprensión tienen la siguiente forma:
+      \\
+      
+      \texttt{[E | Q1, ..., Qn]}
+      \\
+      
+      Donde \texttt{E} es una expresion y \texttt{Q1}, ..., \texttt{Qn} son llamados calificadores y estos pueden ser generadores o filtros.
+      \\
+      
+      Los selectores o generadores tienen la forma:
+      \\
+      
+      \texttt{P |<~L}
+      \\
+      
+      Donde \texttt{P} es un patrón y \texttt{L} es una expresion que debe resultar en una lista, los generadores van extrayendo uno a uno los elementos de la lista \texttt{L} para formar los elementos de la lista por comprensión.
+      \\
+      
+      Los filtros son expresiones que retornan valores lógicos y son usados como condiciones que deben tener los elementos extraídos en los generadores.
+      \\
+      
+      La cantidad de calificadores puede ser cero o mas, si es cero la lista estará formada por un solo elemento que sera el valor de la expresion.
+      
+      \begin{fxcode}
+         \arrowcode{[x | x |<~[1 .. 10], Odd x]}\\
+         \outcode{[1, 3, 5, 7, 9]}\\
+         \arrowcode{[2 | ]}\\
+         \outcode{[2]}\\
+         \arrowcode{[x | ]}\\
+         \outcode{[x]}\\
+         \arrowcode{[2*n - 1 | n |<~[1 .. 4]]}\\
+         \outcode{[1, 3, 5, 7]}
+      \end{fxcode}
+   
+   \section{Funciones que actúan sobre elementos}
+      Para finalizar este capitulo presentamos dos funciones útiles que actúan sobre los elementos de una lista.
+      
+      \subsection*{Filtrar elementos}: \texttt{Filter <función>~<lista>}\\
+      Donde \texttt{<función>} debe ser una función que devuelva valores lógicos y \texttt{<lista>} es una lista, esta función filtra todos los elementos para los que \texttt{<función>} aplicado a dicho elemento resulte verdadera en pocas palabras filtra elementos que cumplan cierta condición.
+      
+      \begin{fxcode}
+         \arrowcode{Filter Even [3, 2, 4, 5]}\\
+         \outcode{[2, 4]}
+      \end{fxcode}
+      
+      En el código anterior se filtra los elementos que sean pares.
+      
+      \begin{fxcode}
+         \arrowcode{Filter (\textbackslash x ->~x <~1) [1.2, 0.4, 3]}\\
+         \outcode{[0.4]}
+      \end{fxcode}
+      
+      \subsection*{Convertir elementos}: \texttt{Map <función>~<lista>}\\
+      Esta función convierte los elementos de la \texttt{<lista>} aplicando la función \texttt{<función>} a cada elemento.
+      
+      \begin{fxcode}
+         \arrowcode{Map Trunc [1.23, 4, 5.6, 1.12]}\\
+         \outcode{[1, 4, 5, 1]}\\
+         \arrowcode{Map Odd [3, 1, 12, 2, 5]}\\
+         \outcode{[true, true, false, false, true]}\\
+         \arrowcode{Map (\textbackslash x ->~x\^{}2) [1, 2, 3]}\\
+         \outcode{[1, 4, 9]}
+      \end{fxcode}
+      
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   

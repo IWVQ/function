@@ -1,0 +1,300 @@
+
+\titleformat{\subsection}[runin]{\large \bfseries}{\thesubsection.}{10pt}{\bfseries}
+\titlespacing{\subsection}{0pt}{10pt}{0pt}
+
+\chapter{Casos de estudio}
+   \section{Función $\phi$ de Euler}
+      La función $\phi$ de Euler es una función que para un numero natural calcula la cantidad de números naturales menores que el y primos relativos con el.
+      \\
+      
+      Matemáticamente se define como:
+      
+      $$\phi(n) := |\{m | m \in \N, m \leq n \wedge gcd(m, n) = 1\}|$$
+      
+      \begin{fxcode}
+         \arrowcode{Phi :: Nat ->~Nat}\\
+         \arrowcode{Phi n := Length[m | m |<~[1 .. n], Gcd(m, n) = 1]}
+      \end{fxcode}
+      
+      \begin{fxcode}
+         \arrowcode{Phi 12}\\
+         \outcode{4}
+      \end{fxcode}
+      
+   \section{Cantidad de dígitos}
+      Crearemos una función que nos indique la cantidad de dígitos que tiene un numero natural.
+      \\
+      
+      La formula para saber esto es:
+      
+      \[D(n) := \left\{ \begin{array}{rcl}
+            1 & \mbox{si} & n = 0\\
+            & & \\
+            1 + \left\lfloor \log_{10}(n)\right\rfloor &  \mbox{si} & n > 0\\
+         \end{array}
+      \right. \]
+      
+      Y cuya codificación en Function v0.5 es:
+      
+      \begin{fxcode}
+         \arrowcode{DigitsCount :: Nat ->~Nat}\\
+         \arrowcode{DigitsCount 0 := 1}\\
+         \arrowcode{DigitsCount n := 1 + Trunc(Ln(n)/Ln(10))}
+      \end{fxcode}
+      
+      \begin{fxcode}
+         \arrowcode{DigitsCount 1234}\\
+         \outcode{4}\\
+         \arrowcode{DigitsCount 1365817450091}\\
+         \outcode{13}
+      \end{fxcode}
+      
+   \section{Espejo de un numero}
+      El espejo de un numero es otro numero con los dígitos en reversa.
+      \\
+      
+      La formula es:
+      
+      \[M(n) := \left\{ \begin{array}{rcl}
+            0 & \mbox{si} & n = 0\\
+            & & \\
+            r10^{D(n) - 1} + M(q) &  \mbox{si} & n > 0\\
+         \end{array}
+      \right. \]
+      
+      Donde $q$ y $r$ son el cociente y el residuo de la división entera de $n$ entre $10$ respectivamente y $D(n)$ es la cantidad de dígitos decimales de $n$.
+      \\
+      
+      Y cuya codificación en Function v0.5 es:
+      
+      \begin{fxcode}
+         \arrowcode{Mirror :: Nat ->~Nat}\\
+         \arrowcode{Mirror 0 := 0}\\
+         \arrowcode{Mirror n := (n Rem 10)*k + Mirror(n Quot 10)}\\
+         \spacecode{~~~~where k~<- 10\^{}((DigitsCount n) - 1)}
+      \end{fxcode}
+      
+      \begin{fxcode}
+         \arrowcode{Mirror 12345}\\
+         \outcode{54321}\\
+         \arrowcode{Mirror 306450126311}\\
+         \outcode{113621054603}
+      \end{fxcode}
+      
+   \section{Método de Newton-Raphson para raíces}
+      Uno de los métodos para aproximar la raíz de una ecuación es el de Newton-Raphson, el método de Newton-Raphson utiliza una iteración en el que en cada paso se va aproximando al valor verdadero de la raíz.
+      \\.
+      
+      La formula de dicha iteración es:
+      
+      $$x_{i+1} = x_i - \frac{f(x_i)}{f'(x_i)}$$
+      
+      La codificación en Function v0.5 es:
+      
+      \begin{fxcode}
+         \arrowcode{Lim :: Real ->~(Real ->~Real) ->~Real}\\
+         \arrowcode{Lim a f := (f(a + 0.00000001) + f(a - 0.00000001))/2}\\
+         \arrowcode{Deriv :: (Real ->~Real) ->~Real ->~Real}\\
+         \arrowcode{Deriv f x := Lim 0 g ...}\\
+         \spacecode{~~~~where g~<- \textbackslash h ->~(f(x + h) - f(x))/h}\\
+         \arrowcode{NewtonRaphson :: (Real ->~Real) ->~Real ->~Nat ->~Real}\\
+         \arrowcode{NewtonRaphson f x 0 := x}\\
+         \arrowcode{NewtonRaphson f x n := NewtonRaphson f (x - f(x)/(Deriv f x)) (n - 1)}\\
+      \end{fxcode}
+      
+      \begin{fxcode}
+         \arrowcode{NewtonRaphson Sin 1 10}\\
+         \outcode{0}\\
+         \arrowcode{NewtonRaphson (\textbackslash x ->~x\^{}2) 1 10}\\
+         \outcode{0.00097656250000011}
+      \end{fxcode}
+      
+   \section{Números primos}
+      Aquí se presentan las funciones sobre numeros primos escrito en un guion ``\texttt{primes.fx}'' guardado en la carpeta principal de Function v0.5 para luego ser cargado desde la consola.
+      
+      \begin{fxcode}
+         \linecode{...primes.fx                                          }\\
+         \linecode{}\\
+         \linecode{...La siguiente funcion lista todos los primos menores a un numero}\\
+         \linecode{Primes~::~Real~\texttt{-}>~[Nat]                      }\\
+         \linecode{Primes~x~:=~[~p~|~p~|<~[2~..~x],~IsPrime~p]           }\\
+         \linecode{}\\
+         \linecode{...La siguiente funcion halla la cantidad de primos menores a un numero}\\
+         \linecode{PrimePi~::~Real~\texttt{-}>~Nat                       }\\
+         \linecode{PrimePi~x~:=~Length~(Primes~x)                        }\\
+         \linecode{                                                      }\\
+         \linecode{...La siguiente funcion halla el n-esimo numero primo}\\
+         \linecode{Prime~::~Nat~\texttt{-}>~Nat                          }\\
+         \linecode{Prime~n~:=                                            }\\
+         \linecode{\texttt{\gray ~}~~~begin                                             }\\
+         \linecode{\texttt{\gray ~}~~~~~~~i~<\texttt{-}~0                               }\\
+         \linecode{\texttt{\gray ~}~~~~~~~k~<\texttt{-}~2                               }\\
+         \linecode{\texttt{\gray ~}~~~~~~~p~<\texttt{-}~0                               }\\
+         \linecode{\texttt{\gray ~}~~~~~~~while~i~<~n~do                                }\\
+         \linecode{\texttt{\gray ~}~~~~~~~~~~~if~IsPrime~k~then                         }\\
+         \linecode{\texttt{\gray ~}~~~~~~~~~~~~~~~i~<\texttt{-}~Next~i                  }\\
+         \linecode{\texttt{\gray ~}~~~~~~~~~~~~~~~p~<\texttt{-}~k                       }\\
+         \linecode{\texttt{\gray ~}~~~~~~~~~~~k~<\texttt{-}~Next~k                      }\\
+         \linecode{\texttt{\gray ~}~~~~~~~return~p                                      }\\
+         \linecode{\texttt{\gray ~}~~~end                                               }\\
+         \linecode{                                                      }\\
+         \linecode{...La siguiente funcion halla el cociente y exponente de un numero como factor del otro}\\
+         \linecode{AsFactor~::~(Nat,~Nat)~\texttt{-}>~(Nat,~Nat)         }\\
+         \linecode{AsFactor(r,~a)~:=                                     }\\
+         \linecode{\texttt{\gray ~}~~~begin                                             }\\
+         \linecode{\texttt{\gray ~}~~~~~~~s~<\texttt{-}~0                               }\\
+         \linecode{\texttt{\gray ~}~~~~~~~while~a~Rem~r~=~0~do                          }\\
+         \linecode{\texttt{\gray ~}~~~~~~~~~~~s~<\texttt{-}~Next~s                      }\\
+         \linecode{\texttt{\gray ~}~~~~~~~~~~~a~<\texttt{-}~a~Quot~r                    }\\
+         \linecode{\texttt{\gray ~}~~~~~~~return(a,~s)                                  }\\
+         \linecode{\texttt{\gray ~}~~~end                                               }\\
+         \linecode{                                                      }\\
+         \linecode{...La siguiente funcion halla los factores primos de un numero}\\
+         \linecode{PrimeFactors~::~Nat~\texttt{-}>~[(Nat,~Nat)]          }\\
+         \linecode{PrimeFactors~n~:=                                     }\\
+         \linecode{\texttt{\gray ~}~~~begin                                             }\\
+         \linecode{\texttt{\gray ~}~~~~~~~if~IsPrime~n~then                             }\\
+         \linecode{\texttt{\gray ~}~~~~~~~~~~~return~[(n,~1)]                           }\\
+         \linecode{\texttt{\gray ~}~~~~~~~else                                          }\\
+         \linecode{\texttt{\gray ~}~~~~~~~~~~~r~<\texttt{-}~[]                          }\\
+         \linecode{\texttt{\gray ~}~~~~~~~~~~~for~p~in~Primes(n/2)~do                   }\\
+         \linecode{\texttt{\gray ~}~~~~~~~~~~~~~~~(n,~s)~<\texttt{-}~AsFactor(p,~n)     }\\
+         \linecode{\texttt{\gray ~}~~~~~~~~~~~~~~~if~s~>~0~then                         }\\
+         \linecode{\texttt{\gray ~}~~~~~~~~~~~~~~~~~~~r~<\texttt{-}~(p,~s)~>|~r         }\\
+         \linecode{\texttt{\gray ~}~~~~~~~~~~~return~r                                  }\\
+         \linecode{\texttt{\gray ~}~~~end                                               }\\
+      \end{fxcode}
+   
+      Ahora ejecutamos el guion.
+      
+      \begin{fxcode}
+         \arrowcode{run \textquotedbl primes.fx\textquotedbl}\\
+      \end{fxcode}
+      
+   \section{Tres en raya}
+      Este es el juego conocido como tres en raya escrito en un guion ``\texttt{michi.fx}'' guardado en la carpeta principal de Function v0.5 para luego ser cargado desde la consola.
+      
+      \begin{fxcode}
+         \linecode{...Michi}\\
+         \linecode{}\\
+         \linecode{MakeGrid~s~:=}\\
+         \linecode{\texttt{\gray ~}~~~begin}\\
+         \linecode{\texttt{\gray ~}~~~~~~~s0~<\texttt{-}~\textquotedbl |~\textquotedbl ~++~[s\{0,~0\}]~++~\textquotedbl ~|~\textquotedbl ~++~[s\{0,~1\}]~++~\textquotedbl ~|~\textquotedbl ~++~[s\{0,~2\}]~++~\textquotedbl ~|\textquotedbl }\\
+         \linecode{\texttt{\gray ~}~~~~~~~s1~<\texttt{-}~\textquotedbl |~\textquotedbl ~++~[s\{1,~0\}]~++~\textquotedbl ~|~\textquotedbl ~++~[s\{1,~1\}]~++~\textquotedbl ~|~\textquotedbl ~++~[s\{1,~2\}]~++~\textquotedbl ~|\textquotedbl }\\
+         \linecode{\texttt{\gray ~}~~~~~~~s2~<\texttt{-}~\textquotedbl |~\textquotedbl ~++~[s\{2,~0\}]~++~\textquotedbl ~|~\textquotedbl ~++~[s\{2,~1\}]~++~\textquotedbl ~|~\textquotedbl ~++~[s\{2,~2\}]~++~\textquotedbl ~|\textquotedbl }\\
+         \linecode{\texttt{\gray ~}~~~~~~~Print~(\textquotedbl ~~~~\textquotedbl ~++~\textquotedbl +\texttt{-}\texttt{-}\texttt{-}+\texttt{-}\texttt{-}\texttt{-}+\texttt{-}\texttt{-}\texttt{-}+\textquotedbl ~++~\textquotedbl ~~~~+\texttt{-}\texttt{-}\texttt{-}+\texttt{-}\texttt{-}\texttt{-}+\texttt{-}\texttt{-}\texttt{-}+\textquotedbl ) }\\
+         \linecode{\texttt{\gray ~}~~~~~~~Print~(\textquotedbl ~~~~\textquotedbl ~++~s0~~~~~~~~~~~~~~++~\textquotedbl ~~~~|~1~|~2~|~3~|\textquotedbl )                           }\\
+         \linecode{\texttt{\gray ~}~~~~~~~Print~(\textquotedbl ~~~~\textquotedbl ~++~\textquotedbl +\texttt{-}\texttt{-}\texttt{-}+\texttt{-}\texttt{-}\texttt{-}+\texttt{-}\texttt{-}\texttt{-}+\textquotedbl ~++~\textquotedbl ~~~~+\texttt{-}\texttt{-}\texttt{-}+\texttt{-}\texttt{-}\texttt{-}+\texttt{-}\texttt{-}\texttt{-}+\textquotedbl ) }\\
+         \linecode{\texttt{\gray ~}~~~~~~~Print~(\textquotedbl ~~~~\textquotedbl ~++~s1~~~~~~~~~~~~~~++~\textquotedbl ~~~~|~4~|~5~|~6~|\textquotedbl )                           }\\
+         \linecode{\texttt{\gray ~}~~~~~~~Print~(\textquotedbl ~~~~\textquotedbl ~++~\textquotedbl +\texttt{-}\texttt{-}\texttt{-}+\texttt{-}\texttt{-}\texttt{-}+\texttt{-}\texttt{-}\texttt{-}+\textquotedbl ~++~\textquotedbl ~~~~+\texttt{-}\texttt{-}\texttt{-}+\texttt{-}\texttt{-}\texttt{-}+\texttt{-}\texttt{-}\texttt{-}+\textquotedbl ) }\\
+         \linecode{\texttt{\gray ~}~~~~~~~Print~(\textquotedbl ~~~~\textquotedbl ~++~s2~~~~~~~~~~~~~~++~\textquotedbl ~~~~|~7~|~8~|~9~|\textquotedbl )                           }\\
+         \linecode{\texttt{\gray ~}~~~~~~~Print~(\textquotedbl ~~~~\textquotedbl ~++~\textquotedbl +\texttt{-}\texttt{-}\texttt{-}+\texttt{-}\texttt{-}\texttt{-}+\texttt{-}\texttt{-}\texttt{-}+\textquotedbl ~++~\textquotedbl ~~~~+\texttt{-}\texttt{-}\texttt{-}+\texttt{-}\texttt{-}\texttt{-}+\texttt{-}\texttt{-}\texttt{-}+\textquotedbl ) }\\
+         \linecode{\texttt{\gray ~}~~~end              }\\
+         \linecode{                     }\\
+      \end{fxcode}
+      
+      Continua...
+      
+      \begin{fxcode}
+         \linecode{CheckEndGame~s~:=    }\\
+         \linecode{\texttt{\gray ~}~~~begin            }\\
+         \linecode{\texttt{\gray ~}~~~~~~~wx~<\texttt{-}~\textquotedbl XXX\textquotedbl             }\\
+         \linecode{\texttt{\gray ~}~~~~~~~wo~<\texttt{-}~\textquotedbl OOO\textquotedbl             }\\
+         \linecode{\texttt{\gray ~}~~~~~~~sl~<\texttt{-}~s\{0,~0\}~>|~s\{0,~1\}~>|~s\{0,~2\}~>|~[]  }\\
+         \linecode{\texttt{\gray ~}~~~~~~~if~sl~=~wx~then                                  }\\
+         \linecode{\texttt{\gray ~}~~~~~~~~~~~return~\textquotesingle X\textquotesingle    }\\
+         \linecode{\texttt{\gray ~}~~~~~~~elif~sl~=~wo~then                                }\\
+         \linecode{\texttt{\gray ~}~~~~~~~~~~~return~\textquotesingle O\textquotesingle    }\\
+         \linecode{\texttt{\gray ~}~~~~~~~sl~<\texttt{-}~s\{1,~0\}~>|~s\{1,~1\}~>|~s\{1,~2\}~>|~[]  }\\
+         \linecode{\texttt{\gray ~}~~~~~~~if~sl~=~wx~then                                  }\\
+         \linecode{\texttt{\gray ~}~~~~~~~~~~~return~\textquotesingle X\textquotesingle    }\\
+         \linecode{\texttt{\gray ~}~~~~~~~elif~sl~=~wo~then                                }\\
+         \linecode{\texttt{\gray ~}~~~~~~~~~~~return~\textquotesingle O\textquotesingle    }\\
+         \linecode{\texttt{\gray ~}~~~~~~~sl~<\texttt{-}~s\{2,~0\}~>|~s\{2,~1\}~>|~s\{2,~2\}~>|~[]  }\\
+         \linecode{\texttt{\gray ~}~~~~~~~if~sl~=~wx~then                                  }\\
+         \linecode{\texttt{\gray ~}~~~~~~~~~~~return~\textquotesingle X\textquotesingle    }\\
+         \linecode{\texttt{\gray ~}~~~~~~~elif~sl~=~wo~then                                }\\
+         \linecode{\texttt{\gray ~}~~~~~~~~~~~return~\textquotesingle O\textquotesingle    }\\
+         \linecode{\texttt{\gray ~}~~~~~~~sl~<\texttt{-}~s\{0,~0\}~>|~s\{1,~0\}~>|~s\{2,~0\}~>|~[]  }\\
+         \linecode{\texttt{\gray ~}~~~~~~~if~sl~=~wx~then                                  }\\
+         \linecode{\texttt{\gray ~}~~~~~~~~~~~return~\textquotesingle X\textquotesingle    }\\
+         \linecode{\texttt{\gray ~}~~~~~~~elif~sl~=~wo~then                                }\\
+         \linecode{\texttt{\gray ~}~~~~~~~~~~~return~\textquotesingle O\textquotesingle    }\\
+         \linecode{\texttt{\gray ~}~~~~~~~sl~<\texttt{-}~s\{0,~1\}~>|~s\{1,~1\}~>|~s\{2,~1\}~>|~[]  }\\
+         \linecode{\texttt{\gray ~}~~~~~~~if~sl~=~wx~then                                  }\\
+         \linecode{\texttt{\gray ~}~~~~~~~~~~~return~\textquotesingle X\textquotesingle    }\\
+         \linecode{\texttt{\gray ~}~~~~~~~elif~sl~=~wo~then                                }\\
+         \linecode{\texttt{\gray ~}~~~~~~~~~~~return~\textquotesingle O\textquotesingle    }\\
+         \linecode{\texttt{\gray ~}~~~~~~~sl~<\texttt{-}~s\{0,~2\}~>|~s\{1,~2\}~>|~s\{2,~2\}~>|~[]  }\\
+         \linecode{\texttt{\gray ~}~~~~~~~if~sl~=~wx~then                                  }\\
+         \linecode{\texttt{\gray ~}~~~~~~~~~~~return~\textquotesingle X\textquotesingle    }\\
+         \linecode{\texttt{\gray ~}~~~~~~~elif~sl~=~wo~then                                }\\
+         \linecode{\texttt{\gray ~}~~~~~~~~~~~return~\textquotesingle O\textquotesingle    }\\
+         \linecode{\texttt{\gray ~}~~~~~~~sl~<\texttt{-}~s\{0,~0\}~>|~s\{1,~1\}~>|~s\{2,~2\}~>|~[]  }\\
+         \linecode{\texttt{\gray ~}~~~~~~~if~sl~=~wx~then                                  }\\
+         \linecode{\texttt{\gray ~}~~~~~~~~~~~return~\textquotesingle X\textquotesingle    }\\
+         \linecode{\texttt{\gray ~}~~~~~~~elif~sl~=~wo~then                                }\\
+         \linecode{\texttt{\gray ~}~~~~~~~~~~~return~\textquotesingle O\textquotesingle    }\\
+         \linecode{\texttt{\gray ~}~~~~~~~sl~<\texttt{-}~s\{0,~2\}~>|~s\{1,~1\}~>|~s\{2,~0\}~>|~[]  }\\
+         \linecode{\texttt{\gray ~}~~~~~~~if~sl~=~wx~then                                  }\\
+         \linecode{\texttt{\gray ~}~~~~~~~~~~~return~\textquotesingle X\textquotesingle    }\\
+         \linecode{\texttt{\gray ~}~~~~~~~elif~sl~=~wo~then                                }\\
+         \linecode{\texttt{\gray ~}~~~~~~~~~~~return~\textquotesingle O\textquotesingle    }\\
+         \linecode{\texttt{\gray ~}~~~~~~~if~~(s\{0,~0\}~=~\textquotesingle ~\textquotesingle )~||     }\\
+         \linecode{\texttt{\gray ~}~~~~~~~~~~~(s\{0,~1\}~=~\textquotesingle ~\textquotesingle )~||     }\\
+         \linecode{\texttt{\gray ~}~~~~~~~~~~~(s\{0,~2\}~=~\textquotesingle ~\textquotesingle )~||     }\\
+         \linecode{\texttt{\gray ~}~~~~~~~~~~~(s\{1,~0\}~=~\textquotesingle ~\textquotesingle )~||     }\\
+         \linecode{\texttt{\gray ~}~~~~~~~~~~~(s\{1,~1\}~=~\textquotesingle ~\textquotesingle )~||     }\\
+         \linecode{\texttt{\gray ~}~~~~~~~~~~~(s\{1,~2\}~=~\textquotesingle ~\textquotesingle )~||     }\\
+         \linecode{\texttt{\gray ~}~~~~~~~~~~~(s\{2,~0\}~=~\textquotesingle ~\textquotesingle )~||     }\\
+         \linecode{\texttt{\gray ~}~~~~~~~~~~~(s\{2,~1\}~=~\textquotesingle ~\textquotesingle )~||     }\\
+         \linecode{\texttt{\gray ~}~~~~~~~~~~~(s\{2,~2\}~=~\textquotesingle ~\textquotesingle )~then   }\\
+         \linecode{\texttt{\gray ~}~~~~~~~~~~~return~\textquotesingle ~\textquotesingle                }\\
+         \linecode{\texttt{\gray ~}~~~~~~~else                                                         }\\
+         \linecode{\texttt{\gray ~}~~~~~~~~~~~return~\textquotesingle E\textquotesingle                }\\
+         \linecode{\texttt{\gray ~}~~~end     }\\
+         \linecode{            }\\
+      \end{fxcode}
+   
+      Continua...
+   
+      \begin{fxcode}
+         \linecode{Michi()~:=  }\\
+         \linecode{\texttt{\gray ~}~~~begin   }\\
+         \linecode{\texttt{\gray ~}~~~~~~~player~<\texttt{-}~\textquotesingle X\textquotesingle }\\
+         \linecode{\texttt{\gray ~}~~~~~~~winner~<\texttt{-}~\textquotesingle ~\textquotesingle }\\
+         \linecode{\texttt{\gray ~}~~~~~~~state~<\texttt{-}~[\textquotedbl ~~~\textquotedbl ,~\textquotedbl ~~~\textquotedbl ,~\textquotedbl ~~~\textquotedbl ] }\\
+         \linecode{\texttt{\gray ~}~~~~~~~MakeGrid~state}\\
+         \linecode{\texttt{\gray ~}~~~~~~~while~winner~=~\textquotesingle ~\textquotesingle ~do}\\
+         \linecode{\texttt{\gray ~}~~~~~~~~~~~s~<\texttt{-}~Input~(\textquotedbl Turno~\textquotedbl ~++~[player]~++~\textquotedbl :~\textquotedbl )}\\
+         \linecode{\texttt{\gray ~}~~~~~~~~~~~d~<\texttt{-}~StrToNum(s)~\texttt{-}~1}\\
+         \linecode{\texttt{\gray ~}~~~~~~~~~~~if~(d~>=~0)~\&\&~(d~<~9)~then}\\
+         \linecode{\texttt{\gray ~}~~~~~~~~~~~~~~~if~state\{d~Quot~3,~d~Rem~3\}~=~\textquotesingle ~\textquotesingle ~then}\\
+         \linecode{\texttt{\gray ~}~~~~~~~~~~~~~~~~~~~state~<\texttt{-}~SetElm~player~[d~Quot~3,~d~Rem~3]~state}\\
+         \linecode{\texttt{\gray ~}~~~~~~~~~~~~~~~~~~~winner~<\texttt{-}~CheckEndGame~state}\\
+         \linecode{\texttt{\gray ~}~~~~~~~~~~~~~~~~~~~player~<\texttt{-}~player~=~\textquotesingle X\textquotesingle ?~\textquotesingle O\textquotesingle ~;~\textquotesingle X\textquotesingle }\\
+         \linecode{\texttt{\gray ~}~~~~~~~~~~~~~~~else}\\
+         \linecode{\texttt{\gray ~}~~~~~~~~~~~~~~~~~~~Print~\textquotedbl Casilla~invalida,~intente~de~nuevo\textquotedbl }\\
+         \linecode{\texttt{\gray ~}~~~~~~~~~~~else}\\
+         \linecode{\texttt{\gray ~}~~~~~~~~~~~~~~~Print~\textquotedbl Casilla~invalida,~intente~de~nuevo\textquotedbl }\\
+         \linecode{\texttt{\gray ~}~~~~~~~~~~~MakeGrid~state                                         }\\
+         \linecode{\texttt{\gray ~}~~~~~~~if~winner~=~\textquotesingle E\textquotesingle ~then       }\\
+         \linecode{\texttt{\gray ~}~~~~~~~~~~~Print~\textquotedbl \texttt{-}\texttt{-}\texttt{-}~EMPATE~\texttt{-}\texttt{-}\texttt{-}\textquotedbl        }\\
+         \linecode{\texttt{\gray ~}~~~~~~~else                                                       }\\
+         \linecode{\texttt{\gray ~}~~~~~~~~~~~Print~(\textquotedbl GANÓ~\textquotedbl ~++~[winner])  }\\
+         \linecode{\texttt{\gray ~}~~~~~~~Print~\textquotedbl Para~salir~presione~Enter\textquotedbl }\\
+         \linecode{\texttt{\gray ~}~~~~~~~Input()}\\
+         \linecode{\texttt{\gray ~}~~~end}\\
+         
+      \end{fxcode}
+      
+      Ahora ejecutamos el guion.
+      
+      \begin{fxcode}
+         \arrowcode{run \textquotedbl michi.fx\textquotedbl}\\
+         \arrowcode{Michi()}
+      \end{fxcode}
+      
+      
+      
+      

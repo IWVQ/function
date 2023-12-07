@@ -1,0 +1,644 @@
+
+\titleformat{\subsection}[runin]{\large \bfseries}{\thesubsection.}{10pt}{\bfseries}
+\titlespacing{\subsection}{0pt}{10pt}{0pt}
+
+\chapter{Funciones y operadores básicos}
+   En este capitulo se presentan las funciones y operadores básicos.
+   
+   \section{Operadores numéricos}
+      Los operadores numéricos son aquellos operadores que tienen por argumento números ya sean naturales, enteros o reales.
+      
+      A continuación se describen las operaciones básicas sobre números:
+      
+      \subsection*{Suma}: \texttt{<número A>~+ <número B>}\\
+      Este operador es la suma de los números A y B.
+      
+      \begin{fxcode}
+         \arrowcode{13.132 + 314.21}\\
+         \outcode{327.342}
+      \end{fxcode}
+      
+      \subsection*{Resta}: \texttt{<número A>~\texttt{-} <número B>}\\
+      Este operador realiza la resta de los números A y B.
+      
+      \begin{fxcode}
+         \arrowcode{431.23 - 314}\\
+         \outcode{117.23}
+      \end{fxcode}
+      
+      \subsection*{Multiplicación}: \texttt{<número A>~* <número B>}\\
+      Este operador realiza la multiplicación de los números A y B.
+      
+      \begin{fxcode}
+         \arrowcode{314 * 23}\\
+         \outcode{7222}
+      \end{fxcode}
+      
+      \subsection*{División}: \texttt{<número A>~/ <número B>}\\
+      Este operador realiza la división de los números reales A y B.
+      
+      \begin{fxcode}
+         \arrowcode{453.76 / 123}\\
+         \outcode{3.68910569105691}
+      \end{fxcode}
+      
+      \subsection*{Potenciación}: \texttt{<número A>~\^{} <número B>}\\
+      Este operador realiza la potenciación de los números reales A y B.
+      
+      \begin{fxcode}
+         \arrowcode{42 \^{} 23.3}\\
+         \outcode{6.63297661658949E37}
+      \end{fxcode}
+      
+      \subsection*{Números con signo}: \texttt{[+|-]<número>}\\
+      Esta operación dota de un signo a un numero.
+      
+      \begin{fxcode}
+         \arrowcode{- 23}\\
+         \outcode{-23}\\
+         \arrowcode{-13}\\
+         \outcode{-13}\\
+         \arrowcode{+43}\\
+         \outcode{43}\\
+         \arrowcode{+ - 12}\\
+         \outcode{-12}
+      \end{fxcode}
+      
+      \subsection*{Cociente de la división entera}: \texttt{<entero A>~Quot <entero B>}\\
+      Este operación devuelve el cociente de la división entera entre A y B.
+      
+      \begin{fxcode}
+         \arrowcode{134 Quot 12}\\
+         \outcode{11}
+      \end{fxcode}
+      
+      \subsection*{Resto de la división entera}: \texttt{<entero A>~Rem <entero B>}\\
+      Este operación devuelve el resto de la división entera entre A y B.
+      
+      \begin{fxcode}
+         \arrowcode{134 Rem 12}\\
+         \outcode{2}
+      \end{fxcode}
+      
+      \subsection*{Factorial}: \texttt{<número natural>~!}\\
+      Esta operación devuelve el factorial de un número natural.
+      
+      \begin{fxcode}
+         \arrowcode{6!}\\
+         \outcode{720}
+      \end{fxcode}
+      
+      \subsection*{Porcentaje}: \texttt{<numero A>~\%~<numero B>}\\
+      Este operación devuelve el A por ciento del numero B.
+      
+      \begin{fxcode}
+         \arrowcode{30 \% 420}\\
+         \outcode{126}
+      \end{fxcode}
+      
+   \section{Funciones numéricas}
+      Las funciones numéricas son funciones que tiene por argumento a números.
+      \\
+      
+      En Function v0.5 las funciones no necesariamente deben tener sus argumentos entre paréntesis es decir que el paréntesis del argumento se puede obviar a menos que sea absolutamente necesario.
+      \\
+      
+      A continuación se describen las funciones mas primordiales sobre números.
+      
+      \subsection*{Truncado}: \texttt{Trunc <número>}\\
+      Esta función devuelve la parte entera o truncada de un numero real.
+      
+      \begin{fxcode}
+         \arrowcode{Trunc(13.4)}\\
+         \outcode{13}
+      \end{fxcode}
+      
+      \subsection*{Parte fraccionaria}: \texttt{Frac <número>}\\
+      Esta función devuelve la parte fraccionaria o decimal de un numero real.
+      
+      \begin{fxcode}
+         \arrowcode{Frac 43.21}\\
+         \outcode{0.21}
+      \end{fxcode}
+      
+      \subsection*{Raíz cuadrada}: \texttt{Sqrt <número>}\\
+      Esta función devuelve la raíz cuadrada de un numero real.
+      
+      \begin{fxcode}
+         \arrowcode{Sqrt(2)}\\
+         \outcode{1.4142135623731}
+      \end{fxcode}
+      
+      \subsection*{Valor absoluto}: \texttt{Abs <número>}\\
+      Esta función devuelve el valor absoluto de un número real.
+      
+      \begin{fxcode}
+         \arrowcode{Abs(-123)}\\
+         \outcode{123}
+      \end{fxcode}
+      
+      \subsection*{Función piso}: \texttt{Floor <número>}\\
+      Esta función devuelve el piso o máximo entero de un número real.
+      
+      \begin{fxcode}
+         \arrowcode{Floor 23.4}\\
+         \outcode{23}
+      \end{fxcode}
+      
+      \subsection*{Función techo}: \texttt{Ceil <número>}\\
+      Esta función devuelve el techo o mínimo entero de un número real.
+      
+      \begin{fxcode}
+         \arrowcode{Ceil 32.23}\\
+         \outcode{33}
+      \end{fxcode}
+      
+      \subsection*{Redondeo}: \texttt{Round <número>}\\
+      Esta función devuelve el redondeo de un número real.
+      
+      \begin{fxcode}
+         \arrowcode{Round 13.5}\\
+         \outcode{14}
+      \end{fxcode}
+      
+   \section{Comparaciones}
+      Estas funciones comparan valores.
+      
+      \subsection*{Igualdad}: \texttt{<argumento A>~= <argumento B>}\\
+      Este operador verifica la igualdad de los valores A y B donde A y B pueden ser números, caracteres, lógicos o cadenas.
+      
+      \begin{fxcode}
+         \arrowcode{123 = 34}\\
+         \outcode{false}\\
+         \arrowcode{\textquotesingle b\textquotesingle = \textquotesingle b\textquotesingle}\\
+         \outcode{true}
+      \end{fxcode}
+      
+      \subsection*{Desigualdad}: \texttt{<argumento A>~<>~<argumento B>}\\
+      Este operador verifica la desigualdad de los valores A y B donde A y B pueden ser números, caracteres, lógicos o cadenas.
+      
+      \begin{fxcode}
+         \arrowcode{13 <>~12}\\
+         \outcode{true}\\
+         \arrowcode{"hola" \texttt{~<>} "mundo"}\\
+         \outcode{true}
+      \end{fxcode}
+      
+      \subsection*{Menor que}: \texttt{<argumento A>~\texttt{<} <argumento B>}\\
+      Este operador verifica si el valor A es menor que B donde A y B pueden ser números, caracteres, lógicos o cadenas.
+      
+      \begin{fxcode}
+         \arrowcode{13 <~12}\\
+         \outcode{false}\\
+         \arrowcode{"hola" \texttt{~<} "mundo"}\\
+         \outcode{true}
+      \end{fxcode}
+      
+      \subsection*{Mayor que}: \texttt{<argumento A>~\texttt{>} <argumento B>}\\
+      Este operador verifica si el valor A es mayor que B donde A y B pueden ser números, caracteres, lógicos o cadenas.
+      
+      \begin{fxcode}
+         \arrowcode{13 >~12}\\
+         \outcode{true}\\
+         \arrowcode{"hola" \texttt{~>} "mundo"}\\
+         \outcode{false}
+      \end{fxcode}
+      
+      Para los números el valor NaN no se puede comparar por lo que cualquier intento de comparación siempre devolverá false incluso consigo mismo.
+      
+      \begin{fxcode}
+         \arrowcode{nan = nan}\\
+         \outcode{false}\\
+         \arrowcode{nan <~nan}\\
+         \outcode{false}\\
+         \arrowcode{nan >~nan}\\
+         \outcode{false}
+      \end{fxcode}
+      
+      \subsection*{Menor o igual que}: \texttt{<argumento A>~<= <argumento B>}\\
+      Este operador verifica si el valor A es menor o igual que B donde A y B pueden ser números, caracteres, lógicos o cadenas.
+      
+      \begin{fxcode}
+         \arrowcode{11 <= 11}\\
+         \outcode{true}\\
+         \arrowcode{true <= false}\\
+         \outcode{false}
+      \end{fxcode}
+      
+      \subsection*{Mayor o igual que}: \texttt{<argumento A>~>= <argumento B>}\\
+      Este operador verifica si el valor A es mayor o igual que B donde A y B pueden ser números, caracteres, lógicos o cadenas.
+      
+      \begin{fxcode}
+         \arrowcode{11 >= 11}\\
+         \outcode{true}\\
+         \arrowcode{true >= false}\\
+         \outcode{true}
+      \end{fxcode}
+      
+   \section{Funciones ordinales}
+      
+      \subsection*{Anterior}: \texttt{Prev <argumento>}\\
+      Esta función obtiene el valor anterior del \texttt{<argumento>} donde \texttt{<argumento>} puede ser números enteros, caracteres o lógicos.
+      
+      \begin{fxcode}
+         \arrowcode{Prev 12}\\
+         \outcode{11}\\
+         \arrowcode{Prev \textquotesingle b\textquotesingle}\\
+         \outcode{\textquotesingle a\textquotesingle}
+      \end{fxcode}
+      
+      \subsection*{Posterior}: \texttt{Next <argumento>}\\
+      Esta función obtiene el valor siguiente del \texttt{<argumento>} donde \texttt{<argumento>} puede ser números enteros, caracteres o lógicos.
+      
+      \begin{fxcode}
+         \arrowcode{Next 12}\\
+         \outcode{13}\\
+         \arrowcode{Next \textquotesingle b\textquotesingle}\\
+         \outcode{\textquotesingle c\textquotesingle}
+      \end{fxcode}
+      
+   \section{Operadores a nivel de bits}
+      Estos operadores actúan sobre la representación binaria de los números enteros, para los números negativos se utiliza la representación de complemento a dos.
+      
+      \subsection*{Negación}: \texttt{Not <entero>}\\
+      Es la negación a nivel de bits de un numero entero.
+      
+      \begin{fxcode}
+         \arrowcode{Not 12}\\
+         \outcode{-13}
+      \end{fxcode}
+      
+      En general el numero resultante para n siempre es - 1 - n.
+      
+      \subsection*{Conjunción}: \texttt{<entero A>~And <entero B>}\\
+      Es la conjunción a nivel de bits de los números enteros A y B.
+      
+      \begin{fxcode}
+         \arrowcode{132 And 12}\\
+         \outcode{4}\\
+         \arrowcode{0xFF And 0xA0}\\
+         \outcode{160}
+      \end{fxcode}
+      
+      \subsection*{Disyunción}: \texttt{<entero A>~Or <entero B>}\\
+      Es la disyunción a nivel de bits de los números enteros A y B.
+      
+      \begin{fxcode}
+         \arrowcode{132 Or 12}\\
+         \outcode{4}\\
+         \arrowcode{0xFF Or 0xA0}\\
+         \outcode{255}
+      \end{fxcode}
+      
+      \subsection*{Disyunción exclusiva}: \texttt{<entero A>~Xor <entero B>}\\
+      Es la operación XOR o disyunción exclusiva a nivel de bits de los números enteros A y B.
+      
+      \begin{fxcode}
+         \arrowcode{0xFF Xor 0xA0}\\
+         \outcode{95}
+      \end{fxcode}
+      
+      \subsection*{Desplazamiento a la izquierda}: \texttt{<entero A>~Shl <entero B>}\\
+      Es el desplazamiento a la izquierda del entero A en B bits.
+      
+      \begin{fxcode}
+         \arrowcode{13 Shl 3}\\
+         \outcode{104}
+      \end{fxcode}
+      
+      \subsection*{Desplazamiento a la derecha}: \texttt{<entero A>~Shr <entero B>}\\
+      Es el desplazamiento a la derecha del entero A en B bits.
+      
+      \begin{fxcode}
+         \arrowcode{0xFF Shr 2}\\
+         \outcode{63}
+      \end{fxcode}
+      
+   \section{Funciones trigonométricas}
+      
+      \subsection*{Seno}: \texttt{Sin <número N>}\\
+      Esta función devuelve el seno del angulo N en radianes.
+      
+      \begin{fxcode}
+         \arrowcode{Sin 1}\\
+         \outcode{0.841470984807897}
+      \end{fxcode}
+      
+      \subsection*{Coseno}: \texttt{Cos <número N>}\\
+      Esta función devuelve el coseno del angulo N en radianes.
+      
+      \begin{fxcode}
+         \arrowcode{Cos 1.57}\\
+         \outcode{0.000796326710733325}
+      \end{fxcode}
+      
+      \subsection*{Tangente}: \texttt{Tan <número N>}\\
+      Esta función devuelve la tangente del angulo N en radianes.
+      
+      \begin{fxcode}
+         \arrowcode{Tan 0.7853}\\
+         \outcode{0.999803692474686}
+      \end{fxcode}
+      
+      \subsection*{Arco seno}: \texttt{ASin <número N>}\\
+      Esta función devuelve en radianes el arco seno de un número.
+      
+      \begin{fxcode}
+         \arrowcode{ASin 0.841470984807897}\\
+         \outcode{1}
+      \end{fxcode}
+      
+      \subsection*{Arco coseno}: \texttt{ACos <número N>}\\
+      Esta función devuelve en radianes el arco coseno de un número.
+      
+      \begin{fxcode}
+         \arrowcode{ACos 0.000796326710733325}\\
+         \outcode{1.57}
+      \end{fxcode}
+      
+      \subsection*{Arco tangente}: \texttt{ATan <número N>}\\
+      Esta función devuelve en radianes el arco tangente de un número.
+      
+      \begin{fxcode}
+         \arrowcode{ATan 0.999803692474686}\\
+         \outcode{0.7853}
+      \end{fxcode}
+      
+      \subsection*{Arco tangente de dos parámetros}: \texttt{ATan2(<número Y>, <número X>)}\\
+      Esta función devuelve en radianes el arco tangente del angulo del triangulo rectángulo con cateto opuesto Y y adyacente X, que es igual al arco tangente de $Y/X$.
+      
+      \begin{fxcode}
+         \arrowcode{ATan2(1, 1)}\\
+         \outcode{0.785398163397448}
+      \end{fxcode}
+      
+   \section{Funciones exponenciales}
+      
+      \subsection*{Logaritmo natural}: \texttt{Ln <numero>}\\
+      Esta función devuelve el logaritmo natural de un numero real.
+      
+      \begin{fxcode}
+         \arrowcode{Ln 12}\\
+         \outcode{2.484906649788}
+      \end{fxcode}
+      
+      \subsection*{Exponencial}: \texttt{Exp <numero>}\\
+      Esta función devuelve el exponencial de un numero real.
+      
+      \begin{fxcode}
+         \arrowcode{Exp 3}\\
+         \outcode{20.0855369231877}
+      \end{fxcode}
+      
+   \section{Constantes matemáticas}
+      
+      \subsection*{Numero pi}: \texttt{Pi}\\
+      Esta constante es el numero $\pi$.
+      
+      \begin{fxcode}
+         \arrowcode{Pi}\\
+         \outcode{3.14159265358979}\\
+         \arrowcode{Sin Pi}\\
+         \outcode{0}
+      \end{fxcode}
+      
+      \subsection*{Numero e}: \texttt{E}\\
+      Esta constante es el numero e.
+      
+      \begin{fxcode}
+         \arrowcode{E}\\
+         \outcode{2.71828182845905}\\
+         \arrowcode{Ln E}\\
+         \outcode{1}
+      \end{fxcode}
+      
+   \section{Caracteres y cadenas}
+      A continuación se presentan las funciones y operaciones sobre caracteres y cadenas.
+      
+      \subsection*{Caracteres de fin de linea}: \texttt{CR | LF}\\
+      Estos caracteres son los caracteres de fin de linea
+      CR es el carácter de retorno de carro y LF es el carácter de salto de linea.
+      
+      \begin{fxcode}
+         \arrowcode{CR}\\
+         \outcode{\textquotesingle\textbackslash n\textquotesingle}\\
+         \arrowcode{LF}\\
+         \outcode{\textquotesingle\textbackslash r\textquotesingle}
+      \end{fxcode}
+      
+      \subsection*{Concatenación}: \texttt{<cadena>~++~<cadena>}\\
+      Esta operación concatena dos cadenas.
+      
+      \begin{fxcode}
+         \arrowcode{\textquotedbl hola\textquotedbl~++ \textquotedbl~\textquotedbl~++ \textquotedbl mundo\textquotedbl}\\
+         \outcode{\textquotedbl hola mundo\textquotedbl}
+      \end{fxcode}
+      
+      \subsection*{Longitud de cadena}: \texttt{Length <cadena>}\\
+      Esta función devuelve la longitud de una cadena.
+      
+      \begin{fxcode}
+         \arrowcode{Length \textquotedbl 1234\textquotedbl}\\
+         \outcode{4}
+      \end{fxcode}
+      
+      \subsection*{Mayúscula}: \texttt{UpperCase [<cadena> | <carácter>]}\\
+      Esta función convierte caracteres minúsculas en mayúsculas, su argumento puede ser una cadena o un carácter.
+      
+      \begin{fxcode}
+         \arrowcode{UpperCase \textquotedbl Hola\textquotedbl}\\
+         \outcode{\textquotedbl HOLA\textquotedbl}\\
+         \arrowcode{UpperCase \textquotesingle a\textquotesingle}
+         \outcode{\textquotesingle A\textquotesingle}
+      \end{fxcode}
+      
+      \subsection*{Minúscula}: \texttt{LowerCase [<cadena> | <carácter>]}\\
+      Esta función convierte caracteres mayúsculas en minúsculas, su argumento puede ser una cadena o un carácter.
+      
+      \begin{fxcode}
+         \arrowcode{LowerCase \textquotedbl Hola\textquotedbl}\\
+         \outcode{\textquotedbl hola\textquotedbl}\\
+         \arrowcode{LowerCase \textquotesingle A\textquotesingle}
+         \outcode{\textquotesingle a\textquotesingle}
+      \end{fxcode}
+      
+      \subsection*{Código ASCII}: \texttt{Ascii}\\
+      Esta cadena es una constante que contiene todos los caracteres del código ASCII extendido en orden.
+      
+      \begin{fxcode}
+         \arrowcode{Ascii}\\
+         \outcode{\textquotedbl \textbackslash 0\textbackslash 1\textbackslash 2\textbackslash 3\textbackslash 4\textbackslash 5\textbackslash 6\textbackslash a\textbackslash b\textbackslash t\textbackslash n\textbackslash v\textbackslash f\textbackslash r\textbackslash 14\textbackslash 15\textbackslash 16\textbackslash 17\textbackslash 18\textbackslash 19\textbackslash 20\textbackslash 21\textbackslash 22\textbackslash 23\textbackslash 24\textbackslash 25\textbackslash 26\textbackslash 27\textbackslash 28\textbackslash 29\textbackslash 30\textbackslash 31~!\\ \textbackslash"\#\$\%\&\textbackslash\textquotesingle()*+,-./0123456789:;<=>?\makeatletter @ABCDEFGHIJKLMNOPQRSTUVWXYZ[\textbackslash\textbackslash]\^{}\_\`{}abcdefghijklmnopqrs\\tuvwxyz\{|\}\~{}\textbackslash 127\textbackslash 128\textbackslash 129\textbackslash 130\textbackslash 131\textbackslash 132\textbackslash 133\textbackslash 134\textbackslash 135\textbackslash 136\textbackslash 137\textbackslash 138\textbackslash 139\textbackslash 140\textbackslash 141\textbackslash 142\textbackslash 143\textbackslash 144\textbackslash 145\\ \textbackslash 146\textbackslash 147\textbackslash 148\textbackslash 149\textbackslash 150\textbackslash 151\textbackslash 152\textbackslash 153\textbackslash 154\textbackslash 155\textbackslash 156\textbackslash 157\textbackslash 158\textbackslash 159\textbackslash 160\textbackslash 161\textbackslash 162\textbackslash 163\textbackslash 164\textbackslash 165\textbackslash 166\textbackslash\\ 167\textbackslash 168\textbackslash 169\textbackslash 170\textbackslash 171\textbackslash 172\textbackslash 173\textbackslash 174\textbackslash 175\textbackslash 176\textbackslash 177\textbackslash 178\textbackslash 179\textbackslash 180\textbackslash 181\textbackslash 182\textbackslash 183\textbackslash 184\textbackslash 185\textbackslash 186\textbackslash 187\textbackslash 1\\88\textbackslash 189\textbackslash 190\textbackslash 191\textbackslash 192\textbackslash 193\textbackslash 194\textbackslash 195\textbackslash 196\textbackslash 197\textbackslash 198\textbackslash 199\textbackslash 200\textbackslash 201\textbackslash 202\textbackslash 203\textbackslash 204\textbackslash 205\textbackslash 206\textbackslash 207\textbackslash 208\textbackslash 20\\9\textbackslash 210\textbackslash 211\textbackslash 212\textbackslash 213\textbackslash 214\textbackslash 215\textbackslash 216\textbackslash 217\textbackslash 218\textbackslash 219\textbackslash 220\textbackslash 221\textbackslash 222\textbackslash 223\textbackslash 224\textbackslash 225\textbackslash 226\textbackslash 227\textbackslash 228\textbackslash 229\textbackslash 230\\ \textbackslash 231\textbackslash 232\textbackslash 233\textbackslash 234\textbackslash 235\textbackslash 236\textbackslash 237\textbackslash 238\textbackslash 239\textbackslash 240\textbackslash 241\textbackslash 242\textbackslash 243\textbackslash 244\textbackslash 245\textbackslash 246\textbackslash 247\textbackslash 248\textbackslash 249\textbackslash 250\textbackslash 251\textbackslash\\ 252\textbackslash 253\textbackslash 254\textbackslash 255\textquotedbl}
+      \end{fxcode}
+      
+   \section{Operadores lógicos}
+      Estas operaciones son las básicas que actúan sobre valores lógicos.
+      
+      \subsection*{Negación}: \texttt{\~{} <lógico>}\\
+      Esta es la negación lógica.
+      
+      \begin{fxcode}
+         \arrowcode{\~{} true}\\
+         \outcode{false}
+      \end{fxcode}
+      
+      \subsection*{Conjunción}: \texttt{<lógico P>~\&\&~<lógico Q>}\\
+      Esta operación es la conjunción lógica de los valores lógicos P y Q.
+      
+      \begin{fxcode}
+         \arrowcode{true \&\& true}\\
+         \outcode{true}\\
+         \arrowcode{true \&\& false}\\
+         \outcode{false}
+      \end{fxcode}
+      
+      \subsection*{Disyunción}: \texttt{<lógico P>~||~<lógico Q>}\\
+      Esta operación es la disyunción lógica de los valores lógicos P y Q.
+      
+      \begin{fxcode}
+         \arrowcode{true || true}\\
+         \outcode{true}\\
+         \arrowcode{true || false}\\
+         \outcode{true}
+      \end{fxcode}
+      
+   \section{Conversiones}
+      Las siguientes funciones hace conversiones entre los tipos de valores.
+      
+      \subsection*{Número a carácter}: \texttt{EncodeChar <natural N>}\\
+      Esta función convierte un numero natural a su respectivo carácter unicode.
+      
+      \begin{fxcode}
+         \arrowcode{EncodeChar 65}\\
+         \outcode{\textquotesingle A\textquotesingle}
+      \end{fxcode}
+      
+      Si N es mayor o igual a la cantidad de caracteres permitidos (actualmente 65536)se toma N = N Rem 65536.
+      
+      \begin{fxcode}
+         \arrowcode{EncodeChar (65536 + 32)}\\
+         \outcode{\textquotesingle~\textquotesingle}
+      \end{fxcode}
+      
+      \subsection*{Carácter a número}: \texttt{DecodeChar <carácter>}\\
+      Esta función devuelve el numero correspondiente al carácter unicode.
+      
+      \begin{fxcode}
+         \arrowcode{DecodeChar \textquotesingle A\textquotesingle}\\
+         \outcode{65}
+      \end{fxcode}
+      
+      \subsection*{Número a valor lógico}: \texttt{EncodeBool <natural>}\\
+      Esta función devuelve un valor lógico correspondiente al numero natural.
+      
+      \begin{fxcode}
+         \arrowcode{EncodeBool 1}\\
+         \outcode{true}
+      \end{fxcode}
+      
+      Esta función devuelve para 0 false para 1 true para 2 false para 3 true y así sucesivamente.
+      
+      \subsection*{Valor lógico a número}: \texttt{DecodeBool <lógico>}\\
+      Esta función devuelve el numero natural correspondiente al valor lógico.
+      
+      \begin{fxcode}
+         \arrowcode{DecodeBool false}\\
+         \outcode{0}
+      \end{fxcode}
+      
+      \subsection*{Número a cadena}: \texttt{NumToStr <numero>}\\
+      Esta función convierte un numero en una cadena de caracteres.
+      
+      \begin{fxcode}
+         \arrowcode{NumToStr 1.243E-10}\\
+         \outcode{\textquotedbl 1.243E-10\textquotedbl}
+      \end{fxcode}
+      
+      \subsection*{Cadena a número}: \texttt{StrToNum <cadena>}\\
+      Esta función convierte una cadena a un numero(si es que es posible).
+      
+      \begin{fxcode}
+         \arrowcode{StrToNum "1.243E-10"}\\
+         \outcode{1.243E-10}
+      \end{fxcode}
+   
+      Si no es posible la conversión devolverá NaN.
+      
+      \begin{fxcode}
+         \arrowcode{StrToNum \textquotedbl\textquotedbl}\\
+         \outcode{nan}
+      \end{fxcode}
+      
+      \subsection*{Carácter a cadena}: \texttt{CharToStr <carácter>}\\
+      Esta función convierte un carácter en una cadena.
+      
+      \begin{fxcode}
+         \arrowcode{CharToStr \textquotesingle a\textquotesingle}\\
+         \outcode{\textquotedbl a\textquotedbl}
+      \end{fxcode}
+      
+      \subsection*{Cadena a carácter}: \texttt{StrToChar <cadena>}\\
+      Esta función convierte una cadena en un carácter.
+      
+      \begin{fxcode}
+         \arrowcode{StrToChar \textquotedbl a\textquotedbl}\\
+         \outcode{\textquotesingle a\textquotesingle}
+      \end{fxcode}
+      
+      Si no es posible la conversión lanzara un error.
+      
+      \begin{fxcode}
+         \arrowcode{StrToChar \textquotedbl\textquotedbl}\\
+         \outcode{ERROR - performing error in command 1 line 1, String is not character}
+      \end{fxcode}
+      
+      \subsection*{Valor lógico a cadena}: \texttt{BoolToStr <lógico>}\\
+      Esta función convierte un valor lógico a una cadena.
+      
+      \begin{fxcode}
+         \arrowcode{BoolToStr true}\\
+         \outcode{\textquotedbl true\textquotedbl}
+      \end{fxcode}
+      
+      \subsection*{Cadena a valor lógico}: \texttt{StrToBool <cadena>}\\
+      Esta función convierte una cadena en un valor lógico.
+      
+      \begin{fxcode}
+         \arrowcode{StrToBool \textquotedbl false\textquotedbl}\\
+         \outcode{false}
+      \end{fxcode}
+      
+      Si no es posible la conversión lanzara un error.
+      
+      \begin{fxcode}
+         \arrowcode{StrToBool \textquotedbl\textquotedbl}\\
+         \outcode{ERROR - performing error in command 1 line 1, String is not boolean}
+      \end{fxcode}
+      
+   \section{Número aleatorio}
+      La funciones que generan valores aleatorios se presentan aquí.
+      
+      \subsection*{Numero entero aleatorio}: \texttt{Random <entero A>}\\
+      Esta función genera un numero pseudo-aleatorio con rango A, con las siguientes características:
+      \begin{enumerate}
+         \item Si A es mayor que 0 entonces el resultado sera un numero entero entre 0 y A - 1.
+         \item Si A es menor que 0 entonces el resultado sera un numero entero entre A + 1 y 0.
+         \item Si A es cero el resultado sera 0.
+      \end{enumerate}
+      
+      \begin{fxcode}
+         \arrowcode{Random 12}\\
+         \outcode{5}\\
+         \arrowcode{Random 12}\\
+         \outcode{7}
+      \end{fxcode}
+      
+      
+   
+   
+   
+   
+   
+   
+   
+   
+   

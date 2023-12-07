@@ -1,0 +1,521 @@
+LEXEMAS
+=======
+Los lexemas son unidades lexicas basicas del lenguaje Function y es tan formados por secuencias de caracteres
+Todos los lexemas estaran presentados en notacion de Backus-Naur a menos que se indique lo contrario
+
+Caracteres leidos
+-----------------
+
+Todos los caracteres.- <UNICODE>
+    Esto son todos los caracteres que son usados, en Function los caracteres usados se extienden a cualquier caracter unicode disponible
+    
+Caracteres de codificacion de lexemas.-
+    Para la codificacion de los lexemas se usan los caracter siguientes como caracteres principales y que basicamente son caracteres del codigo ASCII
+    
+    _
+    ABCDEFGHIJKLMNOPQRSTUVWXYZ
+    abcdefghijklmnopqrstuvwxyz
+    1234567890
+    |!$%&/=?\*+^-.:<>#~`@
+    "'
+    ()[]{},;
+    
+    Ademas estan caracteres especiales que tambien son usados representados por las siguientes secuencias
+    
+    \n      Representa el caracter de retorno de carro
+    \r      Representa el caracter de salto de linea
+    \32     Representa el caracter de espacio en blanco
+    \9      Representa el caracter tabulador
+    
+    En las siguientes ciertos grupos de estos caracteres tienen nombres especiales y seleccionados segun el uso que se le da
+    
+Caracteres de final de linea.-
+    <CR> ::= \n
+    <LF> ::= \r
+    
+Caracter de subguion.- <SG>
+    Es el caracter _ y es utilizado ampliamente en el lenguaje
+    
+Caracteres literales.- <LIT>
+    Son los caracteres ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz del codigo ASCII
+    
+Caracteres numerales.- <NU>
+    Son los caracteres 1234567890 del codigo ASCII
+    
+Caracteres de extension hexadecimales.- <HX>
+    Son los caracteres abcdefABCDEF del codigo ASCII
+    
+Caracteres simbolicos.- <SY>
+    Son los caracteres |!$%&/=?\@*+^-.:<>#~` del codigo ASCII
+    
+Caracter de comilla doble.- <DQ>
+    Es la comilla doble " del codigo ASCII
+    
+Caracter de comilla simple.- <SQ>
+    Es la comilla simple ' del codigo ASCII
+    
+Caracter de espacio en blanco.- <WS>
+    Son los caracteres \32 y \9 del codigo ASCII
+    
+Todos los caracteres excepto los de fin de linea.- <CH>
+    Son todos los caracteres unicode exceptuando los caracteres ASCII \n y \r que representan el final de una linea
+    
+Secuencias ignoradas
+--------------------
+Estas secuencias de caracteres no son tomadas como tokens en la interpretacion de la entrada pero tienen otros usos importantes como el diseño del sangrado, multiples entradas, etc.
+
+Fin de linea.- <eol>
+    Esta es la secuencia que indica el final de una linea y luego de esta iniciara otra linea, Function solamente interpreta tres tipos de finales de linea (que a su vez son los mas usados) el fin de linea crlf que se el estandar de los sistemas Windows, lf que es un estandar en los sistemas tipo Unix (por ejemplo Linux) y cr que es el estandar de los sistemas Mac y similares.
+    
+    <eol> ::= (<CR><LF>)|<LF>|<CR>
+    
+Espacio en blanco.- <space>
+    Estas es la secuencia de los espacios en blanco soportados en Function, estos sirven para separar tokens que de otro modo no serian distinguibles entre si.
+    
+    <space> ::= <WS>{<WS>}
+    
+Comentarios.- <comment>
+    Los comentarios son una secuencia de caracteres que no son de fin de linea que inician por los puntos suspensivos "..." (a menos que estos puntos sean parte de algun otro token) y terminan en el final de linea
+    
+    Tienen la forma
+        ...ccc donde ccc es una secuencia de caracteres <CH>
+    
+    Formalmente
+    <comment> ::= "..."{<CH>}
+    
+Tokens
+------
+Los tokens son las unidades lexicas interpretadas por el programa
+
+Numeros.- <number>
+    Un numero es una secuencia de caracteres que representa un numero decimal o hexadecimal que tienen una estructura similar a las notaciones matematicas con el punto como separador decimal en el caso de numeros decimales y con las secuencia 0x con x mayuscula o minuscula como iniciador de los numeros hexadecimales.
+    
+    Tienen la forma
+        0xHH        numero hexadecimal
+                    Donde HH es una secuencia de digitos hexadecimales
+        dd.dde+-dd  numero decimal
+                    Donde dd es una secuencia de digitos decimales
+    
+    Formalmente
+    <hex> ::= "0"("x"|"X"){<NU>|<HX>}
+    <dec> ::= <NU>{<NU>}["."{<NU>}][("e"|"E")["+"|"-"]{<NU>}]
+    <number> ::= <hex> | <dec>
+    
+    En los numeros hexadecimales si no se encuentra nada despues de la x el sistema lo interpretara como el numero 0
+    
+    Para los numeros negativos tanto decimal como hexadecimal simplemente se agrega el simbolo menos - por la izquierda, en realidad los numeros con signo(tanto con + como con -) no forman una unidad lexica valida o token, solo son operaciones de suma y resta simplificadas en el que se supone que el argumento de la izquierda es cero(ej: -0.34e-4)
+    
+Secuencias de escape.- <ESC>
+    Antes de continuar con la descripcion de los tokens es necesario hacer una pausa y describir las secuencias de escape.
+    Las secuencias de escape son secuencias de caracteres que inician con la barra invertida seguido de unos cuantos caracteres permitidos e identifican cualquier caracter unicode.
+    
+    Hay tres tipos de secuencias de escape: las secuencias simples, las que contienen codigo hexadecimal y los de codigo decimal.
+    
+    En el caso de las secuencias simples estan representados por la barra invertida seguida de un solo caracter y son:
+        
+        \"      Representa la comilla doble
+        \'      Representa la comilla simple
+        \\      Representa la barra invertida
+        \a      Representa el caracter \a
+        \b      Representa el caracter \b
+        \f      Representa el caracter \f
+        \n      Representa el caracter de retorno de carro
+        \r      Representa el caracter de salto de linea
+        \t      Representa el caracter tabulador
+        \v      Representa el caracter tabulador vertical
+        
+    Lo cual en notacion de Backus-Naur es:
+        
+        <ESC BASIC> ::= "\"
+            ( <DQ>
+            | <SQ>
+            | "\"
+            | "a"
+            | "b"
+            | "f"
+            | "n"
+            | "r"
+            | "t"
+            | "v"
+            )
+    
+    Las secuencias hexadecimales estan formadas por la barra invertida seguida de la x (mayuscula o minuscula) y seguido de 4 caracteres hexadecimales como maximo y que formen un numero entre 0 y FFFF, esto representa al caracter unicode que tenga como codigo hexadecimal al numero que se haya formado
+    Como en los numeros hexadecimales si no se encuentra un numero hexadecimal despues de la x entonces el sistema lo interpretara como 0 o en este caso como el caracter nulo
+        
+        \x
+        \x0
+        .
+        .
+        .
+        \xffff
+        
+    Mas formalmente en notacion de Backus-Naur:
+        <ESC HEX> ::= "\"("x"|"X")[<NU>|<HX>][<NU>|<HX>][<NU>|<HX>][<NU>|<HX>]
+    
+    Las secuencias de escape decimales estan formadas por la barra invertida seguida de un maximo de 5 y un minimo de 1 caracteres numerales y que formen un numero entre 0 y 65535, esto representa al caracter unicode cuyo codigo decimal sea el numero que se haya formado
+        
+        \0
+        .
+        .
+        .
+        \65535
+        
+    En notacion de Backus-Naur:
+        <ESC DEC> ::= "\"<NU>[<NU>][<NU>][<NU>][<NU>]
+    
+    Por ultimo en notacion de Backus-Naur las secuencias de escape estan formadas como:
+        <ESC> ::= <ESC BASIC> | <ESC HEX> | <ESC DEC>
+    
+Caracter.- <character>
+    Un token de caracter es una secuencia de caracteres que es capaz de representar cualquier caracter unicode y en Function se representa por un caracter encerrado en comillas simples o como una secuencia de escape tambien encerrado en comillas simples similar al lenguaje C
+    
+    Tienen la forma
+        'c' donde c es un caracter valido o secuencia de escape
+    
+    Formalmente
+    <character> ::= <SQ> (<CH CHAR> | <ESC>) <SQ>
+    
+    Donde <CH CHAR> es cualquier caracter <CH> a excepcion de la comilla simple y la barra invertida
+    
+Cadena de caracteres.- <string>
+    El token de cadena de caracteres o simplemente cadena se representa como una secuencia finita o cero de caracteres y/o secuencias de escape encerrados entre comillas dobles, las cadenas de caracteres son utilies porque permiten representar cualquier secuencia de caracteres unicode en Function
+    
+    Tienen la forma
+        "ccc" donde ccc es una secuencia de caracteres validos o secuencias de escape
+    
+    Formalmente
+    <string> ::= <DQ>{<CH STR>|<ESC>}<DQ>
+    
+    Donde <CH STR> es cualquier caracter <CH> a excepcion de la comilla doble y la barra invertida
+    
+Identificadores.- <identifier>
+    Los identificadores son secuencias de literales o simbolicos que representara una variable o el nombre de alguna funcion u operador, en el caso de identificadores literales estos iniciaran por un caracter literal o subguion seguido de caracteres literales, subguion o numerales, para los identificadores simbolicos estos iniciaran por caracteres simbolicos y seguidos de caracteres simbolicos
+    
+    <symbol> ::= <SY>{<SY>}
+    <literal> ::= (<LIT>|<SG>){<LIT>|<SG>|<NU>}
+    <identifier> ::= <symbol> | <literal>
+    
+    De acuerdo a esto si a los puntos suspensivos "..." le preceden caracteres simbolicos entonces no representara el inicio de un comentario(ej: *...)
+    
+    No todos los tokens literales o simbolicos pueden ser considerados como identificadores, hay un grupo de estos tokens que son llamados palabras o simbolos clave y su uso esta reservado para el lenguaje Function los cuales se presentan a continuacion
+    
+    Palabras clave
+        fail        valor de fallo o fracaso durante una evaluacion
+        true        valor logico de verdad
+        false       valor logico de falsedad
+        _           identificador anonimo(usado en patrones)
+        let         expresiones let
+        in          expresiones let y bucles for
+        where       expresiones where
+        
+        run         para ejecutar un guion o script
+        clear       para borrar el valor de un identificador
+        
+        infix       notaciones
+        infixl      notaciones
+        infixr      notaciones
+        posfix      notaciones
+        prefix      notaciones
+        
+        begin       programacion imperativa
+        if          condicionales
+        elif        multicondicionales 
+        then        condicionales 
+        else        bicondicionales y multicondicionales
+        while       bucles
+        do          bucles
+        for         bucles
+        return      retorno de una funcion imperativa
+        end         fin de la programacion imperativa
+        
+        nan         NAN
+        inf         infinito
+        real        tipo real extendido
+        int         tipo entero
+        nat         tipo natural
+        bool        tipo logico(booleano)
+        char        tipo caracter
+        
+    Simbolos clave
+        ::=         sinonimos de tipo
+        ::          tipado heredable
+        :=          definiciones
+        \           expresiones lambda
+        <-          asignaciones
+        ->          expresiones lambda
+        |<          generadores de listas por comprension
+        >|          constructor de lista
+        ..          listas por sucesion
+        |           listas por comprension
+        :           tipado de variables
+        ?           guardas
+        
+    Tambien estan reservados el uso de los tokens literales llamados primitivas que representan funciones primitivas del lenguaje y los cuales son
+    
+    Primitivas
+        PrimAdd              suma
+        PrimSub              resta
+        PrimMul              multiplicacion
+        PrimDiv              division
+        PrimPow              potenciacion
+        PrimEqual            igualdad
+        PrimLess             menor que
+        PrimGreater          mayor que
+        PrimIsNaN            si es NAN
+        PrimTrunc            truncado o parte entera
+        PrimFrac             parte fraccionaria
+        PrimSin              seno
+        PrimCos              coseno
+        PrimTan              tangente
+        PrimASin             arco seno
+        PrimACos             arco coseno
+        PrimATan             arco tangente
+        PrimLn               logaritmo natural
+        PrimExp              exponencial
+        PrimRem              residuo
+        PrimQuot             cociente
+        PrimBitNot           NOT a nivel de bits
+        PrimBitAnd           AND a nivel de bits
+        PrimBitOr            OR a nivel de bits
+        PrimBitShl           desplazamiento a la izquierda a nivel de bits
+        PrimBitShr           desplazamiento a la derecha a nivel de bits
+        PrimRandom           numero aleatorio
+        PrimEncodeChar       codificar caracter
+        PrimDecodeChar       decodificar caracter
+        PrimLength           longitud de lista
+        PrimGet              extraer elemento de la lista    
+        PrimSet              establecer elemento en la lista
+        PrimArity            aridad de tupla
+        PrimSelect           extraer elemento de la tupla
+        PrimPut              establecer elemento en la tupla
+        PrimInput            lectura
+        PrimOutput           escritura
+        PrimClearScreen      borrar consola
+        PrimGetDateTime      obtener hora y fecha
+        PrimSetDateTime      establecer hora y fecha
+        PrimAnswer           resultado de la evaluacion anterior
+        PrimError            lanzar un error
+        PrimTryStrToNum      convertir cadena a numero
+        PrimValueToStr       convertir valor a cadena
+        PrimTypeToStr        convertir tipo a cadena
+        PrimValueToStrFull   convertir valor a cadena(modo completo)
+        PrimIsAnonymous      si es el identificador anonimo
+        PrimIsFreeIdentifier si es el identificador indefinido o libre
+        PrimIsTuple          si es tupla
+        PrimIsLambda         si es expresion lambda
+        PrimLanguage         idioma actual del sistema
+        PrimQuit             salir
+        PrimInterrupt        interrumpir
+        PrimRestart          reiniciar
+        
+Tokens monicos.-<mono>
+    Estos tokens estan formados por un solo caracter los cuales son
+    
+        (       apertura de parentesis(tuplas y agrupaciones)
+        )       cierre de parentesis(tuplas y agrupaciones)
+        [       apertura de corchetes(listas)
+        ]       cierre de corchetes(listas)
+        {       apertura de llaves(indice de listas)
+        }       cierre de llaves(indice de listas)
+        ,       separador en parentesis, corchetes y llaves
+        ;       constructor de fallo(operador de fallo)
+
+
+Resumen
+-------
+
+Todos los caracteres.- <UNICODE>
+Caracteres de codificacion de lexemas.-
+    _
+    ABCDEFGHIJKLMNOPQRSTUVWXYZ
+    abcdefghijklmnopqrstuvwxyz
+    1234567890
+    |!$%&/=?\*+^-.:<>#~`@
+    "'
+    ()[]{},;
+    \n \r \32 \9
+Caracteres de final de linea.-
+    <CR> ::= \n
+    <LF> ::= \r
+Caracter subguion(_).- <SG>
+    _
+Caracteres literales.- <LIT>
+    ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz
+Caracteres numerales.- <NU>
+    1234567890
+Caracteres de extension hexadecimal.- <HX>
+    abcdefABCDEF
+Caracteres simbolicos.- <SY>
+    |!$%&/=?\@*+^-.:<>#~`
+Caracter de comilla doble.- <DQ>
+    "
+Caracter de comilla simple.- <SQ>
+    '
+Caracteres de espacio en blanco.- <WS>
+    \32 \9
+Todos los caracteres excepto los de fin de linea.- <CH>
+Fin de linea
+    <eol> ::= (<CR><LF>)|<LF>|<CR>
+Espacio en blanco
+    <space> ::= <WS>{<WS>}
+Comentarios
+    <comment> ::= "..."{<CH>}
+Numeros
+    <hex> ::= "0"("x"|"X"){<NU>|<HX>}
+    <dec> ::= <NU>{<NU>}["."{<NU>}][("e"|"E")["+"|"-"]{<NU>}]
+    <number> ::= <hex> | <dec>
+Secuencias de escape
+    <ESC BASIC> ::= "\"( <DQ> | <SQ> | "\" | "a" | "b" | "f" | "n"
+        | "r" | "t" | "v")
+    <ESC HEX> ::= 
+        "\"("x"|"X")[<NU>|<HX>][<NU>|<HX>][<NU>|<HX>][<NU>|<HX>]
+    <ESC DEC> ::= "\"<NU>[<NU>][<NU>][<NU>][<NU>]
+    <ESC> ::= <ESC BASIC> | <ESC HEX> | <ESC DEC>
+Caracter
+    <CH CHAR> ::= ;cualquier <CH> excepto ' y \
+    <character> ::= <SQ> (<CH CHAR> | <ESC>) <SQ>
+Cadena
+    <CH STR> ::= ;cualquier <CH> excepto " y \
+    <string> ::= <DQ>{<CH STR>|<ESC>}<DQ>
+Identificadores
+    <symbol> ::= <SY>{<SY>}
+    <literal> ::= (<LIT>|<SG>){<LIT>|<SG>|<NU>}
+    <identifier> ::= <symbol> | <literal>
+Palabras clave
+    fail   
+    true   
+    false  
+    _      
+    let    
+    in     
+    where  
+    run 
+    clear  
+    infix  
+    infixl 
+    infixr 
+    posfix 
+    prefix  
+    begin  
+    if     
+    elif   
+    then   
+    else   
+    while  
+    do     
+    for    
+    return 
+    end    
+    nan    
+    inf    
+    real   
+    int    
+    nat    
+    bool   
+    char   
+Simbolos clave
+    ::=
+    :: 
+    := 
+    \  
+    <- 
+    -> 
+    |< 
+    >| 
+    .. 
+    |  
+    :  
+    ?  
+Primitivas.- <primitive>
+    PrimAdd            
+    PrimSub            
+    PrimMul            
+    PrimDiv            
+    PrimPow            
+    PrimEqual          
+    PrimLess           
+    PrimGreater        
+    PrimIsNaN          
+    PrimTrunc          
+    PrimFrac           
+    PrimSin            
+    PrimCos            
+    PrimTan            
+    PrimASin           
+    PrimACos           
+    PrimATan           
+    PrimLn             
+    PrimExp            
+    PrimRem            
+    PrimQuot           
+    PrimBitNot         
+    PrimBitAnd         
+    PrimBitOr          
+    PrimBitShl         
+    PrimBitShr         
+    PrimRandom         
+    PrimEncodeChar     
+    PrimDecodeChar    
+    PrimLength
+    PrimGet
+    PrimSet 
+    PrimArity          
+    PrimSelect
+    PrimPut
+    PrimInput          
+    PrimOutput         
+    PrimClearScreen    
+    PrimGetDateTime    
+    PrimSetDateTime    
+    PrimAnswer         
+    PrimError          
+    PrimTryStrToNum    
+    PrimValueToStr     
+    PrimTypeToStr      
+    PrimValueToStrFull 
+    PrimIsAnonymous    
+    PrimIsFreeIdentifier    
+    PrimIsTuple        
+    PrimIsLambda    
+    PrimLanguage
+    PrimQuit           
+    PrimInterrupt      
+    PrimRestart        
+Tokens monicos
+    (
+    )
+    [
+    ]
+    {
+    }
+    ,
+    ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

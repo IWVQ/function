@@ -1,0 +1,447 @@
+
+\titleformat{\subsection}[runin]{\large \bfseries}{\thesubsection.}{10pt}{\bfseries}
+\titlespacing{\subsection}{0pt}{10pt}{0pt}
+
+\chapter{Funciones anónimas}
+   Las funciones anónimas son expresiones de la forma:
+   
+   \begin{longtable}[c]{l}
+      \texttt{\textbackslash~<patrón>~...~<patrón>~\texttt{->}~<expresión de retorno>}\\ \\
+      \begin{minipage}{15cm}
+         Donde \texttt{<patrón>} es una expresion especial llamada patrones que se explicara mas adelante.
+      \end{minipage}
+   \end{longtable}
+   
+   Estas funciones llamadas también abstracciones lambda representan a funciones sin nombre ya que solo describen su comportamiento y la forma que tendrá el valor de retorno.
+   
+   \section{Abstracción lambda simple}
+      Una abstracción lambda simple es una expresion formada por variables y una expresion de retorno, estas describen el comportamiento de una función sin llegar a tener un nombre, tienen la siguiente forma.
+      
+      \begin{longtable}[c]{l}
+         \texttt{\textbackslash~v1~...~vn~\texttt{->}~E}\\\\
+         \begin{minipage}{15cm}
+            Donde v1, ..., vn son identificadores y se le llaman variables y E es una expresion formada con dichas variables, las variables también pueden ser identificadores negativos.
+         \end{minipage}
+      \end{longtable}
+      
+      \begin{fxcode}
+         \arrowcode{\textbackslash x~\texttt{->}~x\^{}2}
+      \end{fxcode}
+         
+      \begin{fxcode}
+         \arrowcode{\textbackslash x~y~\texttt{->}~x*y + x/y}
+      \end{fxcode}
+      
+      Como se dijo estas representan funciones que no tienen nombre, en los ejemplos anteriores la expresion \texttt{\textbackslash x ->~x\^{}2} representa una función que toma un valor y lo eleva al cuadrado y la expresion \texttt{\textbackslash x y ->~x*y + x/y} toma dos valores \texttt{x} y \texttt{y} devolviendo $xy + \frac{x}{y}$.
+      
+      \begin{fxcode}
+         \arrowcode{(\textbackslash x ->~x\^{}2) 2}\\
+         \outcode{2}\\
+         \arrowcode{(\textbackslash x y ->~x*y + x/y)2 3}\\
+         \outcode{6.66666666666667}
+      \end{fxcode}
+      
+      La cantidad de variables en una expresion lambda debe ser siempre mayor o igual a uno.
+      
+      \begin{fxcode}
+         \outcode{\textbackslash~\texttt{->}~2} \codecomment{no es una expresion lambda valida}
+      \end{fxcode}
+      
+      a las variables de E que aparecen a la izquierda de ``\texttt{->}'' se le llama variables ligadas y si no aparecen ahí se le llaman variables libres.
+      \\
+      
+      Para determinar el alcance que tiene las expresiones lambda a veces es necesario encerrarlos entre paréntesis, por ejemplo la expresion \texttt{\textbackslash f ->~f 2} frente a la expresion \texttt{(\textbackslash f -> f) 2} es diferente.
+      \\
+      
+      Si una expresion lambda se encuentra no aplicada a ninguna otra expresion entonces la evaluación devuelve la misma expresion lambda.
+      
+      \begin{fxcode}
+         \arrowcode{\textbackslash f ->~f 2}\\
+         \outcode{(\textbackslash~f ->~f 2)}\\
+         \arrowcode{(\textbackslash f -> f) 2}\\
+         \outcode{2}
+      \end{fxcode}
+      
+      En las expresiones lambda suceden un fenómeno muy interesante en el que una variable que era libre termina estando ligada.
+      
+      \begin{fxcode}
+         \arrowcode{(\textbackslash s ->~(\textbackslash x ->~s)(\textbackslash y ->~x))} \codecomment{aqui x es libre}\\
+         \outcode{(\textbackslash x ->~(\textbackslash y ->~x))} \codecomment{x esta ligada}
+      \end{fxcode}
+      
+      Las expresiones lambda de múltiples variables
+         \begin{center}
+            \texttt{\textbackslash v1 v2 ... vn ->~E}
+         \end{center}
+      son equivalentes a una expresion lambda anidada de una sola variable.
+         \begin{center}
+            \texttt{\textbackslash v1 ->~\textbackslash v2 ->~... ->~\textbackslash vn ->~E}
+         \end{center}
+      
+      Por ejemplo, la expresion lambda \texttt{\textbackslash x y ->~x*y} es equivalente a \texttt{\textbackslash x ->~\textbackslash y ->~x*y}
+      
+   \section{Tipado de variables}
+      En Function v0.5 los tipos básicos están representados por las palabras reservadas \texttt{nat}, \texttt{int}, \texttt{real}, \texttt{char}, \texttt{bool} donde:
+      
+      \begin{longtable}[c]{ll}
+         \texttt{nat}     & representa el tipo de los números naturales incluido el cero \\
+         \texttt{int}     & representa el tipo de los números enteros\\
+         \texttt{real}    & representa el tipo de los números reales incluido infinitos y nan\\
+         \texttt{char}    &representa el tipo de los caracteres unicode\\
+         \texttt{bool}    &representa el tipo de valores lógicos
+      \end{longtable}
+      
+      Ahora bien, se puede dotar de un tipo a las variables de una expresion lambda para que reciban solo ese tipo de argumentos.
+      \\
+      
+      Las variables tipadas tiene la forma:
+      \begin{longtable}[c]{ll}
+         \texttt{v: T}    & donde v es una variable y T un tipo de dato\\
+      \end{longtable}
+   
+      \begin{fxcode}
+         \arrowcode{(\textbackslash(x: real) ->~x\^{}2 + x) 2}\\
+         \outcode{6}\\
+         \arrowcode{(\textbackslash(x: real) ->~x\^{}2 + x) \textquotesingle2\textquotesingle}\\
+         \outcode{fail}
+      \end{fxcode}
+      
+      En la segunda evaluación se puede ver que retorna fail eso es porque el argumento es un carácter y no un numero real por lo que la evaluación falla.
+      
+      Veamos otro ejemplo.
+      
+      \begin{fxcode}
+         \arrowcode{(\textbackslash(c: char) ->~UpperCase c) \textquotesingle a\textquotesingle}\\
+         \outcode{\textquotesingle A\textquotesingle}\\
+         \arrowcode{(\textbackslash(b: bool) ->~\~{}b)1}\\
+         \outcode{fail}
+      \end{fxcode}
+      
+      Los tipos de dato delimitan el dominio de las funciones anónimas pero un tipo especial llamado tipo anónimo admite todo tipo de valores y esta representado por el identificador anónimo.
+      
+      \begin{fxcode}
+         \arrowcode{(\textbackslash(x: \_) ->~x)2}\\
+         \outcode{2}\\
+         \arrowcode{(\textbackslash(x: \_) ->~x)\textquotesingle1\textquotesingle}\\
+         \arrowcode{\textquotesingle1\textquotesingle}
+      \end{fxcode}
+      
+      La expresion anterior es equivalente a la expresion \texttt{(\textbackslash x ->~x)} que no tiene tipo y que puede aceptar también todo tipo de valores.
+      \\
+      
+      Para las cadenas de caracteres se tiene el tipo String.
+      
+      \begin{fxcode}
+         \arrowcode{(\textbackslash(s: String) ->~UpperCase s) \textquotedbl Hola mundo\textquotedbl}\\
+         \outcode{\textquotedbl HOLA MUNDO\textquotedbl}
+      \end{fxcode}
+      
+      De hecho String es un identificador y en general los tipos también pueden estar representados por identificadores siempre en cuanto estén definidas el tipo que representa.
+      \\
+      
+      El uso de los paréntesis es necesario en el tipado de variables pues permite identificar cual es la "expresion de tipo" y hasta donde, por ejemplo si se tuviera \texttt{\textbackslash x: real ->~x*x} esta seria ambigua pues el simbolo \texttt{->} sera leído como parte del tipo de dato esto sucede por que \texttt{->} también es usado para tipos compuestos, en cambio si se tiene \texttt{\textbackslash(x: real) ->~x*x} los paréntesis delimitan donde termina el tipado por lo que \texttt{->} es leído ahora como parte de la expresion lambda y ya no como parte de un tipo compuesto.
+      \\
+      
+      En la siguiente sección se vera con detalle.
+      
+   \section{Tipos compuestos}
+      Los tipos atómicos presentados en la sección anterior pueden ser combinados para formar nuevos tipos llamados tipos compuestos, los tipos compuestos o expresiones de tipos pueden ser de tres clases:
+      
+      \begin{enumerate}
+         \item Los tipos tupla, que tienen la forma:
+            \begin{longtable}[c]{ll}
+               \texttt{(T1, ..., Tn)} &
+               \begin{minipage}{10cm}
+                  donde los \texttt{Ti} son tipos atómicos o tipos compuestos, como en las expresiones de valor en las expresiones de tipo no se permiten tuplas de aridad 1 pues habría un conflicto con el uso de los paréntesis para agrupar o asociar expresiones de tipos.
+               \end{minipage}
+            \end{longtable}
+         \item Los tipos lista, que tienen la forma:
+            \begin{longtable}[c]{ll}
+               \texttt{[T]} &
+               \begin{minipage}{10cm}
+                  donde \texttt{T} es un tipo atómico o       compuesto, indica que todos los elementos de la lista deben tener tipo \texttt{T}.
+               \end{minipage}
+            \end{longtable}
+         \item Los tipos función, que tienen la forma:
+            \begin{longtable}[c]{ll}
+               \texttt{T1 ->~T2} &
+               \begin{minipage}{10cm}
+                  donde \texttt{T1} y \texttt{T2} son tipos atómicos o expresiones de tipo, \texttt{T1} se le llama tipo argumento y \texttt{T2} tipo de retorno.
+               \end{minipage}
+            \end{longtable}
+      \end{enumerate}
+      
+      Por ejemplo:
+      
+      \begin{longtable}[c]{ll}
+         \texttt{(real, real)} &
+         \begin{minipage}{10cm}
+            es una expresion de tipo de los pares ordenados de números reales
+         \end{minipage}\\
+         \texttt{()} & 
+         \begin{minipage}{10cm}
+            es otra expresion de tipo llamada tipo vació o trivial
+         \end{minipage}\\
+         \texttt{[\_]} & 
+         \begin{minipage}{10cm}
+            este es el tipo de todas las listas
+         \end{minipage}\\
+         \texttt{[int]} & 
+         \begin{minipage}{10cm}
+            este es el tipo de todas las listas de números enteros
+         \end{minipage}\\
+         \texttt{real ->~real} & 
+         \begin{minipage}{10cm}
+            este es el tipo de las funciones reales de variable real 
+         \end{minipage}\\
+         \texttt{[]} & 
+         \begin{minipage}{10cm}
+            este no es un tipo valido pues no se aceptan listas vacías como tipos 
+         \end{minipage}\\
+         \texttt{char ->} & 
+         \begin{minipage}{10cm}
+            este tampoco es un tipo valido pues le falta su parte derecha o tipo retorno
+         \end{minipage}\\
+         \texttt{[char, char]} & 
+         \begin{minipage}{10cm}
+            esto tampoco es un tipo valido pues no se permiten tipos lista con mas de 1 elemento
+         \end{minipage}\\
+         \texttt{real ->~real ->~real} & 
+         \begin{minipage}{10cm}
+            Este si es un tipo valido pues representa a la función que toma argumentos reales y devuelve una función real de variable real
+         \end{minipage}\\
+      \end{longtable}
+      
+      En el ultimo ejemplo se puede notar que \texttt{real ->~real ->~real} representa al tipo \texttt{real ->~(real ->~real)}, esto nos muestra que el tipo función es asociativo por la derecha.
+      \\
+      
+      Los tipos compuestos pueden ser utilizados para tipar variables de la misma forma que con los tipos atómicos.
+      
+      \begin{fxcode}
+         \arrowcode{(\textbackslash(l: [real]) ->~Sum l)[1, 2, 3, 4]} \codecomment{Sum es la función suma de todos los elementos de una lista}\\
+         \outcode{10}\\
+         \arrowcode{(\textbackslash(l: [real]) ->~Sum l)[1, \textquotesingle2\textquotesingle, false, 4]}\\
+         \outcode{fail}
+      \end{fxcode}
+      
+      Es interesante notar en el código anterior que en la primera evaluación si acepta a la lista en cambio en la segunda no lo acepta pues aunque algunos valores de la lista sean números reales no todos lo son y el tipo lista exige que todos sean en este caso del tipo real, en general los elementos de una lista siempre deben ser del mismo tipo, a menos que el tipo sea anónimo entonces y solo entonces aceptara listas que contengan elementos de cualquier tipo.
+      
+      \begin{fxcode}
+         \arrowcode{(\textbackslash(l: [\_]) ->~Length l)[1, \textquotesingle2\textquotesingle, false, 4]}\\
+         \outcode{4}
+      \end{fxcode}
+      
+      \begin{fxcode}
+         \arrowcode{(\textbackslash(p: (real, real)) ->~PairX p) (1, 2)}\\
+         \outcode{1}\\
+         \arrowcode{(\textbackslash(p: (real, String)) ->~PairX p) []}\\
+         \outcode{fail}\
+         \arrowcode{(\textbackslash(f: real -> real) ->~f 1)Sin}\\
+         \outcode{0.841470984807897}
+      \end{fxcode}
+      
+      En el código anterior se pueden hacer las siguientes observaciones:
+      
+      \begin{enumerate}
+         \item En la primera evaluación se muestra una expresion lambda que pide un argumento que sea un par ordenado con ambos elementos de tipo real.
+         \item En la segunda evaluación vemos que falla pues la expresion lambda exige que su argumento sea un par ordenado con el primer elemento numero real y el segundo una cadena y la lista vacía no es de es tipo.
+         \item En la tercera evaluación vemos que es una expresion lambda con la variable de tipo función y Sin es una función.
+         \item En la tercera evaluación se hace necesario el uso del paréntesis pues sin el paréntesis \texttt{\textbackslash f: real ->~real ->~f 1} habría ambigüedad para distinguir entre la expresion de retorno de la expresion de tipo.
+      \end{enumerate}
+      
+      Al proceso presentado de verificación de tipo se le suele llamar también encaje de tipo es decir que el argumento no solo debe ser del tipo que se exige sino también puede ser un subtipo de este.
+      
+      
+      \begin{fxcode}
+         \arrowcode{(\textbackslash(x: real) ->~x\^{}x)3}\\
+         \outcode{27}
+      \end{fxcode}
+      
+      En este ejemplo \texttt{3} es un numero natural por lo que es de tipo natural y la expresion lambda pide un numero real pero eso se cumple pues los números naturales son también números reales, por lo que el tipo \texttt{nat} es un subtipo de real.
+      
+      Los subtipos se definen recursivamente como:
+      \begin{enumerate}
+         \item cualquier tipo es subtipo de si mismo.
+         \item cualquier tipo es un subtipo de \texttt{\_}.
+         \item \texttt{nat} <: \texttt{int} <: \texttt{real}.
+         \item si \texttt{T} <: \texttt{S} entonces \texttt{[T]} <: \texttt{[S]}
+         \item si \texttt{T1} <: \texttt{S1} y \texttt{T2} <: \texttt{S2} entonces \texttt{T1 -> S1} <: \texttt{T2 -> S2}.
+         \item si \texttt{T1} <: \texttt{S1}, ..., \texttt{Tn} <: \texttt{Sn} entonces \texttt{(T1, ..., Tn)} <: \texttt{(S1, ..., Sn)}.
+      \end{enumerate}
+      
+      donde <: significa ``es un subtipo de''.
+      \\
+      
+      en Function v0.5 la verificación de tipo del argumento se hace solo en tiempo de ejecución es decir cuando se usa la función o expresion lambda, a esto se le llama también tipado dinámico y suele ser bastante útil.
+      
+   \section{Encaje de patrones}
+      Las expresiones lambda no están limitadas a tener solo variables en la parte de los argumentos a los que llamaremos receptores sino también pueden ser cualquier otra expresion atómica como números, caracteres, etc, pero que cuando se aplica a algún valor esta debe ser igual al receptor.
+      
+      \begin{fxcode}
+         \arrowcode{(\textbackslash1 ->~Sin 0)1}\\
+         \outcode{0}\\
+         \arrowcode{(\textbackslash\textquotesingle2\textquotesingle~1 ->~1)\textquotedbl a\textquotedbl}\\
+         \outcode{fail}
+      \end{fxcode}
+      
+      estas constantes no pueden ser tipadas como las variables por lo que si se tiene \texttt{(\textbackslash(3: real) ->~3)} se generara un error.
+      \\
+      
+      Una expresion atómica interesante es el identificador anónimo, en las expresiones lambda tienen un comportamiento peculiar pues permiten ignorar el valor del argumento sin importar cual sea.
+      
+      \begin{fxcode}
+         \arrowcode{(\textbackslash\_ ->~12) 3}
+      \end{fxcode}
+      
+      Las tuplas y las listas también se permiten como receptores como se puede ver en los siguientes ejemplos.
+      
+      \begin{fxcode}
+         \arrowcode{(\textbackslash(x, y) [\_, v, w] ->~x*v + y*w) (1, 2) [3, 4, 5]}\\
+         \outcode{14}\\
+         \arrowcode{(\textbackslash[x, y] ->~x*y)}\\
+         \outcode{(\textbackslash[x, y] ->~x*y)}
+      \end{fxcode}
+      
+      En la primera evaluación se puede ver que en el receptor \texttt{[\_, v, w]} se encuentra \_ lo que permite ignorar el valor del primer elemento de la lista \texttt{[3, 4, 5]}.
+      \\
+      
+      Ni las tuplas ni las listas en los receptores pueden asociarse a tipos de dato pero las variables dentro de ellas si pueden estar tipados.
+      
+      \begin{fxcode}
+         \arrowcode{(\textbackslash(c: char, s: String) ->~c >| s)(\textquotesingle h\textquotesingle, \textquotedbl ola\textquotedbl)}\\
+         \outcode{\textquotedbl hola\textquotedbl}
+      \end{fxcode}
+      
+      Ahora bien vimos que una cadena no es mas que una lista de caracteres pues bien el tipo \texttt{String} no es mas un identificador que representa al tipo lista de caracteres \texttt{[char]}.
+      
+      
+      \begin{fxcode}
+         \arrowcode{(\textbackslash(s1: [char], s2: String) ->~s1 ++ s2) (\textquotedbl hola \textquotedbl, \textquotedbl mundo\textquotedbl)}\\
+         \outcode{\textquotedbl hola mundo\textquotedbl}
+      \end{fxcode}
+      
+      La expresion de constructor de lista también puede estar en el receptor de una expresion lambda
+      
+      \begin{fxcode}
+         \arrowcode{(\textbackslash x >| xs ->~xs) [3, 4, \textquotesingle e\textquotesingle]}\\
+         \outcode{[4, \textquotesingle e\textquotesingle]}
+      \end{fxcode}
+      
+      Esta expresion lambda recepciona una lista donde x toma el valor de la cabeza y xs el de la cola y devuelve la cola.
+      \\
+      
+      Si el argumento no tiene la forma del receptor la evaluación falla.
+      
+      \begin{fxcode}
+         \arrowcode{(\textbackslash~x >| xs ->~xs) (3, 4, \textquotesingle e\textquotesingle)}\\
+         \outcode{fail}
+      \end{fxcode}
+      
+      Todas estas formas de receptores presentados anteriormente pueden combinarse como cualquier expresion y formar un nuevo receptor a esto se le llama {\it patrones} y se define como:
+      
+      \begin{enumerate}
+         \item Todas las expresiones atómicas son patrones.
+         \item Las variables tipadas son patrones.
+         \item Una lista de patrones es un patrón.
+         \item una tupla de patrones es también un patrón.
+         \item el constructor de lista sobre patrones es también un patrón.
+         \item se permite la asociación de patrones por medio de paréntesis.
+      \end{enumerate}
+      
+      Una expresion lambda esta formada por patrones y una expresion de retorno de la siguiente forma:
+      \\
+      
+      \texttt{\textbackslash~<patrón>~...~<patrón> ->~<expresion>}
+      \\
+      
+      Donde la cantidad de patrones puede ser 1 o mas pero no cero.
+      \\
+      
+      Los patrones indican que el argumento debe tener esa forma y al proceso de verificar si el argumento tiene la forma del patrón se le llama {\it encaje de patrones} y si un argumento no encaja con el patrón entonces retorna \texttt{fail}.
+      
+      \begin{fxcode}
+         \arrowcode{(\textbackslash(x >| xs, n: nat) ->~n*x >| xs)([3, 4, 5], 2)}\\
+         \outcode{[6, 4, 5]}\\
+         \arrowcode{(\textbackslash(x >| xs, n: nat) ->~n*x >| xs)2}\\
+         \outcode{fail}
+      \end{fxcode}
+      
+      Dos tipos de constantes no encajan con ningún valor ni consigo mismo son el valor NaN y el valor \texttt{fail}.
+      
+      \begin{fxcode}
+         \arrowcode{(\textbackslash nan ->~1)nan}\\
+         \outcode{fail}\\
+         \arrowcode{(\textbackslash nan ->~3)\textquotesingle a\textquotesingle}\\
+         \outcode{fail}\\
+         \arrowcode{(\textbackslash fail ->~3)4}\\
+         \outcode{fail}\\
+         \arrowcode{(\textbackslash fail ->~4)fail}\\
+         \outcode{fail}
+      \end{fxcode}
+      
+      Estas constantes naturalmente no encajan con otro valor que no sea el mismo pero ademas no encajan consigo mismo y se explica a continuación el porque:
+      
+      \begin{enumerate}
+         \item El valor NaN al ser comparados con cualquier numero incluso consigo mismo siempre resulta falso es por ello que en los encajes de patrones siempre devuelve \texttt{fail}, es decir no encaja.
+         \item El valor \texttt{fail} no puede encajar consigo mismo porque en toda aplicación si el argumento o función son \texttt{fail} entonces el resultado también es \texttt{fail}.
+      \end{enumerate}
+      
+      Para poder utilizar y/o verificar que un valor es NaN se puede recurrir a las variables y utilizar la función \texttt{IsNaN}.
+      \\
+      
+      Una característica de Function v0.5 es que el tipado de variables no se restringe solo a patrones, estas pueden estar incluso en variables de una expresion al momento de la evaluación.
+      
+      \begin{fxcode}
+         \arrowcode{v: nat}\\
+         \outcode{(v: nat)}
+      \end{fxcode}
+      
+      Esto sucede porque la clase de los patrones es una subclase de las expresiones, es decir los patrones son también expresiones.
+      
+   \section{Supercombinadores}
+      Tres expresiones lambda son las principales en las matemáticas y la lógica se les llaman supercombinadores y son las siguientes:
+      
+      \begin{enumerate}
+         \item \texttt{(\textbackslash x ->~x)}
+         \item \texttt{(\textbackslash x y ->~x)}
+         \item \texttt{(\textbackslash x y z ->~(x z (y z)))}
+      \end{enumerate}
+      
+      Son los combinadores {\bf I}, {\bf K} y {\bf S} representan a una función identidad, constante y composición respectivamente.
+      \\
+      
+      En Function v0.5 estas están definidas con los siguientes nombres \texttt{LambdaI}, \texttt{LambdaK} y \texttt{LambdaS}.
+      \\
+      
+      La importancia de estas expresiones es que todas las demás expresiones lambda ``puras''(que solo estén formadas por variables, expresiones lambda y aplicaciones) se pueden representar tan solo combinando estas expresiones en forma de aplicaciones.
+      \\
+      
+      Por ejemplo la expresion lambda \texttt{(\textbackslash x y z ->~x(y z))} es equivalente a \texttt{LambdaS(LambdaK LambdaS)LambdaK}.
+      
+   \section{Funciones de identificación de tipo}
+      Para saber de que tipo son ciertos valores Function v0.5 proporciona un conjunto de funciones de verificación de tipo.
+      
+      \begin{longtable}[c]{ll}
+         {\bf Función} & {\bf Lo que verifica}\\ \hline
+         \texttt{IsNat}      & Si es un numero natural\\   
+         \texttt{IsInt}      & Si es un numero entero\\
+         \texttt{IsReal}     & Si es un numero real\\
+         \texttt{IsNum}      & Si es cualquier numero\\
+         \texttt{IsBool}     & Si es un valor logico\\
+         \texttt{IsChar}     & Si es un carácter\\
+         \texttt{IsString}   & Si es una cadena   \\ 
+         \texttt{IsList}     & Si es una lista\\
+         \texttt{IsTuple}    & Si es una tupla\\
+         \texttt{IsLambda}   & Si es una expresion lambda\\
+         \texttt{IsFunction} & Si es una función\\
+      \end{longtable}
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   

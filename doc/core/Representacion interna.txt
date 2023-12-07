@@ -1,0 +1,175 @@
+REPRESENTACION INTERNA
+======================
+
+Arbol basico de tipo
+--------------------
+    
+Tipos basicos.-
+    Se representan por hojas en el arbol
+        <real>
+        <int>
+        <nat>
+        <bool>
+        <char>
+Identificador.-
+    Es una hoja en el arbol
+        <identifier>
+Anonimo.-
+    Es una hoja en el arbol
+        <anonymous>
+Tupla.-
+    Es una rama con varias(o ninguna) subramas que son tipos
+            <tuple>
+              / \     
+             / . \    
+            /  .  \   
+           /   .   \  
+       <type> ... <type>
+    
+Lista.-
+    Es una rama con una sola subrama
+                <list>
+                  |
+                  |
+                  |
+                <type>
+    
+Funcion.-
+    Es una rama con dos subramas
+           <function>
+              / \     
+             /   \    
+            /     \   
+           /       \  
+       <type>     <type>
+    
+Expresion basica de tipo
+------------------------
+    Sintacticamente no existe distincion entre la sintaxis de un tipo de dato y la sintaxis basica por lo que son identicos
+    
+    <type basic> ::= "real" | "int" | "nat" | "bool" | "char"
+    <type tuple> ::= "(" [<type> {"," <type>}] ")"
+    <type list> ::= "[" <type> "]"
+    <type function> ::= <type> "->" <type>
+    
+    <type> ::= <anonymous> | <identifier> | <type basic>
+        | <type tuple> | <type list> | <type function>
+    
+Arbol basico de expresion
+-------------------------
+    Es la forma o expresion basica al cual se convierten todas las demas expresiones
+    
+Numero.-
+    Es una hoja en el arbol
+    <number>
+Logico.-
+    Es una hoja en el arbol
+    <boolean>
+Caracter.-
+    Es una hoja en el arbol
+    <character>
+Lista vacia.-
+    Es una hoja en el arbol
+    <null>
+Fallo.-
+    Es una hoja en el arbol
+    <fail>
+Identificador.-
+    Es una hoja en el arbol
+    <identifier>
+Primitiva.-
+    Es una hoja en el arbol
+    <primitive>
+Anonimo.-
+    Es una hoja en el arbol
+    <anonymous>
+Captura de fallo.-
+    Es una rama con dos subramas
+             <try>
+              / \     
+             /   \    
+            /     \   
+           /       \  
+       <expr>     <expr>
+    En la evaluacion primero evalua la expresion de la izquierda y luego si falla evalua la derecha
+Tuplas.-
+    Es una rama con varias(o ninguna) subramas
+            <tuple>
+              / \     
+             / . \    
+            /  .  \   
+           /   .   \  
+       <expr> ... <expr>
+    Aunque en la implementacion actual se hace de izquierda a derecha en realidad no hay un orden de evaulacion especifico para su subramas
+Constructor de lista.-
+    Es una rama con dos subramas
+             <list>
+              / \     
+             /   \    
+            /     \   
+           /       \  
+       <expr>     <expr>
+    Aunque en la implementacion actual se hace de izquierda a derecha en realidad no hay un orden de evaulacion especifico para su subramas
+Abstraccion lambda.-
+    Es una rama con dos subramas
+            <lambda>
+              / \     
+             /   \    
+            /     \   
+           /       \  
+      <pattern>   <expr>
+    Al evaluar este arbol no hace nada la abstraccion lambda solo trabaja en una aplicacion
+Aplicacion.-
+    Es una rama con dos subramas
+             <app>
+              / \     
+             /   \    
+            /     \   
+           /       \  
+       <expr>     <expr>
+    Aunque en la implementacion actual se hace de izquierda a derecha en realidad no hay un orden de evaulacion especifico para sus subramas, pero una vez evaluado si alguna rama es fail entonces devolvera fail, despues de evaluar las subramas recien se realiza el encaje de patrones y se evalua la expresion de retorno(llamado evaluacion estricta) esto ultimo es util pues permite la implementacion de expresiones imperativas
+Patron.-
+    Un patron es un arbol formado solo por numeros, logicos, caracteres, lista vacia, fallo, identificador, anonimo, tuplas y constructor de lista
+    <pattern>
+    
+Expresion basica de valor
+-------------------------
+    
+    La expresion basica de valor es la siguiente
+    <constant> ::= <number> | <bool> | <character> | <null> | <fail>
+    Donde <null> es la lista vacia []
+    
+    <try> ::= <expression> ";" <expression>
+    <tuple> ::= "(" [<expression> {"," <expression>}] ")"
+    <list> ::= <expression> ">|" <expression>
+    <lambda> ::= "\" <pattern> "->" <expression>
+    <application> ::= <expression> <expression>
+    
+    <tuple pattern> ::= "(" [<pattern> {"," <pattern>}] ")"
+    <list pattern ::= <pattern> ">|" <pattern>
+    <pattern> ::= <constant> | <identifier> | <anonymous>
+        | <tuple pattern> | <list pattern>
+    
+    <expression> ::= <constant> | <identifier> | <anonymous>
+        | <try> | <tuple> | <list> | <lambda> | <application> | <primitives>
+    
+El resultado de la evaluacion de una expresion puede ser una combinacion de tuplas, listas, lambda, constantes, identificadores y anonimos
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    

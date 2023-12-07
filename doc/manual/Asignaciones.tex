@@ -1,0 +1,200 @@
+
+\titleformat{\subsection}[runin]{\large \bfseries}{\thesubsection.}{10pt}{\bfseries}
+\titlespacing{\subsection}{0pt}{10pt}{0pt}
+
+\chapter{Asignaciones}
+   Para guardar valores en variables para un posterior uso se utilizan las asignaciones, estas son de dos clases: las asignaciones globales y las asignaciones locales.
+   
+   \section{Asignaciones globales}
+      Las asignaciones globales son un comando que realiza la asignación de un valor a una variable para que pueda ser utilizado posteriormente, tiene la forma:
+      \\
+      
+      \texttt{<identificador>~<-~<expresion>}
+      \\
+      
+      Esto significa que el \texttt{<identificador>} tomara el valor de la \texttt{<expresion>} cada vez que se haga uso de el, para asignar el valor se evalúa la \texttt{<expresion>} y luego se le asigna dicho valor.
+      
+      \begin{fxcode}
+         \arrowcode{m~\texttt{<-}~1}\\
+         \arrowcode{m}\\
+         \outcode{1}\\
+         \arrowcode{m~<- Exp 2 + Ln(3 + 4)}\\
+         \arrowcode{2*m}\\
+         \outcode{18.6699324959719}
+      \end{fxcode}
+      
+      Al evaluar la expresion de la asignación no imprime el resultado en la pantalla, para saber cual es el valor basta con evaluar el identificador con el comando de evaluación.
+      
+      \begin{fxcode}
+         \arrowcode{v~<- 2*(4 + 2)\^{}2 - 12}\\
+         \arrowcode{v}\\
+         \outcode{60}
+      \end{fxcode}
+      
+      Una asignación tampoco afecta al valor de la función \texttt{Ans()} pues esta función solo devuelve el resultado de la ejecución del comando de evaluación y no del comando de asignación.
+      
+      \begin{fxcode}
+         \arrowcode{2 + 3}\\
+         \outcode{5}\\
+         \arrowcode{Ans()}\\
+         \outcode{5}\\
+         \arrowcode{y~<- 3*4} \codecomment{en este caso ``y'' sera $12$}\\
+         \arrowcode{Ans()} \codecomment{devuelve el valor de la evaluación de $2 + 3$}\\
+         \outcode{5}\\
+      \end{fxcode}
+      
+      Al volver a hacer una asignación para un mismo identificador esta cambia su valor por el nuevo resultante de la expresion.
+      
+      \begin{fxcode}
+         \arrowcode{x~<- 1}\\
+         \arrowcode{x}\\
+         \outcode{1}\\
+         \arrowcode{x~<- 2}\\
+         \arrowcode{x}\\
+         \outcode{2}
+      \end{fxcode}
+      
+      Al igual que el comando de evaluación y otros comandos este tiene una regla de sangrado en el cual el sangrado lo marca el primer token que en este caso es el identificador de asignación.
+      \\
+      
+      \begin{fxcode}
+         \layoutcomment{~}{Aquí esta la columna de sangrado}\\
+         \arrowcode{I~<- E}
+      \end{fxcode}
+      
+      \begin{fxcode}
+         \arrowcode{x~<- 2 * 3 ...}\\
+         \spacecode{~~\texttt{-} 2} \codecomment{$- 2$ esta en el sangrado por lo que es parte de la asignación}
+      \end{fxcode}
+      
+      \begin{fxcode}
+         \arrowcode{x~<- 2 * 3 ...}\\
+         \spacecode{- 2} \codecomment{$- 2$ no esta en el sangrado por lo que no es parte de la asignación}
+      \end{fxcode}
+      
+      \begin{fxcode}
+         \arrowcode{~~x~<- 2 * 3 ...}\\
+         \spacecode{- 2} \codecomment{$- 2$ esta totalmente fuera del sangrado por lo que tampoco es parte de la asignación}
+      \end{fxcode}
+      
+      \begin{fxcode}
+         \layoutcomment{~}{La columna de sangrado}\\
+         \arrowcode{y <- 2*(4 + 2) ...}\\
+         \spacecode{~~~\^{}2 - ...}\\
+         \spacecode{~~12}
+      \end{fxcode}
+      
+   \section{Asignaciones locales}
+      Como se vio antes las asignaciones permiten otorgarle un valor a una variable o identificador que posteriormente serán reemplazados en las expresiones, pues bien se puede hacer asignaciones que sean validas solo al momento de la evaluación a esto se le llama asignaciones locales, y están presentes en dos formas las expresiones \texttt{let} y las expresiones \texttt{where}, en ambas primero se realiza la asignación luego se evalúa la expresion pero el orden en que van escritas difieren, a diferencia de las asignaciones globales las asignaciones locales no se restringen solo a identificadores sino que pueden ser cualquier patrón.
+      
+   \section{Expresiones let}
+      En las expresiones \texttt{let} las asignaciones se escriben antes de la expresion de retorno, tienen la siguiente forma:
+      \\
+      
+      \texttt{let~<patrón>~<-~<expresion A>~in~<expresion E>}
+      \\
+      
+      Como se puede ver la asignación se realiza a un patrón, esto significa que las variables que encajen serán reemplazadas en E por su respectivo valor.
+      
+      \begin{fxcode}
+         \arrowcode{let x~<- 12 in x\^{}2 + 2*x - 1}\\
+         \outcode{167}\\
+         \arrowcode{let (x, \_~>| ys)~<- (2, [0, 4, \textquotesingle e\textquotesingle]) in (x~>| ys) ++ \textquotedbl abc\textquotedbl}\\
+         \outcode{[2, 4, \textquotesingle e\textquotesingle, \textquotesingle a\textquotesingle, \textquotesingle b\textquotesingle, \textquotesingle c\textquotesingle]}\\
+         \arrowcode{4\^{}(let y~<- -2 in y\^{}3 + y\^{}2 + y + 1)}\\
+         \outcode{0.0009765625}
+      \end{fxcode}
+      
+      Las expresiones \texttt{let} pueden simplificar muchas expresiones que de otro modo serian muy largos.
+      
+      \begin{fxcode}
+         \arrowcode{(\textbackslash(a, b) ->~let c <- a + b in 2*c\^{}4 + c\^{}3 + c\^{}2 + 3*c + 2/c)(2, 3)}\\
+         \outcode{1415.4}\\
+         \arrowcode{(\textbackslash(a, b) ->~2*(a + b)\^{}4 + (a + b)\^{}3 + (a + b)\^{}2 + 3*(a + b) + 2/(a + b))(2, 3)}\\
+         \outcode{1415.4}
+      \end{fxcode}
+      
+   \section{Expresiones where}
+      Las expresiones \texttt{where} son similares a las expresiones \texttt{let} pero la asignación se escribe después de la expresion:
+      \\
+      
+      \texttt{<expresion E>~where~<patrón>~<-~<expresion A>}
+      \\
+      
+      Aquí también se puede ver que la asignación se realiza a un patrón, las variables que encajen serán reemplazadas en E por su respectivo valor.
+      
+      \begin{fxcode}
+         \arrowcode{x\^{}2 + 2*x - 1 where x~<- 12}\\
+         \outcode{167}\\
+         \arrowcode{(x~>| ys) ++ \textquotedbl abc\textquotedbl~where (x, \_~>| ys)~<- (2, [0, 4, \textquotesingle e\textquotesingle])}\\
+         \outcode{[2, 4, \textquotesingle e\textquotesingle, \textquotesingle a\textquotesingle, \textquotesingle b\textquotesingle, \textquotesingle c\textquotesingle]}\\
+         \arrowcode{4\^{}(y\^{}3 + y\^{}2 + y + 1 where y~<- -2)}\\
+         \outcode{0.0009765625}\\
+         \arrowcode{4\^{}(y\^{}3 + y\^{}2 + y + 1) where y~<- -2}\\
+         \outcode{0.0009765625}
+      \end{fxcode}
+      
+      Al igual que las expresiones \texttt{let} las expresiones \texttt{where} simplifican las expresiones
+      
+   \section{Sangrado de las asignaciones locales}
+      Las asignaciones de las expresiones \texttt{where} y \texttt{let} poseen un sangrado que los permite diferenciar hasta donde abarca la expresion a ser asignado.
+      
+      \begin{fxcode}
+         \layoutcomment{~~~~~}{Columna de sangrado}\\
+         \arrowcode{let P~<- A in E}
+      \end{fxcode}
+      
+      \begin{fxcode}
+         \layoutcomment{~~~~~~~~~}{Columna de sangrado}\\
+         \arrowcode{E where P~<- A}
+      \end{fxcode}
+      
+      Estas columnas de sangrado son el limite en el cual puede aceptar que A sea parte de la asignación, el primer token del patrón marca el sangrado de la asignación.
+      
+      \begin{fxcode}
+         \layoutcomment{~~~~~}{La columna de sangrado}\\
+         \arrowcode{let x~<- 3 * 4 in x}
+      \end{fxcode}
+      
+      \begin{fxcode}
+         \layoutcomment{~~~~~}{La columna de sangrado}\\
+         \arrowcode{let (a, b)~<- (2, ...}\\
+         \spacecode{~~~3) in a + b}
+      \end{fxcode}
+      
+      En el código anterior se puede observar que 3 ya no esta dentro del sangrado por lo que 3 ya no es parte de la expresion de asignación por lo que el sangrado se cierra y ninguno de los demás tokens sera parte de la expresion de asignación, tal código incluso lleva a un error pues no se llega a cerrar la tupla \texttt{(2,}.
+      
+      \begin{fxcode}
+         \layoutcomment{~~~~~~~~~~~~~}{La columna de sangrado}\\
+         \arrowcode{a + b where (a, b)~<- (3, 4)}
+      \end{fxcode}
+      
+      \begin{fxcode}
+         \arrowcode{c where c~<- 2*a where a~<- 5}
+      \end{fxcode}
+      
+      En el código anterior los tokens \texttt{c} y \texttt{a} después de la palabra \texttt{where} son los que marcan el sangrado de su respectiva asignación, como el segundo \texttt{where} esta dentro del sangrado marcado por c entonces ``\texttt{where a~<- 5}'' es parte de la expresion que se asigna a \texttt{c}, por lo que la expresion anterior es equivalente a \texttt{c where c~<- (2*a where a~<- 5)}.
+   
+      \begin{fxcode}
+         \arrowcode{a + b where a~<- 2 ...}\\
+         \spacecode{~~~~~~where b~<- 3}
+      \end{fxcode}
+      
+      Después del token \texttt{2} el token \texttt{where} esta en una columna fuera del sangrado marcado por \texttt{a} por lo que \texttt{where} ya no es parte de la expresion que se asigna a \texttt{a}, la expresion anterior es equivalente a \texttt{(a + b where a~<- 2) where b~<- 3}.
+      
+      \begin{fxcode}
+         \arrowcode{let i~<- 1}\\
+         \spacecode{~~~~\texttt{-} 1 in i} \codecomment{el token ``-'' tiene la misma columna de inicio que i por lo que no esta en el sangrado}
+      \end{fxcode}
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
