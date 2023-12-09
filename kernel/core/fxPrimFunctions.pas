@@ -87,7 +87,8 @@ type
         
         function GetFunction(Index: Integer): TPrimitiveFunction;
     protected
-        STOP: BOOLEAN;
+        STOP: BOOLEAN;  
+        SLEEP: BOOLEAN;
     public
         constructor Create(AFrontEnd: IFrontEndListener; AInterpreter: IInterpreterListener;
             AStorage: TStorage; AError: TErrorRegister);
@@ -97,6 +98,8 @@ type
         function Count: Integer;
         property __Item[Index: Integer]: TPrimitiveFunction read GetFunction; default;
         procedure Interrupt;
+        procedure Pause;
+        procedure Resume;
     end;
     
 implementation
@@ -211,7 +214,7 @@ LABEL LBL_END;
 begin // _ -> _
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     MakeHeadValueBranch(FX_VN_NONE, AReturn);
     
@@ -229,7 +232,7 @@ var
 begin // (Real, Real) -> Real
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if (AArgument^.vKind = FX_VN_TUPLE) and (Length(AArgument^.Childs) = 2) then begin
         if ValueIsRealNumber(AArgument^.Childs[0], A) then begin
@@ -258,7 +261,7 @@ var
 begin // (Real, Real) -> Real
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if (AArgument^.vKind = FX_VN_TUPLE) and (Length(AArgument^.Childs) = 2) then begin
         if ValueIsRealNumber(AArgument^.Childs[0], A) then begin
@@ -287,7 +290,7 @@ var
 begin // (Real, Real) -> Real
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if (AArgument^.vKind = FX_VN_TUPLE) and (Length(AArgument^.Childs) = 2) then begin
         if ValueIsRealNumber(AArgument^.Childs[0], A) then begin
@@ -316,7 +319,7 @@ var
 begin // (Real, Real) -> Real
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if (AArgument^.vKind = FX_VN_TUPLE) and (Length(AArgument^.Childs) = 2) then begin
         if ValueIsRealNumber(AArgument^.Childs[0], A) then begin
@@ -345,7 +348,7 @@ var
 begin // (Real, Real) -> Real
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if (AArgument^.vKind = FX_VN_TUPLE) and (Length(AArgument^.Childs) = 2) then begin
         if ValueIsRealNumber(AArgument^.Childs[0], A) then begin
@@ -374,7 +377,7 @@ var
 begin // (Real, Real) -> Bool
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if (AArgument^.vKind = FX_VN_TUPLE) and (Length(AArgument^.Childs) = 2) then begin
         if ValueIsRealNumber(AArgument^.Childs[0], A) then begin
@@ -403,7 +406,7 @@ var
 begin // (Real, Real) -> Bool
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if (AArgument^.vKind = FX_VN_TUPLE) and (Length(AArgument^.Childs) = 2) then begin
         if ValueIsRealNumber(AArgument^.Childs[0], A) then begin
@@ -432,7 +435,7 @@ var
 begin // (Real, Real) -> Bool
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if (AArgument^.vKind = FX_VN_TUPLE) and (Length(AArgument^.Childs) = 2) then begin
         if ValueIsRealNumber(AArgument^.Childs[0], A) then begin
@@ -461,7 +464,7 @@ var
 begin // Real -> Bool
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     // siempre encaja
     if ValueIsRealNumber(AArgument, A) then begin
         MakeBoolValueBranch(fxMath.nIsNaN(A), AReturn);
@@ -483,7 +486,7 @@ var
 begin // Real -> Int
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if  ValueIsRealNumber(AArgument, A) then
         MakeNumberValueBranch(fxMath.nTrunc(A), AReturn)
@@ -504,7 +507,7 @@ var
 begin // Real -> Real
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if  ValueIsRealNumber(AArgument, A) then
         MakeNumberValueBranch(fxMath.nFrac(A), AReturn)
@@ -525,7 +528,7 @@ var
 begin // Real -> Real
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if  ValueIsRealNumber(AArgument, A) then
         MakeNumberValueBranch(fxMath.nSin(A), AReturn)
@@ -546,7 +549,7 @@ var
 begin // Real -> Real
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if  ValueIsRealNumber(AArgument, A) then
         MakeNumberValueBranch(fxMath.nCos(A), AReturn)
@@ -567,7 +570,7 @@ var
 begin // Real -> Real
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if  ValueIsRealNumber(AArgument, A) then
         MakeNumberValueBranch(fxMath.nTan(A), AReturn)
@@ -588,7 +591,7 @@ var
 begin // Real -> Real
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if  ValueIsRealNumber(AArgument, A) then
         MakeNumberValueBranch(fxMath.nASin(A), AReturn)
@@ -609,7 +612,7 @@ var
 begin // Real -> Real
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if  ValueIsRealNumber(AArgument, A) then
         MakeNumberValueBranch(fxMath.nACos(A), AReturn)
@@ -630,7 +633,7 @@ var
 begin // Real -> Real
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if  ValueIsRealNumber(AArgument, A) then
         MakeNumberValueBranch(fxMath.nATan(A), AReturn)
@@ -651,7 +654,7 @@ var
 begin // Real -> Real
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if  ValueIsRealNumber(AArgument, A) then
         MakeNumberValueBranch(fxMath.nLn(A), AReturn)
@@ -672,7 +675,7 @@ var
 begin // Real -> Real
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if  ValueIsRealNumber(AArgument, A) then
         MakeNumberValueBranch(fxMath.nExp(A), AReturn)
@@ -693,7 +696,7 @@ var
 begin // (Int, Int) -> Int
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if (AArgument^.vKind = FX_VN_TUPLE) and (Length(AArgument^.Childs) = 2) then begin
         if ValueIsIntegerNumber(AArgument^.Childs[0], A) then begin
@@ -722,7 +725,7 @@ var
 begin // (Int, Int) -> Int
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if (AArgument^.vKind = FX_VN_TUPLE) and (Length(AArgument^.Childs) = 2) then begin
         if ValueIsIntegerNumber(AArgument^.Childs[0], A) then begin
@@ -751,7 +754,7 @@ var
 begin // Int -> Int
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if  ValueIsIntegerNumber(AArgument, A) then
         MakeNumberValueBranch(fxMath.iNot(A), AReturn)
@@ -772,7 +775,7 @@ var
 begin // (Int, Int) -> Int
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if (AArgument^.vKind = FX_VN_TUPLE) and (Length(AArgument^.Childs) = 2) then begin
         if ValueIsIntegerNumber(AArgument^.Childs[0], A) then begin
@@ -801,7 +804,7 @@ var
 begin // (Int, Int) -> Int
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if (AArgument^.vKind = FX_VN_TUPLE) and (Length(AArgument^.Childs) = 2) then begin
         if ValueIsIntegerNumber(AArgument^.Childs[0], A) then begin
@@ -830,7 +833,7 @@ var
 begin // (Int, Int) -> Int
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if (AArgument^.vKind = FX_VN_TUPLE) and (Length(AArgument^.Childs) = 2) then begin
         if ValueIsIntegerNumber(AArgument^.Childs[0], A) then begin
@@ -859,7 +862,7 @@ var
 begin // (Int, Int) -> Int
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if (AArgument^.vKind = FX_VN_TUPLE) and (Length(AArgument^.Childs) = 2) then begin
         if ValueIsIntegerNumber(AArgument^.Childs[0], A) then begin
@@ -888,7 +891,7 @@ var
 begin // Int -> Int
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
 
     if  ValueIsIntegerNumber(AArgument, A) then
         MakeNumberValueBranch(fxMath.iRandom(A), AReturn)
@@ -909,7 +912,7 @@ var
 begin // Nat -> Char
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if  ValueIsNaturalNumber(AArgument, A) then
         MakeCharValueBranch(fxMath.cEncode(A), AReturn)
@@ -930,7 +933,7 @@ var
 begin // Char -> Nat
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if  AArgument^.vKind = FX_VN_CHARACTER then begin
         A := AArgument^.D.cValue;
@@ -954,7 +957,7 @@ var
 begin // [_] -> Nat
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if AArgument^.vKind = FX_VN_LIST_CONS then begin
         TailBranch := AArgument;
@@ -985,7 +988,7 @@ var
 begin // ([_], Nat) -> _
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if (AArgument^.vKind = FX_VN_TUPLE) and (Length(AArgument^.Childs) = 2) then begin
         if AArgument^.Childs[0]^.vKind = FX_VN_LIST_CONS then begin
@@ -1033,7 +1036,7 @@ var
 begin // (_, [_], Nat) -> _
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if (AArgument^.vKind = FX_VN_TUPLE) and (Length(AArgument^.Childs) = 3) then begin
         if AArgument^.Childs[1]^.vKind = FX_VN_LIST_CONS then begin
@@ -1085,7 +1088,7 @@ LABEL LBL_END;
 begin // _ -> Nat
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if AArgument^.vKind = FX_VN_TUPLE then
         MakeNumberValueBranch(Int64(Length(AArgument^.Childs)), AReturn)
@@ -1106,7 +1109,7 @@ var
 begin // (_, Nat) -> _
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if (AArgument^.vKind = FX_VN_TUPLE) and (Length(AArgument^.Childs) = 2) then begin
         if (AArgument^.Childs[0]^.vKind = FX_VN_TUPLE) then begin
@@ -1139,7 +1142,7 @@ var
 begin // (_, _, Nat) -> _
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if (AArgument^.vKind = FX_VN_TUPLE) and (Length(AArgument^.Childs) = 3) then begin
         if (AArgument^.Childs[1]^.vKind = FX_VN_TUPLE) then begin
@@ -1172,7 +1175,7 @@ LABEL LBL_END;
 begin // () -> [Char]
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if (AArgument^.vKind = FX_VN_TUPLE) and (Length(AArgument^.Childs) = 0) then
         MakeStrValueBranch(FrontEnd.InputStr, AReturn)
@@ -1193,7 +1196,7 @@ var
 begin // [Char] -> ()
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if CheckValidStr(AArgument, Str) then begin
         FrontEnd.OutputStr(Str);
@@ -1213,7 +1216,7 @@ LABEL LBL_END;
 begin // () -> ()
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if (AArgument^.vKind = FX_VN_TUPLE) and (Length(AArgument^.Childs) = 0) then begin
         FrontEnd.ClearScreen;
@@ -1236,7 +1239,7 @@ var
 begin // () -> (Nat, Nat, Nat, Nat, Nat, Nat, Nat, Nat)
     Result := FX_RES_SUCCESS;
 
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
 
     if (AArgument^.vKind = FX_VN_TUPLE) and (Length(AArgument^.Childs) = 0) then begin
         GetNowDateTime(Year, Month, DayOfWeek, Day, Hour, Minute, Second, Milliseconds);
@@ -1268,7 +1271,7 @@ var
 begin // (Nat, Nat, Nat, Nat, Nat, Nat, Nat, Nat) -> ()
     Result := FX_RES_SUCCESS;
 
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
 
     if  (AArgument^.vKind = FX_VN_TUPLE) and (Length(AArgument^.Childs) = 8) and
         ValueIsIntegerNumber(AArgument^.Childs[0], Year        ) and
@@ -1297,7 +1300,7 @@ LABEL LBL_END;
 begin // () -> _
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if (AArgument^.vKind = FX_VN_TUPLE) and (Length(AArgument^.Childs) = 0) then begin
         if Storage.HasAnswer then 
@@ -1322,7 +1325,7 @@ var
 begin // [Char] -> _
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if CheckValidStr(AArgument, Str) then begin
         Result := FX_RES_ERR_SINGLE;
@@ -1349,7 +1352,7 @@ var
 begin // [Char] -> (Real, Bool)
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if CheckValidStr(AArgument, Str) then begin
         B := fxStrUtils.TryStrToNumber(Str, N);
@@ -1376,10 +1379,10 @@ var
 begin // _ -> [Char]
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     // siempre encaja
     ArgStr := FStrConverter.__ValueToStr(AArgument);
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     MakeStrValueBranch(ArgStr, AReturn);
     
 LBL_END:
@@ -1398,13 +1401,13 @@ begin // _ -> [Char]
     Result := FX_RES_SUCCESS;
     AuxTypeBranch := nil;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     // siempre encaja
     Result := FTypeInferencer.__Infer(AArgument, AuxTypeBranch);
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     if Result = FX_RES_SUCCESS then begin
         ArgStr := FStrConverter.__TypeToStr(AuxTypeBranch);
-        IF STOP THEN GOTO LBL_END;
+        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
         MakeStrValueBranch(ArgStr, AReturn);
     end;
     
@@ -1424,10 +1427,10 @@ var
 begin // _ -> [Char]
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     // siempre encaja
     ArgStr := FStrConverter.__ValueToStrFullForm(AArgument);
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     MakeStrValueBranch(ArgStr, AReturn);
     
 LBL_END:
@@ -1441,7 +1444,7 @@ LABEL LBL_END;
 begin // _ -> Bool
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     // siempre encaja
     if (AArgument^.vKind = FX_VN_ANONYMOUS) then begin
         MakeBoolValueBranch(True, AReturn);
@@ -1460,7 +1463,7 @@ LABEL LBL_END;
 begin // _ -> Bool
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     // siempre encaja
     if (AArgument^.vKind = FX_VN_IDENTIFIER) then begin
         MakeBoolValueBranch(True, AReturn);
@@ -1479,7 +1482,7 @@ LABEL LBL_END;
 begin // _ -> Bool
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     // siempre encaja
     if (AArgument^.vKind = FX_VN_TUPLE) then begin
         MakeBoolValueBranch(True, AReturn);
@@ -1498,7 +1501,7 @@ LABEL LBL_END;
 begin // _ -> Bool
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     // siempre encaja
     if (AArgument^.vKind = FX_VN_LAMBDA) then begin
         MakeBoolValueBranch(True, AReturn);
@@ -1517,7 +1520,7 @@ LABEL LBL_END;
 begin // () -> Nat
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if (AArgument^.vKind = FX_VN_TUPLE) and (Length(AArgument^.Childs) = 0) then begin
         MakeNumberValueBranch(GetLanguage, AReturn);
@@ -1536,7 +1539,7 @@ LABEL LBL_END;
 begin // () -> ()
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if (AArgument^.vKind = FX_VN_TUPLE) and (Length(AArgument^.Childs) = 0) then begin
         FrontEnd.DoQuit;
@@ -1556,7 +1559,7 @@ LABEL LBL_END;
 begin // () -> ()
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if (AArgument^.vKind = FX_VN_TUPLE) and (Length(AArgument^.Childs) = 0) then begin
         FrontEnd.DoInterrupt;
@@ -1576,7 +1579,7 @@ LABEL LBL_END;
 begin // () -> ()
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if (AArgument^.vKind = FX_VN_TUPLE) and (Length(AArgument^.Childs) = 0) then begin
         FrontEnd.DoRestart;
@@ -1633,6 +1636,20 @@ begin
     STOP := TRUE;
     FStrConverter.Interrupt;
     FTypeInferencer.Interrupt;
+end;
+
+procedure TPrimitiveFunctionList.Pause;
+begin
+    SLEEP := TRUE;
+    FStrConverter.Pause;
+    FTypeInferencer.Pause;
+end;
+
+procedure TPrimitiveFunctionList.Resume;
+begin
+    SLEEP := FALSE;
+    FStrConverter.Resume;
+    FTypeInferencer.Resume;
 end;
 
 end.

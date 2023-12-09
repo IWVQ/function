@@ -35,7 +35,7 @@ type
     { Language types }
     
     TFxBool   = Boolean;
-    TFxChar   = Char;
+    TFxChar   = AnsiChar;
     //TFxNumber = Complex;
     TFxNumber = Extended;
     
@@ -44,8 +44,8 @@ type
     //TFxComplex = Complex;
     TFxReal = Extended;
     TFxInteger = Int64;
-    TFxString = string;
-    PFxString = PString;
+    TFxString = ansistring;
+    PFxString = PAnsiString;
     
     { Other types }
     
@@ -72,15 +72,15 @@ type
     { CharStream }
     
     IStream = interface
-        function GetItem(AIndex: Integer): Char;
+        function GetItem(AIndex: Integer): TFxChar;
         function ColFromPos(APos: Integer): Integer;
         function LineFromPos(APos: Integer): Integer;
-        function GetCaption: string; // script file name or console name
-        function GetRange(AFrom, ATo: Integer): string;
+        function GetCaption: ansistring; // script file name or console name
+        function GetRange(AFrom, ATo: Integer): TFxString;
         function Length: Integer;
         function TabSize: Integer;
         procedure MarkLine(ALine: Integer);
-        property Item[AIndex: Integer]: Char read GetItem; default;
+        property Item[AIndex: Integer]: TFxChar read GetItem; default;
     end;
     
     { FrontEnd }
@@ -100,6 +100,7 @@ type
         procedure DoQuit;
         procedure DoInterrupt;
         procedure DoRestart;
+        procedure DoPause;
     end;
 
 procedure UndefinedRoutine(S: string);

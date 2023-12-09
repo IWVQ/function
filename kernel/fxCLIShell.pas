@@ -54,6 +54,7 @@ type
         procedure DoQuit;
         procedure DoInterrupt;
         procedure DoRestart;
+        procedure DoPause;
     public
         constructor Create;
         destructor Destroy; override;
@@ -207,6 +208,11 @@ procedure TFrontEnd.DoRestart;
 begin
     DoInterrupt;
     RestartFlag := True;
+end;
+
+procedure TFrontEnd.DoPause;
+begin
+    // do nothing
 end;
 
 { TCLIShell }

@@ -28,7 +28,8 @@ type
         function __PrimitiveMap(var ABranch: TValueExpr): Word;
         function __Map(var ABranch: TValueExpr): Word;
     protected
-        STOP: BOOLEAN;
+        STOP: BOOLEAN;  
+        SLEEP: BOOLEAN;
     public
         constructor Create(AFrontEnd: IFrontEndListener; AInterpreter: IInterpreterListener;
             AStorage: TStorage; AError: TErrorRegister);
@@ -38,6 +39,8 @@ type
         function __ReplaceIdentifier(AIdCode: Integer; AArgument: TValueExpr; var AReturn: TValueExpr): Word;
         function __Evaluate(var AValue: TValueExpr): Word;
         procedure Interrupt;
+        procedure Pause;
+        procedure Resume;
     end;
     
 implementation
@@ -120,10 +123,10 @@ begin
     
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     Result := FTypeChecker.__ValueMatchsValueType(APattern, AArgument, AMatches);
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
 LBL_END:
     
@@ -181,7 +184,7 @@ begin
     
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     DoReplacement(AReturn);
     
@@ -201,7 +204,7 @@ begin
 
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     case APattern^.vKind of
         FX_PN_NONE      :;
@@ -252,7 +255,7 @@ begin
         end;
         FX_PN_IDENTIFIER: begin
             Result := __MatchWithIdentifier(APattern, AArgument, IdMatches);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             if Result = FX_RES_SUCCESS then begin
                 if IdMatches then begin
                     if  (AArgument^.vKind = FX_VN_IDENTIFIER) and
@@ -261,7 +264,7 @@ begin
                         (AArgument^.D.tKind = FX_TN_NONE) then begin end
                     else begin
                         Result := __ReplaceIdentifier(APattern^.D.vIdCode, AArgument, AReturn);
-                        IF STOP THEN GOTO LBL_END;
+                        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     end;
                 end
                 else begin
@@ -277,9 +280,9 @@ begin
             if (AArgument^.vKind = FX_VN_TUPLE) and (Length(APattern^.Childs) = Length(AArgument^.Childs)) then begin
                 // incluye automaticamente tupla vacia
                 for K := 0 to Length(APattern^.Childs) - 1 do begin
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     Result := __Match(APattern^.Childs[K], AArgument^.Childs[K], AReturn);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     if Result = FX_RES_SUCCESS then begin
                         if AReturn^.vKind = FX_VN_FAIL then
                             Break // ya no es necesario seguir encajando
@@ -299,11 +302,11 @@ begin
         FX_PN_LIST_CONS : begin
             if AArgument^.vKind = FX_VN_LIST_CONS then begin
                 Result := __Match(APattern^.Childs[0], AArgument^.Childs[0], AReturn);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 if Result = FX_RES_SUCCESS then begin
                     if AReturn^.vKind <> FX_VN_FAIL then begin
                         Result := __Match(APattern^.Childs[1], AArgument^.Childs[1], AReturn);
-                        IF STOP THEN GOTO LBL_END;
+                        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     end
                     else
                         // ya no es necesario seguir encajando
@@ -335,13 +338,13 @@ begin
     Argument := nil;
     Return := nil;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     Argument := ABranch^.Childs[1];
     ABranch^.Childs[1] := nil;
     Return := nil;
     Result := FPrimitiveFunctionList[ABranch^.Childs[0]^.D.vIdCode](Argument, Return);
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     if Result = FX_RES_SUCCESS then begin
         EraseValueBranch(ABranch);
         ABranch := Return;
@@ -370,11 +373,11 @@ begin
     Argument := nil;
     Return := nil;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if ABranch^.Childs[0]^.vKind = FX_VN_PRIMITIVE then begin
         Result := __PrimitiveMap(ABranch);
-        IF STOP THEN GOTO LBL_END;
+        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     end
     else if ABranch^.Childs[0]^.vKind = FX_VN_LAMBDA then begin
         Pattern := ABranch^.Childs[0]^.Childs[0];
@@ -385,7 +388,7 @@ begin
         ABranch^.Childs[0]^.Childs[1] := nil;
         EraseValueBranch(ABranch);
         Result := __Match(Pattern, Argument, Return);
-        IF STOP THEN GOTO LBL_END;
+        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
         if Result = FX_RES_SUCCESS then begin
             ABranch := Return;
             Return := nil;
@@ -414,7 +417,7 @@ LBL_AGAIN:
     
     Result := FX_RES_SUCCESS;
 
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
 
         case ABranch^.vKind of
             FX_VN_NONE       : ;
@@ -434,7 +437,7 @@ LBL_AGAIN:
             FX_VN_ANONYMOUS  : ; // no reduce
             FX_VN_TRY        : begin
                 Result := __Reduce(ABranch^.Childs[0]); // intentar que no falle
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 if Result = FX_RES_SUCCESS then begin
                     if ABranch^.Childs[0]^.vKind = FX_VN_FAIL then begin
                         // primero reemplazar con su expresion derecha y luego reducir(para recursividad eterna)
@@ -457,9 +460,9 @@ LBL_AGAIN:
             end;
             FX_VN_TUPLE      : begin
                 for K := 0 to Length(ABranch^.Childs) - 1 do begin // en caso de tupla vacia ya estara reducido
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     Result := __Reduce(ABranch^.Childs[K]);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     if Result = FX_RES_SUCCESS then begin
                         if ABranch^.Childs[K]^.vKind = FX_VN_FAIL then begin
                             EraseValueBranchChilds(ABranch);
@@ -477,7 +480,7 @@ LBL_AGAIN:
             FX_VN_LIST_CONS       : begin
                 // no es necesario revisar tipo(ejm, se permite: ['a', 1, \x -> x])
                 Result := __Reduce(ABranch^.Childs[0]);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 if Result = FX_RES_SUCCESS then begin
                     if ABranch^.Childs[0]^.vKind = FX_VN_FAIL then begin
                         EraseValueBranchChilds(ABranch);
@@ -485,7 +488,7 @@ LBL_AGAIN:
                     end
                     else begin
                         Result := __Reduce(ABranch^.Childs[1]);
-                        IF STOP THEN GOTO LBL_END;
+                        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                         if Result = FX_RES_SUCCESS then begin
                             if ABranch^.Childs[1]^.vKind = FX_VN_FAIL then begin
                                 EraseValueBranchChilds(ABranch);
@@ -506,7 +509,7 @@ LBL_AGAIN:
             FX_VN_LAMBDA     : ; // no reduce
             FX_VN_APPLICATION: begin
                 Result := __Reduce(ABranch^.Childs[0]);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 if Result = FX_RES_SUCCESS then begin
                     if ABranch^.Childs[0]^.vKind = FX_VN_FAIL then begin
                         EraseValueBranchChilds(ABranch);
@@ -515,12 +518,12 @@ LBL_AGAIN:
                     else if (ABranch^.Childs[0]^.vKind <> FX_VN_PRIMITIVE) and (ABranch^.Childs[0]^.vKind <> FX_VN_LAMBDA) then begin
                         // la parte izquierda de la aplicacion no es una funcion(detectar aqui para ya no evaluar el lado derecho)
                         Str := FStrConverter.__ValueToStr(ABranch^.Childs[0]);
-                        IF STOP THEN GOTO LBL_END;
+                        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                         Result := EvaluationError(ExpectedFunctionLeftSideStr, [Str]);
                     end
                     else begin
                         Result := __Reduce(ABranch^.Childs[1]);
-                        IF STOP THEN GOTO LBL_END;
+                        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                         if Result = FX_RES_SUCCESS then begin
                             if ABranch^.Childs[1]^.vKind = FX_VN_FAIL then begin
                                 EraseValueBranchChilds(ABranch);
@@ -528,7 +531,7 @@ LBL_AGAIN:
                             end
                             else begin
                                 Result := __Map(ABranch);
-                                IF STOP THEN GOTO LBL_END;
+                                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                                 if Result = FX_RES_SUCCESS then begin
                                     goto LBL_AGAIN; // para poder programar recursiones y bucles infinitas
                                 end;
@@ -551,11 +554,11 @@ begin
     
     Result := FX_RES_SUCCESS;
 
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     fxMath.iRandomize;
     
     Result := __Reduce(AValue);
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
 LBL_END:
     
@@ -568,6 +571,22 @@ begin
     FTypeChecker.Interrupt;
     FPrimitiveFunctionList.Interrupt;
     FStrConverter.Interrupt;
+end;
+                   
+procedure TEvaluator.Pause;
+begin
+    SLEEP := TRUE;
+    FTypeChecker.Pause;
+    FPrimitiveFunctionList.Pause;
+    FStrConverter.Pause;
+end;
+
+procedure TEvaluator.Resume;
+begin
+    SLEEP := FALSE;
+    FTypeChecker.Resume;
+    FPrimitiveFunctionList.Resume;
+    FStrConverter.Resume;
 end;
 
 end.

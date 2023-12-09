@@ -57,13 +57,16 @@ type
         function __ParseCommand(var ABranch: TAbstractSyntaxTree): Word;
     protected
         STOP: BOOLEAN;
+        SLEEP: BOOLEAN;
     public
         constructor Create(AFrontEnd: IFrontEndListener; AInterpreter: IInterpreterListener;
             AStorage: TStorage; AError: TErrorRegister);
         destructor Destroy; override;
         
         function __Parse(var ATokenList: TTokenList; var AAST: TAbstractSyntaxTree): Word;
-        procedure Interrupt;
+        procedure Interrupt;  
+        procedure Pause;
+        procedure Resume;
     end;
 
 implementation
@@ -396,14 +399,14 @@ begin // Por la forma en que esta escrito el parser, cada arbol del bosque esta 
     
     AEKind := FX_VEK_EMPTY;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
 
     PrevAppKind := AK_NONE;
 
     K := 0;
     
     while K < AForest.Count do begin
-        IF STOP THEN GOTO LBL_END;
+        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
         CurrentAppKind := GetAppKind;
         case PrevAppKind of
             AK_NONE  :
@@ -438,7 +441,7 @@ begin // Por la forma en que esta escrito el parser, cada arbol del bosque esta 
                     AK_INFIXL,
                     AK_INFIXR: begin
                         while not OprStack.IsEmpty do begin
-                            IF STOP THEN GOTO LBL_END;
+                            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                             Result := CheckInfixAssociativity;
                             if (Result = FX_RES_SUCCESS) and CanPopOpr then
                                 MakeInfixApplication
@@ -458,7 +461,7 @@ begin // Por la forma en que esta escrito el parser, cada arbol del bosque esta 
                     AK_INFIXL,
                     AK_INFIXR: begin
                         while not OprStack.IsEmpty do begin
-                            IF STOP THEN GOTO LBL_END;
+                            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                             Result := CheckInfixAssociativity;
                             if (Result = FX_RES_SUCCESS) and CanPopOpr then
                                 MakeInfixApplication
@@ -501,7 +504,7 @@ begin // Por la forma en que esta escrito el parser, cada arbol del bosque esta 
                     Result := ErrorAtAppIdentStack(MissingRightArgumentForStr);
             else
                 while not OprStack.IsEmpty do begin
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     MakeInfixApplication;
                 end;
         end;
@@ -533,7 +536,7 @@ begin
     AuxBranch := nil;
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if TokenInLayout then begin
         AParsed := True;
@@ -587,7 +590,7 @@ begin
 
                         ReadNextToken;
                         Result := __ParseTypeExpression(ABranch^.Childs[1], SEP);
-                        IF STOP THEN GOTO LBL_END;
+                        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                         if Result = FX_RES_SUCCESS then begin
                             if not SEP then
                                 Result := ErrorAtToken(TypeExpressionExpectedStr);
@@ -633,16 +636,16 @@ begin
                     K := 0;
                     AddASTBranchChilds(ABranch);
                     Result := __ParsePatternExpression(ABranch^.Childs[K], SEP);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     if Result = FX_RES_SUCCESS then begin
                         if SEP then begin
                             while (Result = FX_RES_SUCCESS) and TokenInLayout and (Tkn^.Kind = FX_TK_COMMA) do begin
-                                IF STOP THEN GOTO LBL_END;
+                                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                                 ReadNextToken;
                                 Inc(K);
                                 AddASTBranchChilds(ABranch);
                                 Result := __ParsePatternExpression(ABranch^.Childs[K], SEP);
-                                IF STOP THEN GOTO LBL_END;
+                                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                                 if (Result = FX_RES_SUCCESS) and (not SEP) then
                                     Result := ErrorAtToken(PatternExpectedStr);
                             end;
@@ -667,16 +670,16 @@ begin
                     K := 0;
                     AddASTBranchChilds(ABranch);
                     Result := __ParsePatternExpression(ABranch^.Childs[K], SEP);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     if Result = FX_RES_SUCCESS then begin
                         if SEP then begin
                             while (Result = FX_RES_SUCCESS) and TokenInLayout and (Tkn^.Kind = FX_TK_COMMA) do begin
-                                IF STOP THEN GOTO LBL_END;
+                                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                                 ReadNextToken;
                                 Inc(K);
                                 AddASTBranchChilds(ABranch);
                                 Result := __ParsePatternExpression(ABranch^.Childs[K], SEP);
-                                IF STOP THEN GOTO LBL_END;
+                                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                                 if (Result = FX_RES_SUCCESS) and (not SEP) then
                                     Result := ErrorAtToken(PatternExpectedStr);
                             end;
@@ -721,11 +724,11 @@ begin
     AuxBranch := nil;
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if TokenInLayout then begin
         Result := __ParsePatternTerm(ABranch, AParsed);
-        IF STOP THEN GOTO LBL_END;
+        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
         if (Result = FX_RES_SUCCESS) and AParsed then begin
             if TokenInLayout and (Tkn^.Kind = FX_TK_KS_PUSH_LIST) then begin
                 MakeHeadASTBranch(FX_ASTN_LIST_CONSTRUCTOR, AuxBranch);
@@ -736,7 +739,7 @@ begin
                 ReadNextToken;
                 if TokenInLayout then begin
                     Result := __ParseListConsPatternPosibility(ABranch^.Childs[1], SEP);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     if Result = FX_RES_SUCCESS then begin
                         if not SEP then
                             Result := ErrorAtToken(PatternExpectedStr);
@@ -779,7 +782,7 @@ begin
     AuxBranch := nil;
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if TokenInLayout then begin
         AParsed := True;
@@ -791,7 +794,7 @@ begin
                 AddASTBranchChilds(ABranch, 2);
                 L := 0;
                 Result := __ParseValueExpression(ABranch^.Childs[L], SEK);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 Inc(L);
                 if Result = FX_RES_SUCCESS then begin
                     if SEK <> FX_VEK_EMPTY then begin
@@ -801,10 +804,10 @@ begin
                             MakeHeadASTBranch(FX_ASTN_UNTITLED, ABranch^.Childs[L]);
                             K := 0;
                             while (Result = FX_RES_SUCCESS) and TokenInLayout do begin
-                                IF STOP THEN GOTO LBL_END;
+                                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                                 AddASTBranchChilds(ABranch^.Childs[L]);
                                 Result := __ParseStatement(ABranch^.Childs[L]^.Childs[K], SEP);
-                                IF STOP THEN GOTO LBL_END;
+                                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                                 if (Result = FX_RES_SUCCESS) and (not SEP) then begin
                                     SetLength(ABranch^.Childs[L]^.Childs, K);
                                     Break;
@@ -818,7 +821,7 @@ begin
                                 
                                 AddASTBranchChilds(ABranch, 2);
                                 Result := __ParseValueExpression(ABranch^.Childs[L], SEK);
-                                IF STOP THEN GOTO LBL_END;
+                                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                                 Inc(L);
                                 if Result = FX_RES_SUCCESS then begin
                                     if SEK <> FX_VEK_EMPTY then begin
@@ -828,10 +831,10 @@ begin
                                             MakeHeadASTBranch(FX_ASTN_UNTITLED, ABranch^.Childs[L]);
                                             K := 0;
                                             while (Result = FX_RES_SUCCESS) and TokenInLayout do begin
-                                                IF STOP THEN GOTO LBL_END;
+                                                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                                                 AddASTBranchChilds(ABranch^.Childs[L]);
                                                 Result := __ParseStatement(ABranch^.Childs[L]^.Childs[K], SEP);
-                                                IF STOP THEN GOTO LBL_END;
+                                                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                                                 if (Result = FX_RES_SUCCESS) and (not SEP) then begin
                                                     SetLength(ABranch^.Childs[L]^.Childs, K);
                                                     Break;
@@ -854,10 +857,10 @@ begin
                                 ReadNextToken;
                                 K := 0;
                                 while (Result = FX_RES_SUCCESS) and TokenInLayout do begin
-                                    IF STOP THEN GOTO LBL_END;
+                                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                                     AddASTBranchChilds(ABranch^.Childs[L]);
                                     Result := __ParseStatement(ABranch^.Childs[L]^.Childs[K], SEP);
-                                    IF STOP THEN GOTO LBL_END;
+                                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                                     if (Result = FX_RES_SUCCESS) and (not SEP) then begin
                                         SetLength(ABranch^.Childs[L]^.Childs, K);
                                         Break;
@@ -882,7 +885,7 @@ begin
                 ReadNextToken;
                 AddASTBranchChilds(ABranch, 2);
                 Result := __ParseValueExpression(ABranch^.Childs[0], SEK);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 if Result = FX_RES_SUCCESS then begin
                     if SEK <> FX_VEK_EMPTY then begin
                         if TokenInLayout and (Tkn^.Kind = FX_TK_KW_DO) then begin
@@ -891,10 +894,10 @@ begin
                             MakeHeadASTBranch(FX_ASTN_UNTITLED, ABranch^.Childs[1]);
                             K := 0;
                             while (Result = FX_RES_SUCCESS) and TokenInLayout do begin
-                                IF STOP THEN GOTO LBL_END;
+                                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                                 AddASTBranchChilds(ABranch^.Childs[1]);
                                 Result := __ParseStatement(ABranch^.Childs[1]^.Childs[K], SEP);
-                                IF STOP THEN GOTO LBL_END;
+                                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                                 if (Result = FX_RES_SUCCESS) and (not SEP) then begin
                                     SetLength(ABranch^.Childs[1]^.Childs, K);
                                     Break;
@@ -917,14 +920,14 @@ begin
                 ReadNextToken;
                 AddASTBranchChilds(ABranch, 3);
                 Result := __ParsePatternExpression(ABranch^.Childs[0], SEP);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 if Result = FX_RES_SUCCESS then begin
                     if SEP then begin
                         if TokenInLayout and (Tkn^.Kind = FX_TK_KW_IN) then begin
                             ReadNextToken;
                             if TokenInLayout then begin
                                 Result := __ParseValueExpression(ABranch^.Childs[1], SEK);
-                                IF STOP THEN GOTO LBL_END;
+                                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                                 if Result = FX_RES_SUCCESS then begin
                                     if SEK <> FX_VEK_EMPTY then begin
                                         if TokenInLayout and (Tkn^.Kind = FX_TK_KW_DO) then begin
@@ -933,10 +936,10 @@ begin
                                             MakeHeadASTBranch(FX_ASTN_UNTITLED, ABranch^.Childs[2]);
                                             K := 0;
                                             while (Result = FX_RES_SUCCESS) and TokenInLayout do begin
-                                                IF STOP THEN GOTO LBL_END;
+                                                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                                                 AddASTBranchChilds(ABranch^.Childs[2]);
                                                 Result := __ParseStatement(ABranch^.Childs[2]^.Childs[K], SEP);
-                                                IF STOP THEN GOTO LBL_END;
+                                                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                                                 if (Result = FX_RES_SUCCESS) and (not SEP) then begin
                                                     SetLength(ABranch^.Childs[2]^.Childs, K);
                                                     Break;
@@ -969,7 +972,7 @@ begin
                 ReadNextToken;
                 AddASTBranchChilds(ABranch, 1);
                 Result := __ParseValueExpression(ABranch^.Childs[0], SEK);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 if Result = FX_RES_SUCCESS then begin
                     if SEK = FX_VEK_EMPTY then
                         Result := ErrorAtToken(ValueExpressionExpectedStr);
@@ -981,7 +984,7 @@ begin
                     LayoutAtToken;
                     
                     Result := __ParseValueExpression(ABranch, SEK);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     if Result = FX_RES_SUCCESS then begin
                         if SEK = FX_VEK_EMPTY then
                             AParsed := False
@@ -996,7 +999,7 @@ begin
                                 ABranch := AuxBranch;
                                 AuxBranch := nil;
                                 Result :=  __ParseValueExpression(ABranch^.Childs[1], SEK);
-                                IF STOP THEN GOTO LBL_END;
+                                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                                 if Result = FX_RES_SUCCESS then begin
                                     if SEK = FX_VEK_EMPTY then
                                         Result := ErrorAtToken(ValueExpressionExpectedStr);
@@ -1040,12 +1043,12 @@ begin
     AuxBranch := nil;
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if TokenInLayout then begin
         AQKind := FX_VQK_FILTER;
         Result := __ParseValueExpression(ABranch, SEK);
-        IF STOP THEN GOTO LBL_END;
+        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
         if Result = FX_RES_SUCCESS then begin
             if SEK = FX_VEK_EMPTY then begin
                 AQKind := FX_VQK_EMPTY;
@@ -1060,7 +1063,7 @@ begin
                     ABranch := AuxBranch;
                     AuxBranch := nil;
                     Result :=  __ParseValueExpression(ABranch^.Childs[1], SEK);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     if Result = FX_RES_SUCCESS then begin
                         if SEK = FX_VEK_EMPTY then
                             Result := ErrorAtToken(ValueExpressionExpectedStr);
@@ -1097,7 +1100,7 @@ begin
     AuxBranch := nil;
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if TokenInLayout then begin
         AParsed := True;
@@ -1105,14 +1108,14 @@ begin
         MakeHeadASTBranch(FX_ASTN_ASSIGNMENT, ABranch);
         AddASTBranchChilds(ABranch, 2);   //&&
         Result := __ParsePatternExpression(ABranch^.Childs[0], AParsed);
-        IF STOP THEN GOTO LBL_END;
+        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
         if Result = FX_RES_SUCCESS then begin
             if AParsed then begin
                 if TokenInLayout and (Tkn^.Kind = FX_TK_KS_LEFT_ARROW) then begin
                     ReadNextToken;
                     if TokenInLayout then begin
                         Result := __ParseValueExpression(ABranch^.Childs[1], SEK);
-                        IF STOP THEN GOTO LBL_END;
+                        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                         if Result = FX_RES_SUCCESS then begin
                             if SEK = FX_VEK_EMPTY then
                                 Result := ErrorAtToken(ValueExpressionExpectedStr);
@@ -1152,7 +1155,7 @@ begin
     AuxBranch := nil;
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if TokenInLayout then begin
         AEKind := FX_VEK_EMPTY;
@@ -1216,7 +1219,7 @@ begin
                     
                     ReadNextToken;
                     Result := __ParseTypeExpression(ABranch^.Childs[1], SEP);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     if Result = FX_RES_SUCCESS then begin
                         if not SEP then
                             Result := ErrorAtToken(TypeExpressionExpectedStr);
@@ -1237,15 +1240,15 @@ begin
                     K := 0;
                     Result := __ParsePatternExpression(ABranch^.Childs[K], SEP);
                     Inc(K);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     if Result = FX_RES_SUCCESS then begin
                         if SEP then begin
                             while (Result = FX_RES_SUCCESS) and TokenInLayout and (Tkn^.Kind <> FX_TK_KS_RIGHT_ARROW) do begin
-                                IF STOP THEN GOTO LBL_END;
+                                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                                 AddASTBranchChilds(ABranch);
                                 Result := __ParsePatternExpression(ABranch^.Childs[K], SEP);
                                 Inc(K);
-                                IF STOP THEN GOTO LBL_END;
+                                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                                 if (Result = FX_RES_SUCCESS) and (not SEP) then
                                     Result := ErrorAtToken(RightArrowExpectedStr);
                             end;
@@ -1255,7 +1258,7 @@ begin
                                     if TokenInLayout then begin
                                         AddASTBranchChilds(ABranch);
                                         Result := __ParseValueExpression(ABranch^.Childs[K], SEK);
-                                        IF STOP THEN GOTO LBL_END;
+                                        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                                         if Result = FX_RES_SUCCESS then begin
                                             if (SEK = FX_VEK_EMPTY) then
                                                 Result := ErrorAtToken(ValueExpressionExpectedStr);
@@ -1283,7 +1286,7 @@ begin
                     K := 0;
                     AddASTBranchChilds(ABranch);
                     Result := __ParseValueExpression(ABranch^.Childs[K], SEK);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     if SEK = FX_VEK_APPPATTERN then
                         AEKind := FX_VEK_APPPATTERN
                     else if SEK > FX_VEK_APPPATTERN then
@@ -1291,12 +1294,12 @@ begin
                     if Result = FX_RES_SUCCESS then begin
                         if SEK <> FX_VEK_EMPTY then begin
                             while (Result = FX_RES_SUCCESS) and TokenInLayout and (Tkn^.Kind = FX_TK_COMMA) do begin
-                                IF STOP THEN GOTO LBL_END;
+                                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                                 ReadNextToken;
                                 Inc(K);
                                 AddASTBranchChilds(ABranch);
                                 Result := __ParseValueExpression(ABranch^.Childs[K], SEK);
-                                IF STOP THEN GOTO LBL_END;
+                                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                                 if AEKind > FX_VEK_PATTERN then
                                     AEKind := FX_VEK_COMPLETE
                                 else if SEK > FX_VEK_PATTERN then
@@ -1326,7 +1329,7 @@ begin
                     K := 0;
                     AddASTBranchChilds(ABranch);
                     Result := __ParseValueExpression(ABranch^.Childs[K], SEK);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     if SEK > AEKind then AEKind := FX_VEK_COMPLETE;
                     if Result = FX_RES_SUCCESS then begin
                         
@@ -1337,7 +1340,7 @@ begin
                                     Inc(K);
                                     AddASTBranchChilds(ABranch);
                                     Result := __ParseValueExpression(ABranch^.Childs[K], SEK);
-                                    IF STOP THEN GOTO LBL_END;
+                                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                                     if SEK > AEKind then AEKind := FX_VEK_COMPLETE;
                                     if Result = FX_RES_SUCCESS then begin
                                         if SEK <> FX_VEK_EMPTY then begin
@@ -1345,12 +1348,12 @@ begin
                                                 if Tkn^.Kind = FX_TK_COMMA then begin
                                                     { Single list }
                                                     while (Result = FX_RES_SUCCESS) and TokenInLayout and (Tkn^.Kind = FX_TK_COMMA) do begin
-                                                        IF STOP THEN GOTO LBL_END;
+                                                        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                                                         ReadNextToken;
                                                         Inc(K);
                                                         AddASTBranchChilds(ABranch);
                                                         Result := __ParseValueExpression(ABranch^.Childs[K], SEK);
-                                                        IF STOP THEN GOTO LBL_END;
+                                                        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                                                         if SEK > AEKind then AEKind := FX_VEK_COMPLETE;
                                                         if (Result = FX_RES_SUCCESS) and (SEK = FX_VEK_EMPTY) then
                                                             Result := ErrorAtToken(ValueExpressionExpectedStr);
@@ -1364,7 +1367,7 @@ begin
                                                     Inc(K);
                                                     AddASTBranchChilds(ABranch);
                                                     Result := __ParseValueExpression(ABranch^.Childs[K], SEK);
-                                                    IF STOP THEN GOTO LBL_END;
+                                                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                                                     if Result = FX_RES_SUCCESS then begin
                                                         if SEK = FX_VEK_EMPTY then
                                                             Result := ErrorAtToken(ValueExpressionExpectedStr);
@@ -1384,16 +1387,16 @@ begin
                                     Inc(K);
                                     AddASTBranchChilds(ABranch);
                                     Result := __ParseQualifier(ABranch^.Childs[K], SEK);
-                                    IF STOP THEN GOTO LBL_END;
+                                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                                     if Result = FX_RES_SUCCESS then begin
                                         if SEK <> FX_VQK_EMPTY then begin
                                             while (Result = FX_RES_SUCCESS) and TokenInLayout and (Tkn^.Kind = FX_TK_COMMA) do begin
-                                                IF STOP THEN GOTO LBL_END;
+                                                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                                                 ReadNextToken;
                                                 Inc(K);
                                                 AddASTBranchChilds(ABranch);
                                                 Result := __ParseQualifier(ABranch^.Childs[K], SEK);
-                                                IF STOP THEN GOTO LBL_END;
+                                                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                                                 if (Result = FX_RES_SUCCESS) and (SEK = FX_VQK_EMPTY) then
                                                     Result := ErrorAtToken(QualifierExpectedStr);
                                             end;
@@ -1410,7 +1413,7 @@ begin
                                     Inc(K);
                                     AddASTBranchChilds(ABranch);
                                     Result := __ParseValueExpression(ABranch^.Childs[K], SEK);
-                                    IF STOP THEN GOTO LBL_END;
+                                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                                     if Result = FX_RES_SUCCESS then begin
                                         if SEK = FX_VEK_EMPTY then
                                             Result := ErrorAtToken(ValueExpressionExpectedStr);
@@ -1439,14 +1442,14 @@ begin
                 if TokenInLayout then begin
                     AddASTBranchChilds(ABranch, 2);
                     Result := __ParseAssignment(ABranch^.Childs[0], SEP);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     if Result = FX_RES_SUCCESS then begin
                         if SEP then begin
                             if TokenInLayout and (Tkn^.Kind = FX_TK_KW_IN) then begin
                                 ReadNextToken;
                                 if TokenInLayout then begin
                                     Result := __ParseValueExpression(ABranch^.Childs[1], SEK);
-                                    IF STOP THEN GOTO LBL_END;
+                                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                                     if Result = FX_RES_SUCCESS then begin
                                         if SEK = FX_VEK_EMPTY then
                                             Result := ErrorAtToken(ValueExpressionExpectedStr);
@@ -1481,10 +1484,10 @@ begin
                 AEKind := FX_VEK_COMPLETE;
                 K := 0;
                 while (Result = FX_RES_SUCCESS) and TokenInLayout do begin
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     AddASTBranchChilds(ABranch);
                     Result := __ParseStatement(ABranch^.Childs[K], SEP);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     if (Result = FX_RES_SUCCESS) and (not SEP) then begin
                         SetLength(ABranch^.Childs, K);
                         Break;
@@ -1526,7 +1529,7 @@ begin
     AuxBranch := nil;
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
 
     if TokenInLayout and (Tkn^.Kind = FX_TK_LEFT_CURLYBRACKET) then begin
         AEKind := FX_VEK_COMPLETE;
@@ -1542,16 +1545,16 @@ begin
             K := 0;
             AddASTBranchChilds(ABranch^.Childs[1]);
             Result := __ParseValueExpression(ABranch^.Childs[1]^.Childs[K], SEK);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             if Result = FX_RES_SUCCESS then begin
                 if SEK <> FX_VEK_EMPTY then begin
                     while (Result = FX_RES_SUCCESS) and TokenInLayout and (Tkn^.Kind = FX_TK_COMMA) do begin
-                        IF STOP THEN GOTO LBL_END;
+                        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                         ReadNextToken;
                         Inc(K);
                         AddASTBranchChilds(ABranch^.Childs[1]);
                         Result := __ParseValueExpression(ABranch^.Childs[1]^.Childs[K], SEK);
-                        IF STOP THEN GOTO LBL_END;
+                        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                         if (Result = FX_RES_SUCCESS) and (SEK = FX_VEK_EMPTY) then
                             Result := ErrorAtToken(ValueExpressionExpectedStr);
                     end;
@@ -1570,7 +1573,7 @@ begin
             Result := ErrorAtToken(RightCurlyBracketExpectedStr);
         if Result = FX_RES_SUCCESS then begin
             Result := __ParseIndexPartPosibilityTail(ABranch, SEK);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
         end;
     end
     else
@@ -1596,14 +1599,14 @@ begin
     AuxBranch := nil;
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if TokenInLayout then begin
         Result := __ParseAppTermPreIndex(ABranch, AEKind);
-        IF STOP THEN GOTO LBL_END;
+        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
         if (Result = FX_RES_SUCCESS) and (AEKind <> FX_VEK_EMPTY) then begin
             Result := Self.__ParseIndexPartPosibilityTail(ABranch, SEK);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
         end;
     end
     else
@@ -1633,12 +1636,12 @@ begin
     
     AEKind := FX_VEK_EMPTY;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     while TokenInLayout do begin
-        IF STOP THEN GOTO LBL_END;
+        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
         Result := __ParseAppTerm(AuxBranch, SEK);
-        IF STOP THEN GOTO LBL_END;
+        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
         if (Result = FX_RES_SUCCESS) and (SEK <> FX_VEK_EMPTY) then begin
 
             AppTermForest.Add(AuxBranch, SEK);
@@ -1660,7 +1663,7 @@ begin
         end
         else begin
             Result := __AppTermForestToApplication(AppTermForest, ABranch, AEKind);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
         end;
     end;
     
@@ -1685,11 +1688,11 @@ begin
     AuxBranch := nil;
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if TokenInLayout then begin
         Result := __ParseApplication(ABranch, AEKind);
-        IF STOP THEN GOTO LBL_END;
+        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
         if (Result = FX_RES_SUCCESS) and (AEKind <> FX_VEK_EMPTY) then begin
             if TokenInLayout and (Tkn^.Kind = FX_TK_KS_PUSH_LIST) then begin
                 MakeHeadASTBranch(FX_ASTN_LIST_CONSTRUCTOR, AuxBranch);
@@ -1700,7 +1703,7 @@ begin
                 ReadNextToken;
                 if TokenInLayout then begin
                     Result := __ParseListConsExprPosibility(ABranch^.Childs[1], SEK);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     if Result = FX_RES_SUCCESS then begin
                         if SEK = FX_VEK_EMPTY then
                             Result := ErrorAtToken(ValueExpressionExpectedStr)
@@ -1745,11 +1748,11 @@ begin
     AuxBranch := nil;
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if TokenInLayout then begin
         Result := __ParseListConsExprPosibility(ABranch, AEKind);
-        IF STOP THEN GOTO LBL_END;
+        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
         if (Result = FX_RES_SUCCESS) and (AEKind <> FX_VEK_EMPTY) then begin
             if TokenInLayout and (Tkn^.Kind = FX_TK_KS_GUARD) then begin
                 AEKind := FX_VEK_COMPLETE;
@@ -1761,7 +1764,7 @@ begin
                 ReadNextToken;
                 if TokenInLayout then begin
                     Result := __ParseGuardExprPosibility(ABranch^.Childs[1], SEK);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     if Result = FX_RES_SUCCESS then begin
                         if SEK = FX_VEK_EMPTY then
                             Result := ErrorAtToken(ValueExpressionExpectedStr);
@@ -1795,11 +1798,11 @@ begin
     AuxBranch := nil;
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if TokenInLayout then begin
         Result := __ParseGuardExprPosibility(ABranch, AEKind);
-        IF STOP THEN GOTO LBL_END;
+        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
         if (Result = FX_RES_SUCCESS) and (AEKind <> FX_VEK_EMPTY) then begin
             if TokenInLayout and (Tkn^.Kind = FX_TK_KS_TRY) then begin
                 AEKind := FX_VEK_COMPLETE;
@@ -1811,7 +1814,7 @@ begin
                 ReadNextToken;
                 if TokenInLayout then begin
                     Result := __ParseTryExprPosibility(ABranch^.Childs[1], SEK);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     if Result = FX_RES_SUCCESS then begin
                         if SEK = FX_VEK_EMPTY then
                             Result := ErrorAtToken(ValueExpressionExpectedStr);
@@ -1845,7 +1848,7 @@ begin
     AuxBranch := nil;
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if TokenInLayout and (Tkn^.Kind = FX_TK_KW_WHERE) then begin
         AEKind := FX_VEK_COMPLETE;
@@ -1857,7 +1860,7 @@ begin
         ReadNextToken;
         if TokenInLayout then begin
             Result := __ParseAssignment(ABranch^.Childs[1], SEP);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             if Result = FX_RES_SUCCESS then begin
                 if not SEP then
                     Result := ErrorAtToken(AssignmentExpectedStr);
@@ -1867,7 +1870,7 @@ begin
             Result := ErrorAtToken(AssignmentExpectedStr);
         if Result = FX_RES_SUCCESS then begin
             Result := __ParseWhereExprPosibilityTail(ABranch, SEK);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
         end;
     end
     else
@@ -1891,14 +1894,14 @@ begin
     ABranch := nil;
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if TokenInLayout then begin
         Result := __ParseTryExprPosibility(ABranch, AEKind);
-        IF STOP THEN GOTO LBL_END;
+        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
         if (Result = FX_RES_SUCCESS) and (AEKind <> FX_VEK_EMPTY) then begin
             Result := __ParseWhereExprPosibilityTail(ABranch, SEK);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             if (Result = FX_RES_SUCCESS) and (SEK <> FX_VEK_EMPTY) then
                 AEKind := FX_VEK_COMPLETE;
         end;
@@ -1932,7 +1935,7 @@ begin
     AuxBranch := nil;
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if TokenInLayout then begin
         AParsed := True;
@@ -1972,16 +1975,16 @@ begin
                     K := 0;
                     AddASTBranchChilds(ABranch);
                     Result := __ParseTypeExpression(ABranch^.Childs[K], SEP);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     if Result = FX_RES_SUCCESS then begin
                         if SEP then begin
                             while (Result = FX_RES_SUCCESS) and TokenInLayout and (Tkn^.Kind = FX_TK_COMMA) do begin
-                                IF STOP THEN GOTO LBL_END;
+                                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                                 ReadNextToken;
                                 Inc(K);
                                 AddASTBranchChilds(ABranch);
                                 Result := __ParseTypeExpression(ABranch^.Childs[K], SEP);
-                                IF STOP THEN GOTO LBL_END;
+                                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                                 if (Result = FX_RES_SUCCESS) and (not SEP) then
                                     Result := ErrorAtToken(TypeExpressionExpectedStr);
                             end;
@@ -2005,7 +2008,7 @@ begin
                 if TokenInLayout then begin
                     AddASTBranchChilds(ABranch);
                     Result := __ParseTypeExpression(ABranch^.Childs[0], SEP);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     if Result = FX_RES_SUCCESS then begin
                         if SEP then begin
                             if TokenInLayout and (Tkn^.Kind = FX_TK_RIGHT_SQUAREBRACKET) then
@@ -2034,7 +2037,7 @@ begin
                 ReadNextToken;
                 if TokenInLayout then begin
                     Result := __ParseTypeExpression(ABranch^.Childs[1], SEP);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     if Result = FX_RES_SUCCESS then begin
                         if SEP then begin
                             ;
@@ -2071,10 +2074,10 @@ begin
     AuxBranch := nil;
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     Result := __ParseValueExpression(ABranch, SEK);
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if Result = FX_RES_SUCCESS then begin
         case SEK of
@@ -2094,7 +2097,7 @@ begin
                         ReadNextToken;
                         if TokenInLayout then begin
                             Result := __ParseValueExpression(ABranch^.Childs[1], SEK);
-                            IF STOP THEN GOTO LBL_END;
+                            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                             if Result = FX_RES_SUCCESS then begin
                                 if SEK = FX_VEK_EMPTY then begin
                                     if TokenInLayout then
@@ -2142,7 +2145,7 @@ begin
     ABranch := nil;
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if Tkn^.Kind = FX_TK_IDENTIFIER then begin
         if Tkn^.Next <> nil then begin
@@ -2153,7 +2156,7 @@ begin
                 ReadNextToken;
                 ReadNextToken;
                 Result := __ParseTypeExpression(ABranch^.Childs[1], SEP);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 if not SEP then
                     Result := ErrorAtToken(TypeExpressionExpectedStr);
             end
@@ -2164,7 +2167,7 @@ begin
                 ReadNextToken;
                 ReadNextToken;
                 Result := __ParseTypeExpression(ABranch^.Childs[1], SEP);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 if not SEP then
                     Result := ErrorAtToken(TypeExpressionExpectedStr);
             end
@@ -2175,23 +2178,23 @@ begin
                 ReadNextToken;
                 ReadNextToken;
                 Result := __ParseValueExpression(ABranch^.Childs[1], SEK);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 if SEK = FX_VEK_EMPTY then
                     Result := ErrorAtToken(ValueExpressionExpectedStr);
             end
             else begin
                 Result := __ParseTentativeDefEvl(ABranch);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             end;
         end
         else begin
             Result := __ParseTentativeDefEvl(ABranch);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
         end;
     end
     else begin
         Result := __ParseTentativeDefEvl(ABranch);
-        IF STOP THEN GOTO LBL_END;
+        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     end;
     if (Result = FX_RES_SUCCESS) and ThereIsToken and TokenInLayout then
         Result := ErrorAtToken(UnexpectedTokenStr);
@@ -2217,7 +2220,7 @@ begin
     Result := FX_RES_SUCCESS;
     AuxBranch := nil;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if ThereIsToken then begin
         LayoutAtToken;
@@ -2244,7 +2247,7 @@ begin
                 K := 0;
                 ReadNextToken;
                 while TokenInLayout do begin
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     if Tkn^.Kind = FX_TK_IDENTIFIER then begin
                         AddASTBranchChilds(ABranch);
                         MakeIdentifierASTBranch(Tkn^.IdCode, Tkn^.Line, ABranch^.Childs[K]);
@@ -2269,7 +2272,7 @@ begin
                             ReadNextToken;
                             LBL_L2:
                             while TokenInLayout do begin
-                                IF STOP THEN GOTO LBL_END;
+                                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                                 if Tkn^.Kind = FX_TK_IDENTIFIER then begin
                                     AddASTBranchChilds(ABranch);
                                     MakeIdentifierASTBranch(Tkn^.IdCode, Tkn^.Line, ABranch^.Childs[K]);
@@ -2315,7 +2318,7 @@ begin
             end; { POSFIX }
             else { Syn, Inh, Def or Evl } begin
                 Result := __ParseTentativeSynInhDefAsgEvl(ABranch);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             end; { Syn, Inh, Def, Asg or Evl }
         end;
     end; 
@@ -2348,6 +2351,16 @@ end;
 procedure TParser.Interrupt;
 begin
     STOP := TRUE;
+end;
+
+procedure TParser.Pause;
+begin
+    SLEEP := TRUE;
+end;
+
+procedure TParser.Resume;
+begin
+    SLEEP := FALSE;
 end;
 
 end.

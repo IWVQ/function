@@ -11,7 +11,7 @@ type
     private
         FrontEnd: IFrontEndListener;
 
-        FCaption: string;
+        FCaption: ansistring;
         FText: TFxString;
         FLines: TIntArray; // line per char: length(FLines) = length(FText) + 1
         FCols: TIntArray; // col per char: length(FCols) = length(FText) + 1
@@ -22,15 +22,15 @@ type
         procedure Init;
         function LoadFromFile(FileName: TFileName): Boolean;
         { listener }
-        function GetItem(AIndex: Integer): Char;
+        function GetItem(AIndex: Integer): TFxChar;
         function ColFromPos(APos: Integer): Integer;
         function LineFromPos(APos: Integer): Integer;
-        function GetCaption: string;
+        function GetCaption: ansistring;
         function GetRange(AFrom, ATo: Integer): TFxString;
         function Length: Integer;
         function TabSize: Integer;
         procedure MarkLine(ALine: Integer);
-        property Item[AIndex: Integer]: Char read GetItem; default;
+        property Item[AIndex: Integer]: TFxChar read GetItem; default;
     end;
     
     TInputStream = class(TFxObject, IStream)
@@ -38,7 +38,7 @@ type
         FrontEnd: IFrontEndListener;
         
         FPrompterSize: Integer;
-        FCaption: string;
+        FCaption: ansistring;
         FText: TFxString;
         FCols: TIntArray; // col per char
         FLines: TIntArray; // line per char
@@ -52,22 +52,22 @@ type
         constructor Create(AFrontEnd: IFrontEndListener);
         destructor Destroy; override;
         procedure Init; virtual;
-        function Load(S: string): Boolean;
+        function Load(S: TFxString): Boolean;
         
         procedure BeginReadLine;
-        function AddLine(S: string): Boolean;
+        function AddLine(S: TFxString): Boolean;
         procedure EndReadLine;
         { listener }
-        function GetItem(Index: Integer): Char;
+        function GetItem(Index: Integer): TFxChar;
         function ColFromPos(P: Integer): Integer;
         function LineFromPos(P: Integer): Integer;
-        function GetCaption: string;
+        function GetCaption: ansistring;
         function GetRange(AFrom, ATo: Integer): TFxString;
         function Length: Integer;
         function TabSize: Integer;
         procedure MarkLine(ALine: Integer); virtual;
         property PrompterSize: Integer read FPrompterSize write FPrompterSize;
-        property Item[Index: Integer]: Char read GetItem; default;
+        property Item[Index: Integer]: TFxChar read GetItem; default;
     end;
     
 implementation
@@ -158,12 +158,12 @@ begin
             Inc(K);
         end;
         CloseFile(F);
-        FText := Utf8ToString(S);
+        FText := S; // Utf8ToString(S);
         CalculateLineCols;
     end;
 end;
 
-function TScriptStream.GetItem(AIndex: Integer): Char;                  
+function TScriptStream.GetItem(AIndex: Integer): TFxChar;
 begin
     if (AIndex >= 0) and (AIndex < Length) then
         Result := FText[AIndex + 1]
@@ -194,7 +194,7 @@ begin
         Result := -1;
 end;
 
-function TScriptStream.GetCaption: string;
+function TScriptStream.GetCaption: ansistring;
 begin
     Result := FCaption;
 end;
@@ -279,7 +279,7 @@ begin
     FLines[Self.Length] := R;
 end;
 
-function TInputStream.Load(S: string): Boolean;
+function TInputStream.Load(S: TFxString): Boolean;
 begin
     Init;
     FText := S;
@@ -293,7 +293,7 @@ begin
     Init;
 end;
 
-function TInputStream.AddLine(S: string): Boolean;
+function TInputStream.AddLine(S: TFxString): Boolean;
 begin
     if FNeedsEoL then 
         FText := FText + GetStdEoL + S
@@ -309,7 +309,7 @@ begin
     FNeedsEoL := True;
 end;
 
-function TInputStream.GetItem(Index: Integer): Char;
+function TInputStream.GetItem(Index: Integer): TFxChar;
 begin
     if (Index >= 0) and (Index < Self.Length) then
         Result := FText[Index + 1]
@@ -337,7 +337,7 @@ begin
         Result := -1;
 end;
 
-function TInputStream.GetCaption: string;
+function TInputStream.GetCaption: ansistring;
 begin
     Result := FCaption;
 end;

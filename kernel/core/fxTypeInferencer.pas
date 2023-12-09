@@ -19,7 +19,8 @@ type
         function InferenceError(AMsg: TFxString): Word;
         function __InferType(AValueBranch: TValueExpr; var ATypeBranch: TTypeExpr): Word;
     protected
-        STOP: BOOLEAN;
+        STOP: BOOLEAN;   
+        SLEEP: BOOLEAN;
     public
         constructor Create(AFrontEnd: IFrontEndListener; AInterpreter: IInterpreterListener;
             AStorage: TStorage; AError: TErrorRegister);
@@ -27,6 +28,8 @@ type
         
         function __Infer(AValue: TValueExpr; var AType: TTypeExpr): Word;
         procedure Interrupt;
+        procedure Pause;
+        procedure Resume;
     end;
     
 implementation
@@ -79,7 +82,7 @@ begin
     AuxTypeBranchHead := nil;
     AuxTypeBranchTail := nil;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     case AValueBranch^.vKind of
         FX_VN_NONE       : begin
@@ -126,9 +129,9 @@ begin
             MakeHeadTypeBranch(FX_TN_TUPLE, ATypeBranch);
             AddTypeBranchChilds(ATypeBranch, Length(AValueBranch^.Childs));
             for K := 0 to Length(AValueBranch^.Childs) - 1 do begin
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 Result := __InferType(AValueBranch^.Childs[K], ATypeBranch^.Childs[K]);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 if Result <> FX_RES_SUCCESS then
                     Break;
             end;
@@ -137,7 +140,7 @@ begin
             MakeHeadTypeBranch(FX_TN_LIST, ATypeBranch);
             AddTypeBranchChilds(ATypeBranch, 1);
             Result := __InferType(AValueBranch^.Childs[0], AuxTypeBranchHead);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             if Result = FX_RES_SUCCESS then begin
                 if AValueBranch^.Childs[1]^.vKind = FX_VN_NULL then begin
                     ATypeBranch^.Childs[0] := AuxTypeBranchHead;
@@ -145,11 +148,11 @@ begin
                 end
                 else begin
                     Result := __InferType(AValueBranch^.Childs[1], AuxTypeBranchTail);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     if Result = FX_RES_SUCCESS then begin
                         if AuxTypeBranchTail^.tKind = FX_TN_LIST then begin
                             Result := FTypeChecker.__TypeIsSubTypeOf(AuxTypeBranchHead, AuxTypeBranchTail^.Childs[0], B);
-                            IF STOP THEN GOTO LBL_END;
+                            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                             if Result = FX_RES_SUCCESS then begin
                                 if B then begin
                                     ATypeBranch^.Childs[0] := AuxTypeBranchTail^.Childs[0];
@@ -157,7 +160,7 @@ begin
                                 end
                                 else begin
                                     Result := FTypeChecker.__TypeIsSubTypeOf(AuxTypeBranchTail^.Childs[0], AuxTypeBranchHead, B);
-                                    IF STOP THEN GOTO LBL_END;
+                                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                                     if Result = FX_RES_SUCCESS then begin
                                         if B then begin
                                             ATypeBranch^.Childs[0] := AuxTypeBranchHead;
@@ -181,10 +184,10 @@ begin
             MakeHeadTypeBranch(FX_TN_FUNCTION, ATypeBranch);
             AddTypeBranchChilds(ATypeBranch, 2);
             Result := __InferType(AValueBranch^.Childs[0], ATypeBranch^.Childs[0]);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             if Result = FX_RES_SUCCESS then begin
                 Result := __InferType(AValueBranch^.Childs[1], ATypeBranch^.Childs[1]);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             end;
         end;
         FX_VN_APPLICATION: begin
@@ -208,10 +211,10 @@ begin
     Result := FX_RES_SUCCESS;
     AType := nil;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     Result := __InferType(AValue, AType);
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
 LBL_END:
     
@@ -223,6 +226,18 @@ procedure TTypeInferencer.Interrupt;
 begin
     STOP := TRUE;
     FTypeChecker.Interrupt;
+end;
+            
+procedure TTypeInferencer.Pause;
+begin
+    SLEEP := TRUE;
+    FTypeChecker.Pause;
+end;
+
+procedure TTypeInferencer.Resume;
+begin
+    SLEEP := FALSE;
+    FTypeChecker.Resume;
 end;
 
 end.

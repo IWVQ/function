@@ -2,6 +2,54 @@
 #include <stdio.h>
 #include <string.h>
 
+#ifdef FUNCTION_KERNEL
+
+KernelFunction fx_call_shell     = nullptr;
+KernelFunction fx_call_create    = nullptr;
+KernelFunction fx_call_destroy   = nullptr;
+KernelFunction fx_call_input     = nullptr;
+KernelFunction fx_call_run       = nullptr;
+KernelFunction fx_call_pause     = nullptr;
+KernelFunction fx_call_resume    = nullptr;
+KernelFunction fx_call_interrupt = nullptr;
+KernelFunction fx_call_save      = nullptr;
+
+KernelLibrary kernellib("fxkernel");
+
+#else
+
+KernelParam fx_call_shell(KernelParam kernel, KernelParam, KernelParam);
+KernelParam fx_call_create(KernelParam shell, KernelParam file, KernelParam callback);
+KernelParam fx_call_destroy(KernelParam kernel, KernelParam, KernelParam);
+KernelParam fx_call_input(KernelParam kernel, KernelParam data, KernelParam);
+KernelParam fx_call_run(KernelParam kernel, KernelParam, KernelParam);
+KernelParam fx_call_pause(KernelParam kernel, KernelParam, KernelParam);
+KernelParam fx_call_resume(KernelParam kernel, KernelParam, KernelParam);
+KernelParam fx_call_interrupt(KernelParam kernel, KernelParam, KernelParam);
+KernelParam fx_call_save(KernelParam kernel, KernelParam data, KernelParam);
+
+#endif
+
+KernelParam fx_callback(KernelParam kernel, KernelParam code, KernelParam data)
+{/*
+    if (data){
+        qDebug("calling the callback from kernel.pas");
+        KernelData *d = reinterpret_cast<KernelData *>(data);
+        qDebug(reinterpret_cast<char*>(d->str));
+    }
+    else
+        qDebug("fx_callback");
+*/
+    Shell *shell = reinterpret_cast<Shell *>(fx_call_shell(kernel, 0, 0));
+    if (shell){
+        qDebug("fx_callback shell->callback");
+        return shell->callback(code, reinterpret_cast<KernelData *>(data));
+        qDebug("fx_callback shell->callback --- after");
+    }
+    else return 0;
+}
+
+
 /* SHELL */
 
 Shell::Shell(QObject *parent): QThread(parent)
@@ -27,7 +75,7 @@ Shell::~Shell()
     exit = true;
     qDebug("exit = true");
     if (evaluating)
-        fx_call_interrupt(kernel);
+        fx_call_interrupt(kernel, 0, 0);
     qDebug("fx_interrupt(kernel);");
     sleepcondition.wakeAll();
     qDebug("sleepcondition.wakeAll();");
@@ -45,10 +93,7 @@ void Shell::run()
     writeBanner();
     // create kernel
     qDebug("creating kernel");
-    QByteArray b = filetoopen.toUtf8();
-    KernelData d;
-    d.str = b.data();
-    d.len = b.length();
+    KernelData d(filetoopen);
     KernelParam callback = reinterpret_cast<KernelParam>(&fx_callback); //#
     kernel = fx_call_create(reinterpret_cast<KernelParam>(this),
                        reinterpret_cast<KernelParam>(&d),
@@ -58,17 +103,20 @@ void Shell::run()
         qDebug("reading something");
         QString input = readInput();
         if (exit) break;
-        QByteArray b = input.toUtf8();
-        d.str = b.data(); // no problem, this doesn't needs to grab
-        d.len = b.length();
+        KernelData d(input);
+        qDebug("---------------- d.str = %llu -----------------", KernelParam(d.str));
+        qDebug("---------------- &d.str = %llu -----------------", KernelParam(&(d.str)));
+        qDebug("---------------- &d.len = %llu -----------------", KernelParam(&(d.len)));
+        qDebug("---------------- &d = %llu -----------------", KernelParam(&d));
+        qDebug("---------------- *d.str = %d --------------", qint32(*(d.str)));
 
         // evaluate
         evaluating = true;
         sendMessage(SHELL_EVALUATING);
         qDebug("evaluating something");
-        fx_call_input(kernel, reinterpret_cast<KernelParam>(&d));
+        fx_call_input(kernel, reinterpret_cast<KernelParam>(&d), callback); //# remove callback
         qDebug("running");
-        KernelParam res = fx_call_run(kernel);
+        KernelParam res = fx_call_run(kernel, 0, 0);
         qDebug("runned");
         evaluating = false;
         sendMessage(SHELL_EVALUATED);
@@ -84,7 +132,7 @@ void Shell::run()
     }while(!exit);
     qDebug("shell exited");
 
-    fx_call_destroy(kernel);
+    fx_call_destroy(kernel, 0, 0);
     kernel = 0;
 }
 
@@ -99,28 +147,25 @@ KernelParam Shell::callback(KernelParam code, KernelData *data)
         qDebug("pause: thread sleep");
         sleepcondition.wait(&mutex);
         qDebug("pause: thread wake up");
-        fx_call_resume(kernel);
+        fx_call_resume(kernel, 0, 0);
         paused = false;
     }
     else if (code == FX_KER_READ){
         QString s = read();
-        QByteArray b = s.toUtf8();
-        KernelData d;
-        d.str = b.data();
-        d.len = b.length();
-        fx_call_input(kernel, reinterpret_cast<KernelParam>(&d));
+        KernelData d(s);
+        fx_call_input(kernel, reinterpret_cast<KernelParam>(&d), 0);
     }
     else if (code == FX_KER_WRITE){
         format(consoleformat);
-        QString s = QString::fromUtf8(data->str, data->len);
+        QString s = QString::fromUtf8(reinterpret_cast<char*>(data->str), data->len);
         write(s);
     }
     else if (code == FX_KER_OUTPUT){
-        QString s = QString::fromUtf8(data->str, data->len);
+        QString s = QString::fromUtf8(reinterpret_cast<char*>(data->str), data->len);
         writeOutput(s);
     }
     else if (code == FX_KER_ERROR){
-        QString s = QString::fromUtf8(data->str, data->len);
+        QString s = QString::fromUtf8(reinterpret_cast<char*>(data->str), data->len);
         writeError(s);
     }
     else if (code == FX_KER_CLRSCR){
@@ -134,7 +179,7 @@ void Shell::pause()
     const QMutexLocker locker(&mutex);
     if (isRunning() && evaluating && !paused){
         paused = true;
-        fx_call_pause(kernel);
+        fx_call_pause(kernel, 0, 0);
     }
 }
 
@@ -143,7 +188,7 @@ void Shell::resume()
     const QMutexLocker locker(&mutex);
     if (isRunning() && evaluating && paused){
         if (reading) // don't wake up
-            fx_call_resume(kernel);
+            fx_call_resume(kernel, 0, 0);
         else
             sleepcondition.wakeAll();
     }
@@ -153,7 +198,7 @@ void Shell::interrupt()
 {
     const QMutexLocker locker(&mutex);
     if (isRunning() && evaluating){
-        fx_call_interrupt(kernel);
+        fx_call_interrupt(kernel, 0, 0);
         if (paused || reading)
             sleepcondition.wakeAll();
     }
@@ -175,11 +220,8 @@ bool Shell::saveToFile(const QString &filename)
 {
     const QMutexLocker locker(&mutex);
     if (isRunning() && !evaluating){
-        QByteArray b = filename.toUtf8();
-        KernelData d;
-        d.str = b.data();
-        d.len = b.length();
-        fx_call_save(kernel, reinterpret_cast<KernelParam>(&d));
+        KernelData d(filename);
+        fx_call_save(kernel, reinterpret_cast<KernelParam>(&d), 0);
     }
     return false;
 }
@@ -350,3 +392,281 @@ QPoint Shell::whereXY(bool end)
         return console->whereXY();
     //*/
 }
+
+
+
+/* KERNEL */
+
+#ifdef FUNCTION_KERNEL
+
+/* library */
+
+KernelLibrary::KernelLibrary(const QString& fileName, QObject *parent):
+    QLibrary(fileName, parent)
+{
+    fx_call_shell     = (KernelFunction)resolve("fx_call_shell");
+    fx_call_create    = (KernelFunction)resolve("fx_call_create");
+    fx_call_destroy   = (KernelFunction)resolve("fx_call_destroy");
+    fx_call_input     = (KernelFunction)resolve("fx_call_input");
+    fx_call_run       = (KernelFunction)resolve("fx_call_run");
+    fx_call_pause     = (KernelFunction)resolve("fx_call_pause");
+    fx_call_resume    = (KernelFunction)resolve("fx_call_resume");
+    fx_call_interrupt = (KernelFunction)resolve("fx_call_interrupt");
+    fx_call_save      = (KernelFunction)resolve("fx_call_save");
+
+    if (!fx_call_shell    ) qDebug("Kernel: error loading fx_call_shell    ");
+    if (!fx_call_create   ) qDebug("Kernel: error loading fx_call_create   ");
+    if (!fx_call_destroy  ) qDebug("Kernel: error loading fx_call_destroy  ");
+    if (!fx_call_input    ) qDebug("Kernel: error loading fx_call_input    ");
+    if (!fx_call_run      ) qDebug("Kernel: error loading fx_call_run      ");
+    if (!fx_call_pause    ) qDebug("Kernel: error loading fx_call_pause    ");
+    if (!fx_call_resume   ) qDebug("Kernel: error loading fx_call_resume   ");
+    if (!fx_call_interrupt) qDebug("Kernel: error loading fx_call_interrupt");
+    if (!fx_call_save     ) qDebug("Kernel: error loading fx_call_save     ");
+
+    QString s = "Kernel: " + errorString() + "------";
+    qDebug(s.toUtf8());
+}
+
+KernelLibrary::~KernelLibrary() = default;
+
+#else
+
+class FakeKernel
+{
+public:
+    FakeKernel(KernelParam shell, KernelData *file, KernelCallback callback)
+    {
+        this->shell = shell;
+        this->callback = callback;
+        if (file->len == 0) // use len instead str==null
+            qDebug("no file loaded on creating kernel");
+        else
+            qDebug("file loaded on creating kernel");
+    }
+
+    ~FakeKernel()
+    {
+
+    }
+
+    void doSomethingInLoop()
+    {
+        // do nothing
+        if (pause){
+            callback(reinterpret_cast<KernelParam>(this), FX_KER_PAUSED, 0);
+
+        }
+    }
+
+    void save()
+    {
+        qDebug("kernel saved");
+    }
+
+    void load()
+    {
+        qDebug("kernel loaded");
+    }
+
+    KernelParam shell;
+    char *input = nullptr;
+    int inputlen = 0;
+    bool pause = false;
+    bool stop = false;
+    KernelCallback callback;
+    long long unsigned int run()
+    {
+        stop = false;
+
+        QString s = QString::fromUtf8(input, inputlen);
+        KernelData d;
+        d.str = nullptr;
+        d.len = 0;
+
+        qDebug("FakeKernel.run() %s", d.str);
+
+        KernelParam code = 0;
+
+        long long unsigned int res = 0;
+
+        if (s == "clrscr") {
+            code = FX_KER_CLRSCR;
+            res = callback(reinterpret_cast<KernelParam>(this),
+                                                 code,
+                                                 reinterpret_cast<KernelParam>(&d));
+        }
+        else if (s == "read") {
+            // write a prompter
+            code = FX_KER_WRITE;
+            QString output = "--> ";
+            QByteArray b = output.toUtf8();
+            d.str = b.data();
+            d.len = output.length();
+
+            res = callback(reinterpret_cast<KernelParam>(this),
+                                                 code,
+                                                 reinterpret_cast<KernelParam>(&d));
+            // read some string
+            code = FX_KER_READ;
+            d.str = nullptr;
+            d.len = 0;
+
+            res = callback(reinterpret_cast<KernelParam>(this),
+                                                 code,
+                                                 reinterpret_cast<KernelParam>(&d));
+            if (stop) goto LBL_STOPPED;
+
+            // print readed string
+            code = FX_KER_WRITE;
+            output = QString::fromUtf8(input, inputlen);
+            output = "readed: " + output + "\n";
+            b = output.toUtf8();
+            d.str = b.data();
+            d.len = output.length();
+
+            res = callback(reinterpret_cast<KernelParam>(this),
+                                                 code,
+                                                 reinterpret_cast<KernelParam>(&d));
+
+        }
+        else if (s == "write") {
+            code = FX_KER_WRITE;
+            QString output = "write: blablablabla\n";
+            QByteArray b = output.toUtf8();
+            d.str = b.data();
+            d.len = output.length();
+
+            res = callback(reinterpret_cast<KernelParam>(this),
+                                                 code,
+                                                 reinterpret_cast<KernelParam>(&d));
+        }
+        else if (s == "error") {
+            code = FX_KER_ERROR;
+            QString output = "error: \"error\" entered";
+            QByteArray b = output.toUtf8();
+            d.str = b.data();
+            d.len = output.length();
+
+            res = callback(reinterpret_cast<KernelParam>(this),
+                                                 code,
+                                                 reinterpret_cast<KernelParam>(&d));
+        }
+        else if (s == "loop") {
+            while(!stop){
+                doSomethingInLoop();
+                // qDebug("looping");
+            }
+        }
+        else if (s == "exit"){
+            qDebug("exiting");
+            return FX_EXIT;
+        }
+        else{
+            code = FX_KER_OUTPUT;
+            QString output = "ans = " + s;
+            QByteArray b = output.toUtf8();
+            d.str = b.data();
+            d.len = output.length();
+
+            res = callback(reinterpret_cast<KernelParam>(this),
+                                                 code,
+                                                 reinterpret_cast<KernelParam>(&d));
+        }
+
+        LBL_STOPPED:
+
+        if (stop){
+            code = FX_KER_WRITE;
+            QString output = "--- INTERRUPTED ---";
+            QByteArray b = output.toUtf8();
+            d.str = b.data();
+            d.len = output.length();
+
+            res = callback(reinterpret_cast<KernelParam>(this),
+                                                 code,
+                                                 reinterpret_cast<KernelParam>(&d));
+
+            res = FX_INTERRUPTED;
+        }
+
+        qDebug("FakeKernel.run() -- after callback");
+
+        return res;
+    }
+
+};
+
+KernelParam fx_call_shell(KernelParam kernel, KernelParam, KernelParam)
+{
+    FakeKernel *k = reinterpret_cast<FakeKernel *>(kernel);
+    return k->shell;
+}
+
+KernelParam fx_call_create(KernelParam shell, KernelParam file, KernelParam callback)
+{
+    FakeKernel *k = new FakeKernel(shell, reinterpret_cast<KernelData *>(file), reinterpret_cast<KernelCallback>(callback));
+    return reinterpret_cast<KernelParam>(k);
+}
+
+KernelParam fx_call_destroy(KernelParam kernel, KernelParam, KernelParam)
+{
+    FakeKernel *k = reinterpret_cast<FakeKernel *>(kernel);
+    delete k;
+    return 0;
+}
+
+KernelParam fx_call_input(KernelParam kernel, KernelParam data, KernelParam)
+{
+    FakeKernel *k = reinterpret_cast<FakeKernel *>(kernel);
+    KernelData *d = reinterpret_cast<KernelData *>(data);
+    // copying data
+    k->inputlen = d->len;
+    if (k->input) delete [] k->input;
+    k->input = new char[d->len];
+    memcpy(k->input, d->str, (d->len) * sizeof(char));
+    qDebug("fx_input %s", k->input);
+    return 0;
+}
+
+KernelParam fx_call_run(KernelParam kernel, KernelParam, KernelParam)
+{
+    FakeKernel *k = reinterpret_cast<FakeKernel *>(kernel);
+    k->stop = false;
+    k->pause = false;
+    qDebug("fx_run %s", k->input);
+    return k->run();
+}
+
+KernelParam fx_call_pause(KernelParam kernel, KernelParam, KernelParam)
+{
+    FakeKernel *k = reinterpret_cast<FakeKernel *>(kernel);
+    k->pause = true;
+    qDebug("kernel paused");
+    return 0;
+}
+
+KernelParam fx_call_resume(KernelParam kernel, KernelParam, KernelParam)
+{
+    FakeKernel *k = reinterpret_cast<FakeKernel *>(kernel);
+    k->pause = false;
+    qDebug("kernel resumed");
+    return 0;
+}
+
+KernelParam fx_call_interrupt(KernelParam kernel, KernelParam, KernelParam)
+{
+    FakeKernel *k = reinterpret_cast<FakeKernel *>(kernel);
+    k->stop = true;
+    return 0;
+}
+
+KernelParam fx_call_save(KernelParam kernel, KernelParam data, KernelParam)
+{
+    FakeKernel *k = reinterpret_cast<FakeKernel *>(kernel);
+    k->save();
+    return 0;
+}
+
+#endif
+

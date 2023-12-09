@@ -16,7 +16,6 @@ SOURCES += \
     fxhilite.cpp \
     hilite.cpp \
     jsonhilite.cpp \
-    kernel.cpp \
     main.cpp \
     mainwindow.cpp \
     pagetabs.cpp \
@@ -34,7 +33,6 @@ HEADERS += \
     fxhilite.h \
     hilite.h \
     jsonhilite.h \
-    kernel.h \
     mainwindow.h \
     pagetabs.h \
     searchengine.h \
@@ -47,6 +45,11 @@ FORMS += \
     mainwindow.ui \
     settingsdialog.ui \
     wndgoto.ui
+
+INCLUDEPATH += $$PWD/../kernel
+
+
+#LIBS += -L$$PWD/../kernel -fxkernel
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

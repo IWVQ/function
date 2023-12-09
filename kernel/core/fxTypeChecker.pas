@@ -16,7 +16,8 @@ type
         
         function CheckingError(AMsg: TFxString; const AArgs: array of const): Word;
     protected
-        STOP: BOOLEAN;
+        STOP: BOOLEAN;  
+        SLEEP: BOOLEAN;
     public
         constructor Create(AFrontEnd: IFrontEndListener; AInterpreter: IInterpreterListener;
             AStorage: TStorage; AError: TErrorRegister);
@@ -27,7 +28,9 @@ type
         function __ValueMatchsValueType(AValueTypeBranch, AValueBranch: TValueExpr; var AMatches: Boolean): Word;
         function __TypeIsSubTypeOf(ATypeBranchSub, ATypeBranchSup: TTypeExpr; var Res: Boolean): Word;
         function __ValueTypeIsSubTypeOf(AValueTypeBranchSub: TValueExpr; ATypeBranchSup: TTypeExpr; var Res: Boolean): Word;
-        procedure Interrupt;
+        procedure Interrupt;  
+        procedure Pause;
+        procedure Resume;
     end;
 
 implementation
@@ -71,7 +74,7 @@ begin
     // revisar en la definicion de sinonimos es suficiente
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if ATypeBranch^.tKind = FX_TN_IDENTIFIER then begin
         if AIdCode = ATypeBranch^.tIdCode then
@@ -79,16 +82,16 @@ begin
         else if Storage[ATypeBranch^.tIdCode].HasTypeSynonymous then begin
             ATypeBranch := Storage[ATypeBranch^.tIdCode].TypeSynonymous;
             Result := __CheckForRecursivity(AIdCode, ATypeBranch);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
         end
         else
             Result := CheckingError(UndefinedTypeSynonymousStr, [Storage[ATypeBranch^.tIdCode].Name]);
     end
     else begin
         for K := 0 to Length(ATypeBranch^.Childs) - 1 do begin
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             Result := __CheckForRecursivity(AIdCode, ATypeBranch^.Childs[K]);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             if Result <> FX_RES_SUCCESS then
                 Break;
         end;
@@ -112,7 +115,7 @@ begin
     Result := FX_RES_SUCCESS;
     AMatches := False;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     case ATypeBranch^.tKind of
         FX_TN_NONE      : begin
@@ -142,7 +145,7 @@ begin
             if Storage[ATypeBranch^.tIdCode].HasTypeSynonymous then begin
                 ATypeBranch := Storage[ATypeBranch^.tIdCode].TypeSynonymous;
                 Result := __ValueMatchsType(ATypeBranch, AValueBranch, AMatches);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             end
             else
                 Result := CheckingError(UndefinedTypeSynonymousStr, [Storage[ATypeBranch^.tIdCode].Name]);
@@ -154,9 +157,9 @@ begin
             if (AValueBranch^.vKind = FX_VN_TUPLE) and (Length(AValueBranch^.Childs) = Length(ATypeBranch^.Childs)) then begin
                 AMatches := True;
                 for K := 0 to Length(AValueBranch^.Childs) - 1 do begin
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     Result := __ValueMatchsType(ATypeBranch^.Childs[K], AValueBranch^.Childs[K], AMatches);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     if (Result <> FX_RES_SUCCESS) or (not AMatches) then
                         Break;
                 end;
@@ -168,12 +171,12 @@ begin
             else if AValueBranch^.vKind = FX_VN_LIST_CONS then begin
                 AMatches := True;
                 Result := __ValueMatchsType(ATypeBranch^.Childs[0], AValueBranch^.Childs[0], AMatches);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 if Result = FX_RES_SUCCESS then begin
                     if AMatches then begin
                         // averiguar si la cola sigue encajando
                         Result := __ValueMatchsType(ATypeBranch, AValueBranch^.Childs[1], AMatches);
-                        IF STOP THEN GOTO LBL_END;
+                        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     end;
                 end;
             end;
@@ -209,7 +212,7 @@ begin
     AMatches := False;
     AuxTypeBranch := nil;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     case AValueTypeBranch^.D.tKind of
         FX_TN_NONE      : begin
@@ -239,7 +242,7 @@ begin
             if Storage[AValueTypeBranch^.D.tIdCode].HasTypeSynonymous then begin
                 AuxTypeBranch := Storage[AValueTypeBranch^.D.tIdCode].TypeSynonymous;
                 Result := __ValueMatchsType(AuxTypeBranch, AValueBranch, AMatches);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             end
             else
                 Result := CheckingError(UndefinedTypeSynonymousStr, [Storage[AValueTypeBranch^.D.tIdCode].Name]);
@@ -251,9 +254,9 @@ begin
             if (AValueBranch^.vKind = FX_VN_TUPLE) and (Length(AValueBranch^.Childs) = Length(AValueTypeBranch^.Childs)) then begin
                 AMatches := True;
                 for K := 0 to Length(AValueBranch^.Childs) - 1 do begin
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     Result := __ValueMatchsValueType(AValueTypeBranch^.Childs[K], AValueBranch^.Childs[K], AMatches);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     if (Result <> FX_RES_SUCCESS) or (not AMatches) then
                         Break;
                 end;
@@ -265,12 +268,12 @@ begin
             else if AValueBranch^.vKind = FX_VN_LIST_CONS then begin
                 AMatches := True;
                 Result := __ValueMatchsValueType(AValueTypeBranch^.Childs[0], AValueBranch^.Childs[0], AMatches);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 if Result = FX_RES_SUCCESS then begin
                     if AMatches then begin
                         // averiguar si la cola sigue encajando
                         Result := __ValueMatchsValueType(AValueTypeBranch, AValueBranch^.Childs[1], AMatches);
-                        IF STOP THEN GOTO LBL_END;
+                        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     end;
                 end;
             end;
@@ -304,13 +307,13 @@ begin
     Result := FX_RES_SUCCESS;
     Res := True;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if ATypeBranchSub^.tKind = FX_TN_IDENTIFIER then begin
         if Storage[ATypeBranchSub^.tIdCode].HasTypeSynonymous then begin
             ATypeBranchSub := Storage[ATypeBranchSub^.tIdCode].TypeSynonymous;
             Result := __TypeIsSubTypeOf(ATypeBranchSub, ATypeBranchSup, Res);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
         end
         else
             Result := CheckingError(UndefinedTypeSynonymousStr, [Storage[ATypeBranchSub^.tIdCode].Name]);
@@ -355,7 +358,7 @@ begin
                 if Storage[ATypeBranchSup^.tIdCode].HasTypeSynonymous then begin
                     ATypeBranchSup := Storage[ATypeBranchSup^.tIdCode].TypeSynonymous;
                     Result := __TypeIsSubTypeOf(ATypeBranchSub, ATypeBranchSup, Res);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 end
                 else
                     Result := CheckingError(UndefinedTypeSynonymousStr, [Storage[ATypeBranchSup^.tIdCode].Name]);
@@ -370,7 +373,7 @@ begin
                 if (ATypeBranchSub^.tKind = FX_TN_TUPLE) and (Length(ATypeBranchSup^.Childs) = Length(ATypeBranchSub^.Childs)) then begin
                     for K := 0 to Length(ATypeBranchSub^.Childs) - 1 do begin
                         Result := __TypeIsSubTypeOf(ATypeBranchSub^.Childs[K], ATypeBranchSup^.Childs[K], Res);
-                        IF STOP THEN GOTO LBL_END;
+                        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                         if (Result <> FX_RES_SUCCESS) or (not Res) then
                             Break;
                     end;
@@ -381,7 +384,7 @@ begin
             FX_TN_LIST      : begin
                 if (ATypeBranchSub^.tKind = FX_TN_LIST) then begin
                     Result := __TypeIsSubTypeOf(ATypeBranchSub^.Childs[0], ATypeBranchSup^.Childs[0], Res);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 end
                 else
                     Res := False;
@@ -389,10 +392,10 @@ begin
             FX_TN_FUNCTION  : begin
                 if (ATypeBranchSub^.tKind = FX_TN_FUNCTION) then begin
                     Result := __TypeIsSubTypeOf(ATypeBranchSub^.Childs[0], ATypeBranchSup^.Childs[0], Res);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     if (Result = FX_RES_SUCCESS) and Res then begin
                         Result := __TypeIsSubTypeOf(ATypeBranchSub^.Childs[1], ATypeBranchSup^.Childs[1], Res);
-                        IF STOP THEN GOTO LBL_END;
+                        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     end;
                 end
                 else
@@ -420,13 +423,13 @@ begin
     Res := True;
     AuxTypeBranchSub := nil;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if AValueTypeBranchSub^.D.tKind = FX_TN_IDENTIFIER then begin
         if Storage[AValueTypeBranchSub^.D.tIdCode].HasTypeSynonymous then begin
             AuxTypeBranchSub := Storage[AValueTypeBranchSub^.D.tIdCode].TypeSynonymous;
             Result := __TypeIsSubTypeOf(AuxTypeBranchSub, ATypeBranchSup, Res);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             AuxTypeBranchSub := nil;
         end
         else
@@ -472,7 +475,7 @@ begin
                 if Storage[ATypeBranchSup^.tIdCode].HasTypeSynonymous then begin
                     ATypeBranchSup := Storage[ATypeBranchSup^.tIdCode].TypeSynonymous;
                     Result := __ValueTypeIsSubTypeOf(AValueTypeBranchSub, ATypeBranchSup, Res);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 end
                 else
                     Result := CheckingError(UndefinedTypeSynonymousStr, [Storage[ATypeBranchSup^.tIdCode].Name]);
@@ -487,7 +490,7 @@ begin
                 if (AValueTypeBranchSub^.D.tKind = FX_TN_TUPLE) and (Length(ATypeBranchSup^.Childs) = Length(AValueTypeBranchSub^.Childs)) then begin
                     for K := 0 to Length(AValueTypeBranchSub^.Childs) - 1 do begin
                         Result := __ValueTypeIsSubTypeOf(AValueTypeBranchSub^.Childs[K], ATypeBranchSup^.Childs[K], Res);
-                        IF STOP THEN GOTO LBL_END;
+                        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                         if (Result <> FX_RES_SUCCESS) or (not Res) then
                             Break;
                     end;
@@ -498,7 +501,7 @@ begin
             FX_TN_LIST      : begin
                 if (AValueTypeBranchSub^.D.tKind = FX_TN_LIST) then begin
                     Result := __ValueTypeIsSubTypeOf(AValueTypeBranchSub^.Childs[0], ATypeBranchSup^.Childs[0], Res);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 end
                 else
                     Res := False;
@@ -506,10 +509,10 @@ begin
             FX_TN_FUNCTION  : begin
                 if (AValueTypeBranchSub^.D.tKind = FX_TN_FUNCTION) then begin
                     Result := __ValueTypeIsSubTypeOf(AValueTypeBranchSub^.Childs[0], ATypeBranchSup^.Childs[0], Res);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     if (Result = FX_RES_SUCCESS) and Res then begin
                         Result := __ValueTypeIsSubTypeOf(AValueTypeBranchSub^.Childs[1], ATypeBranchSup^.Childs[1], Res);
-                        IF STOP THEN GOTO LBL_END;
+                        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     end;
                 end
                 else
@@ -529,6 +532,16 @@ end;
 procedure TTypeChecker.Interrupt;
 begin
     STOP := TRUE;
+end;
+
+procedure TTypeChecker.Pause;
+begin
+    SLEEP := TRUE;
+end;
+
+procedure TTypeChecker.Resume;
+begin
+    SLEEP := FALSE;
 end;
 
 end.

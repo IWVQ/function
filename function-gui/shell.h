@@ -2,17 +2,19 @@
 #define SHELL_H
 
 #include <QtWidgets>
-#include "kernel.h"
 #include "codeeditor.h"
 #include "consolehilite.h"
 #include "aboutdialog.h"
 
 #define SHELL_FILE "fxsh"
 
+#define FUNCTION_KERNEL
+
 #define FX_SUCCESS          0
 #define FX_EXIT             1
 #define FX_RESTARTED        2
 #define FX_INTERRUPTED      3
+#define FX_ERROR            4
 
 #define FX_KER_NOTHING      0
 #define FX_KER_PAUSED       1
@@ -20,7 +22,7 @@
 #define FX_KER_WRITE        3
 #define FX_KER_OUTPUT       4
 #define FX_KER_ERROR        5
-#define FX_KER_CLRSCR       7
+#define FX_KER_CLRSCR       6
 
 #define SHELL_READ          1
 #define SHELL_WRITE         2
@@ -32,6 +34,41 @@
 #define SHELL_EVALUATED     8
 #define SHELL_EXIT          9
 #define SHELL_STARTED       10
+
+struct KernelData{
+    long long int len;
+    unsigned char *str = nullptr;
+    KernelData(const QString &s)
+    {
+        QByteArray b = s.toUtf8();
+        len = b.length();
+        str = new unsigned char[len + 1];
+        for (int i = 0; i < len; i++)
+            str[i] = b[i];
+        str[len] = 0;
+    }
+
+    ~KernelData()
+    {
+        delete [] str;
+        str = nullptr;
+    }
+};
+
+// union KernelDataU{KernelData d;};
+
+typedef unsigned long long int KernelParam;
+
+typedef KernelParam (*KernelFunction)(KernelParam, KernelParam, KernelParam);
+typedef KernelFunction KernelCallback;
+
+class KernelLibrary: public QLibrary
+{
+    Q_OBJECT
+public:
+    explicit KernelLibrary(const QString& fileName, QObject *parent = nullptr);
+    ~KernelLibrary();
+};
 
 class Shell: public QThread
 {

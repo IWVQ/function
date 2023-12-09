@@ -25,6 +25,7 @@ type
         
     protected
         STOP: BOOLEAN;
+        SLEEP: BOOLEAN; // this means paused
         { listener }
         function __RunScript(S: TFxString): Word;
         function __Reduce(V: TValueExpr): Word;
@@ -37,6 +38,9 @@ type
         function __Run(AStream: IStream): Word;
         function Stopped: Boolean;
         procedure Interrupt;
+        procedure Pause;
+        procedure Resume;
+        function Paused: Boolean;
     end;
 
 implementation
@@ -109,29 +113,29 @@ begin
             Error.Stream := AStream;
             Error.CommandIndex := CommandIndex;
             Error.CommandStartLine := AStream.LineFromPos(ScanPos);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             // escanear el siguiente comando
             Error.Phase := FX_PHASE_SCANNER;
             Result := FScanner.__ScanCommand(ScanPos, AStream, TknList, ARIV);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             if Result <> FX_RES_SUCCESS then
                 Break;
 
             Error.Phase := FX_PHASE_PARSER;
             Result := FParser.__Parse(TknList, AST);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             if Result <> FX_RES_SUCCESS then
                 Break;
 
             Error.Phase := FX_PHASE_TRANSLATOR;
             Result := FTranslator.__Translate(AST, ARIV, Command);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             if Result <> FX_RES_SUCCESS then
                 Break;
 
             Error.Phase := FX_PHASE_PERFORMER;
             Result := FPerformer.__Perform(Command, ARIV);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             if Result <> FX_RES_SUCCESS then
                 Break;
                 
@@ -170,9 +174,38 @@ begin
         FScriptInterpreter.Interrupt;
 end;
 
+procedure TInterpreter.Pause;
+begin
+    SLEEP := TRUE;
+    FScanner.Pause;
+    FParser.Pause;
+    FTranslator.Pause;
+    FPerformer.Pause;
+
+    if FScriptInterpreter <> nil then
+        FScriptInterpreter.Pause;
+end;
+
+procedure TInterpreter.Resume;
+begin
+    SLEEP := FALSE;
+    FScanner.Resume;
+    FParser.Resume;
+    FTranslator.Resume;
+    FPerformer.Resume;
+
+    if FScriptInterpreter <> nil then
+        FScriptInterpreter.Resume;
+end;
+
 function TInterpreter.Stopped: Boolean;
 begin
     Result := STOP;
+end;
+
+function TInterpreter.Paused: Boolean;
+begin
+    Result := SLEEP;
 end;
 
 { listener }

@@ -31,6 +31,7 @@ type
         function __ScanCommandTokens(var K: Integer; var ATokenList: TTokenList; var ARIV: TRestrictedVariables): Word;
     protected
         STOP: BOOLEAN;
+        SLEEP: BOOLEAN;
     public
         constructor Create(AFrontEnd: IFrontEndListener; AInterpreter: IInterpreterListener;
             AStorage: TStorage; AError: TErrorRegister);
@@ -38,7 +39,9 @@ type
         
         function __ScanCommand(var AScanPos: Integer; var AStream: IStream; var ATokenList: TTokenList;
             var ARestrictedInternalVars: TRestrictedVariables): Word;
-        procedure Interrupt;
+        procedure Interrupt; 
+        procedure Pause;
+        procedure Resume;
     end;
 
 {
@@ -131,7 +134,7 @@ begin
     
     Result := APosFrom;
     while Result < Stream.Length do begin
-        IF STOP THEN GOTO LBL_END;
+        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
         if Stream[Result] = FX_EOL_LF then begin
             Inc(Result);
             Break;
@@ -161,14 +164,14 @@ begin
     
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     ASeq := System.Copy(ASeq, 2, Length(ASeq) - 2);
     L := Length(ASeq);
     K := 1;
     Str := '';
     while (Result = FX_RES_SUCCESS) and (K <= L) do begin
-        IF STOP THEN GOTO LBL_END;
+        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
         if ASeq[K] = '\' then begin
             Inc(K);
             if ReadEscapeSequenceAtPos(ASeq, K, L, Ch) then
@@ -197,7 +200,7 @@ begin
     
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     ASeq := System.Copy(ASeq, 2, Length(ASeq) - 2);
     L := Length(ASeq);
@@ -232,7 +235,7 @@ begin
 
     Result := FX_RES_SUCCESS;
 
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
 
     Token.Next := nil;
     Token.Col := Stream.ColFromPos(LxPos);
@@ -249,7 +252,7 @@ begin
         FX_LEXEME_CHAR        : begin
             Token.Kind := FX_TK_CHARACTER;
             Result := __CharFromSequence(LxStr, Ch);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             if Result = FX_RES_SUCCESS then
                 Token.cValue := Ch;
         end;
@@ -257,7 +260,7 @@ begin
             Token.Kind := FX_TK_STRING;
             System.New(Token.sValue);
             Result := __StringFromSequence(LxStr, Str);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             if Result = FX_RES_SUCCESS then
                 Token.sValue^ := Str;
         end;
@@ -321,7 +324,7 @@ var
 begin
     
     Result := FX_RES_SUCCESS;
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     LineStart := K;
     L := Stream.Length;
@@ -331,7 +334,7 @@ begin
     LxPos := 0;
     
     LBL_GETNEWTOKEN:
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     if K >= L then
         goto LBL_END;
     
@@ -341,7 +344,7 @@ begin
             if (K + 2 < L) and (Stream[K + 2] = '.') then begin
                 S := K + 3;
                 K := __FindNextLineStart(S);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 LineStart := K;
                 goto LBL_GETNEWTOKEN;
             end;
@@ -376,14 +379,14 @@ begin
             LxStr := LxStr + Stream[K];
             Inc(K);
             while (K < L) and IsHexadecimalChar(Stream[K]) do begin
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 LxStr := LxStr + Stream[K];
                 Inc(K);
             end;
         end
         else begin
             while (K < L) and IsNumeralChar(Stream[K]) do begin
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 LxStr := LxStr + Stream[K];
                 Inc(K);
             end;
@@ -391,7 +394,7 @@ begin
                 LxStr := LxStr + Stream[K];
                 Inc(K);
                 while (K < L) and IsNumeralChar(Stream[K]) do begin
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     LxStr := LxStr + Stream[K];
                     Inc(K);
                 end;
@@ -404,7 +407,7 @@ begin
                     Inc(K);
                 end;
                 while (K < L) and IsNumeralChar(Stream[K]) do begin
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     LxStr := LxStr + Stream[K];
                     Inc(K);
                 end;
@@ -420,7 +423,7 @@ begin
         LxStr := Stream[K];
         Inc(K);
         while (K < L) and (Stream[K] <> '''') and (not IsEOLChar(Stream[K])) do begin
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             LxStr := LxStr + Stream[K];
             if Stream[K] = '\' then begin
                 Inc(K);
@@ -447,7 +450,7 @@ begin
         LxStr := Stream[K];
         Inc(K);
         while (K < L) and (Stream[K] <> '"') and (not IsEOLChar(Stream[K])) do begin
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             LxStr := LxStr + Stream[K];
             if Stream[K] = '\' then begin
                 Inc(K);
@@ -474,7 +477,7 @@ begin
         LxStr := Stream[K];
         Inc(K);
         while (K < L) and IsLiteralTailChar(Stream[K]) do begin
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             LxStr := LxStr + Stream[K];
             Inc(K);
         end;
@@ -488,7 +491,7 @@ begin
         LxStr := Stream[K];
         Inc(K);
         while (K < L) and IsSymbolTailChar(Stream[K]) do begin
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             LxStr := LxStr + Stream[K];
             Inc(K);
         end;
@@ -506,7 +509,7 @@ begin
         LxKind := FX_LEXEME_NONE;
         Inc(K);
         while (K < L) and IsWhiteSpaceChar(Stream[K]) do begin
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             Inc(K);
         end;
     end
@@ -520,21 +523,21 @@ begin
     
     // agregar lexema
     if (Result = FX_RES_SUCCESS) and (LxKind <> FX_LEXEME_NONE) then begin
-        IF STOP THEN GOTO LBL_END;
+        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
         
         // agregar token
         
         if ATokenList = nil then begin
             System.New(ATokenList);
             Result := __TokenFromLexeme(ATokenList^, ARIV);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             LastTkn := ATokenList;
         end
         else begin
             System.New(LastTkn^.Next);
             LastTkn := LastTkn^.Next;
             Result := __TokenFromLexeme(LastTkn^, ARIV);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
         end;
         
     end;
@@ -557,6 +560,16 @@ end;
 procedure TScanner.Interrupt;
 begin
     STOP := TRUE;
+end;
+          
+procedure TScanner.Pause;
+begin
+    SLEEP := TRUE;
+end;
+
+procedure TScanner.Resume;
+begin
+    SLEEP := FALSE;
 end;
 
 end.

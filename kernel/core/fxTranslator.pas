@@ -37,13 +37,16 @@ type
         function __TranslateCommand(var ABranch: TAbstractSyntaxTree; var ACommand: TCommand): Word;
     protected
         STOP: BOOLEAN;
+        SLEEP: BOOLEAN;
     public
         constructor Create(AFrontEnd: IFrontEndListener; AInterpreter: IInterpreterListener;
             AStorage: TStorage; AError: TErrorRegister);
         destructor Destroy; override;
         
         function __Translate(var ATree: TAbstractSyntaxTree; var ARestrictedInternalVars: TRestrictedVariables; var ACommand: TCommand): Word;
-        procedure Interrupt;
+        procedure Interrupt;  
+        procedure Pause;
+        procedure Resume;
     end;
     
 implementation
@@ -150,18 +153,18 @@ begin
     ATuple := nil;
     Result := FX_RES_SUCCESS;
 
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
 
     SetLength(PosIds, Storage.Count);
     FillChar(PosIds[0], Storage.Count*SizeOf(Boolean), 0); // rellenar con valor falso
 
     __CheckBranchIdentifiers_(ABranch);
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     K := 0;
     MakeHeadASTBranch(FX_ASTN_TUPLE, ATuple);
     
     for I := 0 to Storage.Count - 1 do begin
-        IF STOP THEN GOTO LBL_END;
+        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
         if PosIds[I] then begin
             AddASTBranchChilds(ATuple);
             MakeIdentifierASTBranch(I, -1, ATuple^.Childs[K]);
@@ -192,12 +195,12 @@ begin
     Stack := TAbstractSyntaxTreeStack.Create;
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     TailBranch := ABranch;
     L := 0;
     while TailBranch^.Kind = FX_ASTN_APPLICATION do begin
-        IF STOP THEN GOTO LBL_END;
+        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
         Stack.Push(TailBranch^.Childs[1], 0);
         TailBranch := TailBranch^.Childs[0];
         Inc(L);
@@ -210,10 +213,10 @@ begin
             for K := 0 to L - 1 do
                 APatterns[K] := nil;
             for K := 0 to L - 1 do begin
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 Stack.Pop(AuxBranch, Sek);
                 Result := __ValueExprFromValueAST(AuxBranch, APatterns[K]);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 if Result <> FX_RES_SUCCESS then Break;
             end;
         end
@@ -250,7 +253,7 @@ begin
     AValueBranch := nil;
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     case ABranch^.Kind of
         FX_ASTN_NONE     : begin
@@ -281,10 +284,10 @@ begin
             MakeHeadValueTypeBranch(FX_TN_FUNCTION, AValueBranch);
             AddValueBranchChilds(AValueBranch, 2);
             Result := __ValueTypeExprFromValueAST(ABranch^.Childs[0], AValueBranch^.Childs[0]);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             if Result = FX_RES_SUCCESS then begin
                 Result := __ValueTypeExprFromValueAST(ABranch^.Childs[1], AValueBranch^.Childs[1]);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             end;
         end;
         FX_ASTN_TUPLE    : begin
@@ -292,7 +295,7 @@ begin
             AddValueBranchChilds(AValueBranch, Length(ABranch^.Childs));
             for K := 0 to Length(ABranch^.Childs) - 1 do begin
                 Result := __ValueTypeExprFromValueAST(ABranch^.Childs[K], AValueBranch^.Childs[K]);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 if Result <> FX_RES_SUCCESS then Break;
             end;
         end;
@@ -300,7 +303,7 @@ begin
             MakeHeadValueTypeBranch(FX_TN_LIST, AValueBranch);
             AddValueBranchChilds(AValueBranch, 1);
             Result := __ValueTypeExprFromValueAST(ABranch^.Childs[0], AValueBranch^.Childs[0]);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
         end;
     end;
     
@@ -319,7 +322,7 @@ begin
     AValueBranch := nil;
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     case ABranch^.Kind of
         FX_ASTN_NONE       : begin  
@@ -351,7 +354,7 @@ begin
             AddValueBranchChilds(AValueBranch, Length(ABranch^.Childs));
             for K := 0 to Length(ABranch^.Childs) - 1 do begin
                 Result := __ValueExprFromValueAST(ABranch^.Childs[K], AValueBranch^.Childs[K]);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 if Result <> FX_RES_SUCCESS then Break;
             end;
         end;
@@ -362,40 +365,40 @@ begin
             MakeHeadValueBranch(FX_VN_LIST_CONS, AValueBranch);
             AddValueBranchChilds(AValueBranch, 2);
             Result := __ValueExprFromValueAST(ABranch^.Childs[0], AValueBranch^.Childs[0]);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             if Result = FX_RES_SUCCESS then begin
                 __ValueExprFromValueAST(ABranch^.Childs[1], AValueBranch^.Childs[1]);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             end;
         end;
         FX_ASTN_LAMBDA     : begin
             MakeHeadValueBranch(FX_VN_LAMBDA, AValueBranch);
             AddValueBranchChilds(AValueBranch, 2);
             __ValueExprFromValueAST(ABranch^.Childs[0], AValueBranch^.Childs[0]);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             if Result = FX_RES_SUCCESS then begin
                 __ValueExprFromValueAST(ABranch^.Childs[1], AValueBranch^.Childs[1]);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             end;
         end;
         FX_ASTN_TRY        : begin
             MakeHeadValueBranch(FX_VN_TRY, AValueBranch);
             AddValueBranchChilds(AValueBranch, 2);
             __ValueExprFromValueAST(ABranch^.Childs[0], AValueBranch^.Childs[0]);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             if Result = FX_RES_SUCCESS then begin
                 __ValueExprFromValueAST(ABranch^.Childs[1], AValueBranch^.Childs[1]);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             end;
         end;
         FX_ASTN_APPLICATION: begin
             MakeHeadValueBranch(FX_VN_APPLICATION, AValueBranch);
             AddValueBranchChilds(AValueBranch, 2);
             __ValueExprFromValueAST(ABranch^.Childs[0], AValueBranch^.Childs[0]);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             if Result = FX_RES_SUCCESS then begin
                 __ValueExprFromValueAST(ABranch^.Childs[1], AValueBranch^.Childs[1]);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             end;
         end;
         FX_ASTN_PRIMITIVE   : begin
@@ -427,7 +430,7 @@ begin
     ATypeBranch := nil;
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     case ABranch^.Kind of
         FX_ASTN_NONE     : begin
@@ -458,10 +461,10 @@ begin
             MakeHeadTypeBranch(FX_TN_FUNCTION, ATypeBranch);
             AddTypeBranchChilds(ATypeBranch, 2);
             Result := __TypeExprFromTypeAST(ABranch^.Childs[0], ATypeBranch^.Childs[0]);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             if Result = FX_RES_SUCCESS then begin
                 Result := __TypeExprFromTypeAST(ABranch^.Childs[1], ATypeBranch^.Childs[1]);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             end;
         end;
         FX_ASTN_TUPLE    : begin
@@ -469,7 +472,7 @@ begin
             AddTypeBranchChilds(ATypeBranch, Length(ABranch^.Childs));
             for K := 0 to Length(ABranch^.Childs) - 1 do begin
                 Result := __TypeExprFromTypeAST(ABranch^.Childs[K], ATypeBranch^.Childs[K]);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 if Result <> FX_RES_SUCCESS then Break;
             end;
         end;
@@ -477,7 +480,7 @@ begin
             MakeHeadTypeBranch(FX_TN_LIST, ATypeBranch);
             AddTypeBranchChilds(ATypeBranch, 1);
             Result := __TypeExprFromTypeAST(ABranch^.Childs[0], ATypeBranch^.Childs[0]);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
         end;
     end;
     
@@ -519,7 +522,7 @@ begin
     
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     case ABranch^.Kind of
         FX_ASTN_NONE:;
@@ -547,7 +550,7 @@ begin
             ABranch := AuxBranch;
             AuxBranch := nil;
             Result := __BasicValueASTBranch(ABranch);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
         end;
         FX_ASTN_WHERE: begin
             MakeHeadASTBranch(FX_ASTN_LET, AuxBranch);
@@ -560,13 +563,13 @@ begin
             ABranch := AuxBranch;
             AuxBranch := nil;
             Result := __BasicValueASTBranch(ABranch);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
         end;
         FX_ASTN_TUPLE: begin
             for K := 0 to Length(ABranch^.Childs) - 1 do begin
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 Result := __BasicValueASTBranch(ABranch^.Childs[K]);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 if Result <> FX_RES_SUCCESS then
                     Break;
             end;
@@ -582,9 +585,9 @@ begin
         end;
         FX_ASTN_LIST: begin
             for K := 0 to Length(ABranch^.Childs) - 1 do begin
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 Result := __BasicValueASTBranch(ABranch^.Childs[K]);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 if Result <> FX_RES_SUCCESS then
                     Break;
             end;
@@ -593,7 +596,7 @@ begin
             ABranch^.Childs := nil;
             TailBranch := ABranch;
             for K := 0 to Length(AuxBranchList) - 1 do begin
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 TailBranch^.Kind := FX_ASTN_LIST_CONSTRUCTOR;
                 SetLength(TailBranch^.Childs, 2);
                 TailBranch^.Childs[0] := AuxBranchList[K];
@@ -607,10 +610,10 @@ begin
         end;
         FX_ASTN_APPLICATION: begin
             Result := __BasicValueASTBranch(ABranch^.Childs[0]);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             if Result = FX_RES_SUCCESS then begin
                 Result := __BasicValueASTBranch(ABranch^.Childs[1]);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             end;
         end;
         FX_ASTN_INDEX: begin
@@ -634,7 +637,7 @@ begin
                 ABranch := AuxBranch;
                 AuxBranch := nil;
                 Result := __BasicValueASTBranch(ABranch);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             end
             else
                 Result := TranslationError(RequiredDefinitionForStr, [FX_RD_GETELM_STR, IndexStructureStr]);
@@ -642,9 +645,9 @@ begin
         FX_ASTN_LAMBDA: begin
             // convertir las subramas en basicas
             for K := 0 to Length(ABranch^.Childs) - 1 do begin
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 Result := __BasicValueASTBranch(ABranch^.Childs[K]);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 if Result <> FX_RES_SUCCESS then
                     Break;
             end;
@@ -673,18 +676,18 @@ begin
         end;
         FX_ASTN_TRY: begin
             Result := __BasicValueASTBranch(ABranch^.Childs[0]);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             if Result = FX_RES_SUCCESS then begin
                 Result := __BasicValueASTBranch(ABranch^.Childs[1]);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             end;
         end;
         FX_ASTN_GUARD: begin
             Result := __BasicValueASTBranch(ABranch^.Childs[0]);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             if Result = FX_RES_SUCCESS then begin
                 Result := __BasicValueASTBranch(ABranch^.Childs[1]);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 if Result = FX_RES_SUCCESS then begin
                     RDIdCode := GetRequiredDefinitionIdCode(FX_RD_IFTHENELSE_STR);
                     if RDIdCode >= 0 then begin
@@ -741,7 +744,7 @@ begin
                 ABranch := AuxBranch;
                 AuxBranch := nil;
                 Result := __BasicValueASTBranch(ABranch);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             end
             else if ABranch^.Childs[1]^.Kind = FX_ASTN_LIST_GENERATOR then begin
                 { first qualifier is generator }
@@ -752,7 +755,7 @@ begin
                     NewListBranch^.Childs[0] := ABranch^.Childs[0];
                     ABranch^.Childs[0] := nil;
                     for K := 2 to Length(ABranch^.Childs) - 1 do begin
-                        IF STOP THEN GOTO LBL_END;
+                        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                         NewListBranch^.Childs[K - 1] := ABranch^.Childs[K];
                         ABranch^.Childs[K] := nil;
                     end;
@@ -781,7 +784,7 @@ begin
                     ABranch := AuxBranch;
                     AuxBranch := nil;
                     Result := __BasicValueASTBranch(ABranch);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 end
                 else
                     Result := TranslationError(RequiredDefinitionForStr, [FX_RD_FLATMAP_STR, ListComprehensionGeneratorStr]);
@@ -795,7 +798,7 @@ begin
                     NewListBranch^.Childs[0] := ABranch^.Childs[0];
                     ABranch^.Childs[0] := nil;
                     for K := 2 to Length(ABranch^.Childs) - 1 do begin
-                        IF STOP THEN GOTO LBL_END;
+                        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                         NewListBranch^.Childs[K - 1] := ABranch^.Childs[K];
                         ABranch^.Childs[K] := nil;
                     end;
@@ -818,7 +821,7 @@ begin
                     ABranch := AuxBranch;
                     AuxBranch := nil;
                     Result := __BasicValueASTBranch(ABranch);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 end
                 else
                     Result := TranslationError(RequiredDefinitionForStr, [FX_RD_IFFALSE_STR, ListComprehensionFilterStr]);
@@ -826,10 +829,10 @@ begin
         end;
         FX_ASTN_LIST_CONSTRUCTOR: begin
             Result := __BasicValueASTBranch(ABranch^.Childs[0]);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             if Result = FX_RES_SUCCESS then begin
                 Result := __BasicValueASTBranch(ABranch^.Childs[1]);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             end;
         end;
         FX_ASTN_LIST_SECUENCE: begin
@@ -852,7 +855,7 @@ begin
                     ABranch := AuxBranch;
                     AuxBranch := nil;
                     Result := __BasicValueASTBranch(ABranch);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 end
                 else
                     Result := TranslationError(RequiredDefinitionForStr, [FX_RD_LISTFROMTO_STR, SequenceListStr]);
@@ -880,7 +883,7 @@ begin
                     ABranch := AuxBranch;
                     AuxBranch := nil;
                     Result := __BasicValueASTBranch(ABranch);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 end
                 else
                     Result := TranslationError(RequiredDefinitionForStr, [FX_RD_LISTFROMTHENTO_STR, SequenceStepListStr]);
@@ -888,10 +891,10 @@ begin
         end;
         FX_ASTN_TYPING: begin
             Result := __BasicValueASTBranch(ABranch^.Childs[0]);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             if Result = FX_RES_SUCCESS then begin
                 Result := __BasicTypeASTBranch(ABranch^.Childs[1]);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             end;
             // MAKE: se fusiona en el copiado
         end;
@@ -910,13 +913,13 @@ begin
                         ABranch := AuxBranch;
                         AuxBranch := nil;
                         Result := __BasicValueASTBranch(ABranch);
-                        IF STOP THEN GOTO LBL_END;
+                        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     end;
                     FX_ASTN_ASSIGNMENT: begin
                         MakeHeadASTBranch(FX_ASTN_IMPERATIVE, NewImpBranch);
                         AddASTBranchChilds(NewImpBranch, Length(ABranch^.Childs) - 1);
                         for K := 1 to Length(ABranch^.Childs) - 1 do begin
-                            IF STOP THEN GOTO LBL_END;
+                            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                             NewImpBranch^.Childs[K - 1] := ABranch^.Childs[K];
                             ABranch^.Childs[K] := nil;
                         end;
@@ -932,7 +935,7 @@ begin
                         ABranch := AuxBranch;
                         AuxBranch := nil;
                         Result := __BasicValueASTBranch(ABranch);
-                        IF STOP THEN GOTO LBL_END;
+                        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     end;
                     FX_ASTN_IF: begin
                         RDIdCode := GetRequiredDefinitionIdCode(FX_RD_IFTHENELSE_STR);
@@ -946,7 +949,7 @@ begin
                                 L := Length(ABranch^.Childs[0]^.Childs) - 2;
                                 AddASTBranchChilds(AuxBranch^.Childs[0], L);
                                 for K := 0 to L -  1 do begin
-                                    IF STOP THEN GOTO LBL_END;
+                                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                                     AuxBranch^.Childs[0]^.Childs[K] := ABranch^.Childs[0]^.Childs[2 + K];
                                     ABranch^.Childs[0]^.Childs[2 + K] := nil;
                                 end;
@@ -954,7 +957,7 @@ begin
                                 ABranch^.Childs[0]^.Childs[2] := AuxBranch;
                                 AuxBranch := nil;
                                 Result := __BasicValueASTBranch(ABranch);
-                                IF STOP THEN GOTO LBL_END;
+                                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                             end
                             else begin
                                 
@@ -965,12 +968,12 @@ begin
                                 MakeHeadASTBranch(FX_ASTN_IMPERATIVE, NewImpBranch);
                                 AddASTBranchChilds(NewImpBranch, L + LL);
                                 for K := 0 to L - 1 do begin
-                                    IF STOP THEN GOTO LBL_END;
+                                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                                     NewImpBranch^.Childs[K] := ABranch^.Childs[0]^.Childs[1]^.Childs[K];
                                     ABranch^.Childs[0]^.Childs[1]^.Childs[K] := nil;
                                 end;
                                 for K := 1 to LL do begin
-                                    IF STOP THEN GOTO LBL_END;
+                                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                                     CopyASTBranch(ABranch^.Childs[K], NewImpBranch^.Childs[K - 1 + L]);
                                 end;
                                 
@@ -988,12 +991,12 @@ begin
                                 MakeHeadASTBranch(FX_ASTN_IMPERATIVE, NewImpBranch);
                                 AddASTBranchChilds(NewImpBranch, L + LL);
                                 for K := 0 to L - 1 do begin
-                                    IF STOP THEN GOTO LBL_END;
+                                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                                     NewImpBranch^.Childs[K] := ABranch^.Childs[0]^.Childs[2]^.Childs[K];
                                     ABranch^.Childs[0]^.Childs[2]^.Childs[K] := nil;
                                 end;
                                 for K := 1 to LL do begin
-                                    IF STOP THEN GOTO LBL_END;
+                                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                                     NewImpBranch^.Childs[K - 1 + L] := ABranch^.Childs[K];
                                     ABranch^.Childs[K] := nil;
                                 end;
@@ -1028,7 +1031,7 @@ begin
                                 ABranch := AuxBranch;
                                 AuxBranch := nil;
                                 Result := __BasicValueASTBranch(ABranch);
-                                IF STOP THEN GOTO LBL_END;
+                                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                             end;
                         end
                         else
@@ -1042,7 +1045,7 @@ begin
 
                             
                             Result := __BranchIdentifiers(ABranch, NewBranchIdTuple);
-                            IF STOP THEN GOTO LBL_END;
+                            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                             if Result = FX_RES_SUCCESS then begin
                                 NewBranchCond := ABranch^.Childs[0]^.Childs[0];
                                 ABranch^.Childs[0]^.Childs[0] := nil;
@@ -1052,7 +1055,7 @@ begin
                                 MakeHeadASTBranch(FX_ASTN_IMPERATIVE, NewImpBranch);
                                 AddASTBranchChilds(NewImpBranch, L + 1);
                                 for K := 0 to L - 1 do begin
-                                    IF STOP THEN GOTO LBL_END;
+                                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                                     NewImpBranch^.Childs[K] := ABranch^.Childs[0]^.Childs[1]^.Childs[K];
                                     ABranch^.Childs[0]^.Childs[1]^.Childs[K] := nil;
                                 end;
@@ -1074,7 +1077,7 @@ begin
                                 MakeHeadASTBranch(FX_ASTN_IMPERATIVE, NewImpBranch);
                                 AddASTBranchChilds(NewImpBranch, LL);
                                 for K := 1 to LL do begin
-                                    IF STOP THEN GOTO LBL_END;
+                                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                                     NewImpBranch^.Childs[K - 1] := ABranch^.Childs[K];
                                     ABranch^.Childs[K] := nil;
                                 end;
@@ -1117,7 +1120,7 @@ begin
                                 ABranch := AuxBranch;
                                 AuxBranch := nil;
                                 Result := __BasicValueASTBranch(ABranch);
-                                IF STOP THEN GOTO LBL_END;
+                                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                             end;
                         end
                         else
@@ -1163,7 +1166,7 @@ begin
                             NewAssignmentBranch := nil;
                             
                             for K := 0 to L - 1 do begin
-                                IF STOP THEN GOTO LBL_END;
+                                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                                 AuxBranch^.Childs[1]^.Childs[K + 1] := ABranch^.Childs[0]^.Childs[2]^.Childs[K];
                                 ABranch^.Childs[0]^.Childs[2]^.Childs[K] := nil;
                             end;
@@ -1172,7 +1175,7 @@ begin
                             AuxBranch := nil;
                             
                             for K := 1 to Length(ABranch^.Childs) - 1 do begin
-                                IF STOP THEN GOTO LBL_END;
+                                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                                 NewImpBranch^.Childs[K + 1] := ABranch^.Childs[K];
                                 ABranch^.Childs[K] := nil;
                             end;
@@ -1184,7 +1187,7 @@ begin
                             ABranch := AuxBranch;
                             AuxBranch := nil;
                             Result := __BasicValueASTBranch(ABranch);
-                            IF STOP THEN GOTO LBL_END;
+                            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                         end
                         else
                             Result := TranslationError(RequiredDefinitionForStr, [FX_RD_NOTEMPTY_STR, LoopForStatementStr]);
@@ -1193,7 +1196,7 @@ begin
                         MakeHeadASTBranch(FX_ASTN_IMPERATIVE, NewImpBranch);
                         AddASTBranchChilds(NewImpBranch, Length(ABranch^.Childs) - 1);
                         for K := 1 to Length(ABranch^.Childs) - 1 do begin
-                            IF STOP THEN GOTO LBL_END;
+                            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                             NewImpBranch^.Childs[K - 1] := ABranch^.Childs[K];
                             ABranch^.Childs[K] := nil;
                         end;
@@ -1215,7 +1218,7 @@ begin
                         ABranch := AuxBranch;
                         AuxBranch := nil;
                         Result := __BasicValueASTBranch(ABranch);
-                        IF STOP THEN GOTO LBL_END;
+                        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     end;
                 end;
             end;
@@ -1257,7 +1260,7 @@ begin
     AuxBranch := nil;
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     case ABranch^.Kind of
         FX_ASTN_NONE:;
@@ -1270,17 +1273,17 @@ begin
         FX_ASTN_ANONYMOUS:;
         FX_ASTN_FUNCTION: begin
             Result := __BasicTypeASTBranch(ABranch^.Childs[0]);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             if Result = FX_RES_SUCCESS then begin
                 Result := __BasicTypeASTBranch(ABranch^.Childs[1]);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             end;
         end;
         FX_ASTN_TUPLE: begin
             for K := 0 to Length(ABranch^.Childs) - 1 do begin
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 Result := __BasicTypeASTBranch(ABranch^.Childs[K]);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 if Result <> FX_RES_SUCCESS then
                     Break;
             end;
@@ -1295,7 +1298,7 @@ begin
         end;
         FX_ASTN_LIST: begin
             Result := __BasicTypeASTBranch(ABranch^.Childs[0]);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
         end;
     end;
     
@@ -1315,13 +1318,13 @@ begin
     APatterns := nil;
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     Result := __BasicValueASTBranch(ABranch);
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     if Result = FX_RES_SUCCESS then begin
         Result := __PatternsFromAppPatternAST(ABranch, AIdCode, APatterns);
-        IF STOP THEN GOTO LBL_END;
+        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     end;
     
 LBL_END:
@@ -1337,13 +1340,13 @@ begin
     AValue := nil;
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     Result := __BasicValueASTBranch(ABranch);
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     if Result = FX_RES_SUCCESS then begin
         Result := __ValueExprFromValueAST(ABranch, AValue);
-        IF STOP THEN GOTO LBL_END;
+        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     end;
     
 LBL_END:
@@ -1359,13 +1362,13 @@ begin
     AType := nil;
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     Result := __BasicTypeASTBranch(ABranch);
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     if Result = FX_RES_SUCCESS then begin
         Result := __TypeExprFromTypeAST(ABranch, AType);
-        IF STOP THEN GOTO LBL_END;
+        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     end;
     
 LBL_END:
@@ -1383,7 +1386,7 @@ begin
     EmptyCommand(ACommand);
     Result := FX_RES_SUCCESS;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     if ABranch = nil then begin
         // comando vacio(no hay nada que ejecutar)
@@ -1401,7 +1404,7 @@ begin
                 System.New(ACommand.Clear);
                 SetLength(ACommand.Clear^.IdCodes, Length(ABranch^.Childs));
                 for K := 0 to Length(ABranch^.Childs) - 1 do begin
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     ACommand.Clear^.IdCodes[K] := ABranch^.Childs[K]^.D.IdCode;
                 end;
             end;
@@ -1410,10 +1413,10 @@ begin
                 System.New(ACommand.Notation);
                 ACommand.Notation^.Position := npInfix;
                 ACommand.Notation^.Priority := nITrunc(ABranch^.Childs[0]^.D.nValue);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 SetLength(ACommand.Notation^.IdCodes, Length(ABranch^.Childs) - 1);
                 for K := 1 to Length(ABranch^.Childs) - 1 do begin
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     ACommand.Notation^.IdCodes[K - 1] := ABranch^.Childs[K]^.D.IdCode;
                 end;
             end;
@@ -1422,10 +1425,10 @@ begin
                 System.New(ACommand.Notation);
                 ACommand.Notation^.Position := npInfixl;
                 ACommand.Notation^.Priority := nITrunc(ABranch^.Childs[0]^.D.nValue);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 SetLength(ACommand.Notation^.IdCodes, Length(ABranch^.Childs) - 1);
                 for K := 1 to Length(ABranch^.Childs) - 1 do begin
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     ACommand.Notation^.IdCodes[K - 1] := ABranch^.Childs[K]^.D.IdCode;
                 end;
             end;
@@ -1434,10 +1437,10 @@ begin
                 System.New(ACommand.Notation);
                 ACommand.Notation^.Position := npInfixr;
                 ACommand.Notation^.Priority := nITrunc(ABranch^.Childs[0]^.D.nValue);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 SetLength(ACommand.Notation^.IdCodes, Length(ABranch^.Childs) - 1);
                 for K := 1 to Length(ABranch^.Childs) - 1 do begin
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     ACommand.Notation^.IdCodes[K - 1] := ABranch^.Childs[K]^.D.IdCode;
                 end;
             end;
@@ -1448,7 +1451,7 @@ begin
                 ACommand.Notation^.Priority := High(TNotationPriority);
                 SetLength(ACommand.Notation^.IdCodes, Length(ABranch^.Childs));
                 for K := 0 to Length(ABranch^.Childs) - 1 do begin
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     ACommand.Notation^.IdCodes[K] := ABranch^.Childs[K]^.D.IdCode;
                 end;
             end;
@@ -1459,7 +1462,7 @@ begin
                 ACommand.Notation^.Priority := High(TNotationPriority);
                 SetLength(ACommand.Notation^.IdCodes, Length(ABranch^.Childs));
                 for K := 0 to Length(ABranch^.Childs) - 1 do begin
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     ACommand.Notation^.IdCodes[K] := ABranch^.Childs[K]^.D.IdCode;
                 end;
             end;
@@ -1468,23 +1471,23 @@ begin
                 System.New(ACommand.Synonymous);
                 ACommand.Synonymous^.IdCode := ABranch^.Childs[0]^.D.IdCode;
                 Result := __TranslateToTypeExpr(ABranch^.Childs[1], ACommand.Synonymous^.Expr);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             end;
             FX_ASTN_INHERITABLE: begin
                 ACommand.Kind := FX_CMD_INHERITABLE;
                 System.New(ACommand.Inheritable);
                 ACommand.Inheritable^.IdCode := ABranch^.Childs[0]^.D.IdCode;
                 Result := __TranslateToTypeExpr(ABranch^.Childs[1], ACommand.Inheritable^.Expr);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             end;
             FX_ASTN_DEFINITION : begin
                 ACommand.Kind := FX_CMD_DEFINITION;
                 System.New(ACommand.Definition);
                 Result := __TranslateDefinitionPatterns(ABranch^.Childs[0], ACommand.Definition^.IdCode, ACommand.Definition^.Patterns);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 if Result = FX_RES_SUCCESS then begin
                     Result := __TranslateToValueExpr(ABranch^.Childs[1], ACommand.Definition^.Return);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 end;
             end;
             FX_ASTN_GLOBAL_ASSIGNMENT: begin
@@ -1492,7 +1495,7 @@ begin
                 System.New(ACommand.Assignment);
                 ACommand.Assignment^.IdCode := ABranch^.Childs[0]^.D.IdCode;
                 Result := __TranslateToValueExpr(ABranch^.Childs[1], ACommand.Assignment^.Expr);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             end;
             else { Evaluation }  begin
                 ACommand.Kind := FX_CMD_EVALUATION;
@@ -1500,7 +1503,7 @@ begin
                 ACommand.Evaluation^.Show := True;
                 ACommand.Evaluation^.Store := True;
                 Result := __TranslateToValueExpr(ABranch, ACommand.Evaluation^.Expr);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             end;
         end;
     end;
@@ -1521,6 +1524,16 @@ end;
 procedure TTranslator.Interrupt;
 begin
     STOP := TRUE;
+end;
+            
+procedure TTranslator.Pause;
+begin
+    SLEEP := TRUE;
+end;
+
+procedure TTranslator.Resume;
+begin
+    SLEEP := FALSE;
 end;
 
 end.

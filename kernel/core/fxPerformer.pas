@@ -24,6 +24,7 @@ type
         function PerformingError(AMsg: TFxString): Word;
     protected
         STOP: BOOLEAN;
+        SLEEP: BOOLEAN;
     public
         property Evaluator: TEvaluator read FEvaluator;
         constructor Create(AFrontEnd: IFrontEndListener; AInterpreter: IInterpreterListener;
@@ -31,7 +32,9 @@ type
         destructor Destroy; override;
         
         function __Perform(var ACommand: TCommand; var ARestrictedInternalVars: TRestrictedVariables): Word;
-        procedure Interrupt;
+        procedure Interrupt;       
+        procedure Pause;
+        procedure Resume;
     end;
     
 implementation
@@ -87,7 +90,7 @@ begin
     Result := FX_RES_SUCCESS;
     AuxBranch := nil;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     case ACommand.Kind of
         FX_CMD_NONE        :;
@@ -96,19 +99,19 @@ begin
         end;
         FX_CMD_CLEAR       : begin
             for K := 0 to Length(ACommand.Clear^.IdCodes) - 1 do begin
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 Storage[ACommand.Clear^.IdCodes[K]].Clear;
             end;
         end;
         FX_CMD_NOTATION    : begin
             for K := 0 to Length(ACommand.Notation^.IdCodes) - 1 do begin
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 Storage[ACommand.Notation^.IdCodes[K]].NewNotation(ACommand.Notation^.Priority, ACommand.Notation^.Position);
             end;
         end;
         FX_CMD_SYNONYMOUS  : begin
             Result := FTypeChecker.__CheckForRecursivity(ACommand.Synonymous^.IdCode, ACommand.Synonymous^.Expr);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             if Result = FX_RES_SUCCESS then
                 Storage[ACommand.Synonymous^.IdCode].NewTypeSynonymous(ACommand.Synonymous^.Expr);
         end;
@@ -118,11 +121,11 @@ begin
         FX_CMD_DEFINITION  : begin
 
             Result := FDefinitionMaker.__InheritType(ACommand.Definition^.IdCode, ACommand.Definition^.Patterns, ACommand.Definition^.Return);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             if Result = FX_RES_SUCCESS then begin
                 Storage[ACommand.Definition^.IdCode].NewDefinition(ACommand.Definition^.Patterns, ACommand.Definition^.Return, ARIV);
                 Result := FDefinitionMaker.__MakeValue(ACommand.Definition^.IdCode, AuxBranch);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 if Result = FX_RES_SUCCESS then begin
                     Storage[ACommand.Definition^.IdCode].NewValue(AuxBranch);
                     AuxBranch := nil;
@@ -131,18 +134,18 @@ begin
         end;
         FX_CMD_ASSIGNMENT  : begin
             Result := FEvaluator.__Evaluate(ACommand.Evaluation^.Expr);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             if Result = FX_RES_SUCCESS then
                 Storage[ACommand.Assignment^.IdCode].NewValue(ACommand.Assignment^.Expr);
         end;
         FX_CMD_EVALUATION  : begin
 
             Result := FEvaluator.__Evaluate(ACommand.Evaluation^.Expr);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             if Result = FX_RES_SUCCESS then begin
                 if ACommand.Evaluation^.Show then begin
                     AnsStr := FStrConverter.__ValueToStr(ACommand.Evaluation^.Expr);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     FrontEnd.PrintAnswer(AnsStr);
                 end;
                 if ACommand.Evaluation^.Store then
@@ -171,6 +174,24 @@ begin
     FDefinitionMaker.Interrupt;
     FStrConverter.Interrupt;
     FTypeChecker.Interrupt;
+end;
+          
+procedure TPerformer.Pause;
+begin
+    SLEEP := TRUE;
+    FEvaluator.Pause;
+    FDefinitionMaker.Pause;
+    FStrConverter.Pause;
+    FTypeChecker.Pause;
+end;
+
+procedure TPerformer.Resume;
+begin
+    SLEEP := FALSE;  
+    FEvaluator.Resume;
+    FDefinitionMaker.Resume;
+    FStrConverter.Resume;
+    FTypeChecker.Resume;
 end;
 
 end.

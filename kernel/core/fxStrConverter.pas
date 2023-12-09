@@ -16,7 +16,8 @@ type
         function __AppToStr(AValue: TValueExpr; var AAppKind: Byte): TFxString;
         function __LambdaToStr(AValue: TValueExpr): TFxString;
     protected
-        STOP: BOOLEAN;
+        STOP: BOOLEAN; 
+        SLEEP: BOOLEAN;
     public
         constructor Create(AFrontEnd: IFrontEndListener; AInterpreter: IInterpreterListener;
             AStorage: TStorage; AError: TErrorRegister);
@@ -29,6 +30,8 @@ type
         function __TypeToStr(AType: TTypeExpr): TFxString;
         
         procedure Interrupt;
+        procedure Pause;
+        procedure Resume;
     end;
     
 implementation
@@ -70,14 +73,14 @@ begin
 
     Result := '';
 
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     // revisar el tipo de lista
     
     ListKind := LK_STRING;
     TailBranch := AValue;
     while TailBranch <> nil do begin
-        IF STOP THEN GOTO LBL_END;
+        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
         HeadBranch := TailBranch^.Childs[0];
         TailBranch := TailBranch^.Childs[1];
         if HeadBranch^.vKind <> FX_VN_CHARACTER then
@@ -99,7 +102,7 @@ begin
             Result := '';
             TailBranch := AValue;
             while TailBranch <> nil do begin
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 HeadBranch := TailBranch^.Childs[0];
                 TailBranch := TailBranch^.Childs[1];
                 Result := Result + HeadBranch^.D.cValue;
@@ -115,11 +118,11 @@ begin
             Result := '[';
             TailBranch := AValue;
             while TailBranch <> nil do begin
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 HeadBranch := TailBranch^.Childs[0];
                 TailBranch := TailBranch^.Childs[1];
                 Result := Result + __ValueToStrPrettyForm(HeadBranch);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 if TailBranch^.vKind = FX_VN_LIST_CONS then begin
                     Result := Result + ', ';
                     Continue;
@@ -140,18 +143,18 @@ begin
             Result := '';
             TailBranch := AValue;
             while TailBranch <> nil do begin
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 HeadBranch := TailBranch^.Childs[0];
                 TailBranch := TailBranch^.Childs[1];
                 if HeadBranch^.vKind = FX_VN_LIST_CONS then begin
                     Str := __ListToStr(HeadBranch, B);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     if not B then
                         Str := '(' + Str + ')';
                 end
                 else begin
                     Str := __ValueToStrPrettyForm(HeadBranch);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     if HeadBranch^.vKind = FX_VN_TRY then
                         Str := '(' + Str + ')';
                 end;
@@ -160,7 +163,7 @@ begin
                     Continue
                 else begin
                     Str := __ValueToStrPrettyForm(TailBranch);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     if TailBranch^.vKind = FX_VN_TRY then
                         Str := '(' + Str + ')';
                     Result := Result + Str;
@@ -188,7 +191,7 @@ begin
 
     Result := '';
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     // a b c == (a b)c
     // a >| as b > bs == a >| (as b) > bs
@@ -208,21 +211,21 @@ begin
             case AValue^.Childs[1]^.vKind of
                 FX_VN_LIST_CONS: begin
                     Str := __ListToStr(AValue^.Childs[1], B);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     if not B then
                         Str := '(' + Str + ')';
                 end;
                 FX_VN_APPLICATION: begin
                     Str := '(' + __AppToStr(AValue^.Childs[1], AK) + ')';
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 end;
                 FX_VN_TRY: begin
                     Str := '(' + __ValueToStrPrettyForm(AValue^.Childs[1]) + ')';
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 end;
                 else begin
                     Str := __ValueToStrPrettyForm(AValue^.Childs[1]);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 end;
             end;
             Result := Result + ' ' + Str;
@@ -233,21 +236,21 @@ begin
             case AValue^.Childs[1]^.vKind of
                 FX_VN_LIST_CONS: begin
                     Str := __ListToStr(AValue^.Childs[1], B);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     if not B then
                         Str := '(' + Str + ')';
                 end;
                 FX_VN_APPLICATION: begin
                     Str := '(' + __AppToStr(AValue^.Childs[1], AK) + ')';
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 end;
                 FX_VN_TRY: begin
                     Str := '(' + __ValueToStrPrettyForm(AValue^.Childs[1]) + ')';
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 end;
                 else begin
                     Str := __ValueToStrPrettyForm(AValue^.Childs[1]);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 end;
             end;
             Result := Str + ' ' + Storage[IdCode].Name;
@@ -263,17 +266,17 @@ begin
                 case LeftArg^.vKind of
                     FX_VN_LIST_CONS: begin
                         Str := __ListToStr(LeftArg, B);
-                        IF STOP THEN GOTO LBL_END;
+                        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                         if not B then
                             Str := '(' + Str + ')';
                     end;
                     FX_VN_TRY: begin
                         Str := '(' + __ValueToStrPrettyForm(LeftArg) + ')';
-                        IF STOP THEN GOTO LBL_END;
+                        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     end;
                     FX_VN_APPLICATION: begin
                         Str := __AppToStr(LeftArg, AK);
-                        IF STOP THEN GOTO LBL_END;
+                        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                         if AK = AK_INFIX then begin
                             LeftAppId := LeftArg^.Childs[0]^.D.vIdCode;
                             if Storage[LeftAppId].Notation.Priority <= Storage[IdCode].Notation.Priority then
@@ -284,7 +287,7 @@ begin
                     end;
                     else begin
                         Str := __ValueToStrPrettyForm(LeftArg);
-                        IF STOP THEN GOTO LBL_END;
+                        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     end;
                 end;
                 
@@ -293,17 +296,17 @@ begin
                 case RightArg^.vKind of
                     FX_VN_LIST_CONS: begin
                         Str := __ListToStr(RightArg, B);
-                        IF STOP THEN GOTO LBL_END;
+                        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                         if not B then
                             Str := '(' + Str + ')';
                     end;
                     FX_VN_TRY: begin
                         Str := '(' + __ValueToStrPrettyForm(RightArg) + ')';
-                        IF STOP THEN GOTO LBL_END;
+                        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     end;
                     FX_VN_APPLICATION: begin
                         Str := __AppToStr(RightArg, AK);
-                        IF STOP THEN GOTO LBL_END;
+                        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                         if AK = AK_INFIX then begin
                             RightAppId := RightArg^.Childs[0]^.D.vIdCode;
                             if Storage[RightAppId].Notation.Priority <= Storage[IdCode].Notation.Priority then
@@ -314,7 +317,7 @@ begin
                     end;
                     else begin
                         Str := __ValueToStrPrettyForm(RightArg);
-                        IF STOP THEN GOTO LBL_END;
+                        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     end;
                 end;
                 
@@ -327,21 +330,21 @@ begin
                 case AValue^.Childs[1]^.vKind of
                     FX_VN_LIST_CONS: begin
                         Str := __ListToStr(AValue^.Childs[1], B);
-                        IF STOP THEN GOTO LBL_END;
+                        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                         if not B then
                             Str := '(' + Str + ')';
                     end;
                     FX_VN_APPLICATION: begin
                         Str := '(' + __AppToStr(AValue^.Childs[1], AK) + ')';
-                        IF STOP THEN GOTO LBL_END;
+                        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     end;
                     FX_VN_TRY: begin
                         Str := '(' + __ValueToStrPrettyForm(AValue^.Childs[1]) + ')';
-                        IF STOP THEN GOTO LBL_END;
+                        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     end;
                     else begin
                         Str := __ValueToStrPrettyForm(AValue^.Childs[1]);
-                        IF STOP THEN GOTO LBL_END;
+                        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     end;
                 end;
                 Result := Result + ' ' + Str;
@@ -355,23 +358,23 @@ begin
         case AValue^.Childs[0]^.vKind of
             FX_VN_LIST_CONS: begin
                 Str := __ListToStr(AValue^.Childs[0], B);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 if not B then
                     Str := '(' + Str + ')';
             end;
             FX_VN_APPLICATION: begin // f g ! 3 == ((f g) !) 3 ; la segunda forma esta xvr
                 Str := __AppToStr(AValue^.Childs[0], AK);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 if AK <> AK_PREFIX then
                     Str := '(' + Str + ')';
             end;
             FX_VN_TRY: begin
                 Str := '(' + __ValueToStrPrettyForm(AValue^.Childs[0]) + ')';
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             end;
             else begin
                 Str := __ValueToStrPrettyForm(AValue^.Childs[0]);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             end;
         end;
         
@@ -380,21 +383,21 @@ begin
         case AValue^.Childs[1]^.vKind of
             FX_VN_LIST_CONS: begin
                 Str := __ListToStr(AValue^.Childs[1], B);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 if not B then
                     Str := '(' + Str + ')';
             end;
             FX_VN_APPLICATION: begin
                 Str := '(' + __AppToStr(AValue^.Childs[1], AK) + ')';
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             end;
             FX_VN_TRY: begin
                 Str := '(' + __ValueToStrPrettyForm(AValue^.Childs[1]) + ')';
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             end;
             else begin
                 Str := __ValueToStrPrettyForm(AValue^.Childs[1]);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             end;
         end;
         Result := Result + ' ' + Str;
@@ -418,24 +421,24 @@ begin
     
     Result := '';
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     Multipattern := False;
     if AValue^.Childs[1]^.vKind = FX_VN_LAMBDA then Multipattern := True;
     TailBranch := AValue;
     Str := '';
     while TailBranch^.vKind = FX_VN_LAMBDA do begin
-        IF STOP THEN GOTO LBL_END;
+        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
         if TailBranch^.Childs[0]^.vKind = FX_VN_LIST_CONS then begin
             LStr := __ListToStr(TailBranch^.Childs[0], HasDelimiter);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             if (not HasDelimiter) and Multipattern then
                 LStr := '(' + LStr + ')';
             Str := Str + ' ' + LStr;
         end
         else begin
             Str := Str + ' ' + __ValueToStrPrettyForm(TailBranch^.Childs[0]);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
         end;
         TailBranch := TailBranch^.Childs[1];
     end;
@@ -465,7 +468,7 @@ begin
 
     Result := '';
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
 
     case AValue^.vKind of
         FX_VN_NONE        :
@@ -484,7 +487,7 @@ begin
             Result := Storage[AValue^.D.vIdCode].Name;
             if AValue^.D.tKind <> FX_TN_NONE then begin
                 Result := '(' + Result + ' : ' + __ValueTypeToStr(AValue) + ')';
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 // parentesis para darle elegancia(aunque en tuplas es innecesario)
             end
             else if (Storage[AValue^.D.vIdCode].Notation.Position <> npPrefix) then begin
@@ -503,34 +506,34 @@ begin
             // a ! ; c ! == (a !) ; (c !)
             // a . b ; c . d == (a . b) ; (c . d)
             Result := __ValueToStrPrettyForm(AValue^.Childs[0]);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             if AValue^.Childs[0]^.vKind = FX_VN_TRY then
                 Result := '(' + Result + ')';
             Result := Result + ' ; ' + __ValueToStrPrettyForm(AValue^.Childs[1]);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
         end;
         FX_VN_TUPLE       : begin
             Result := '(';
             for K := 0 to Length(AValue^.Childs) - 1 do begin
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 if K <> 0 then
                     Result := Result + ', ';
                 Result := Result + __ValueToStrPrettyForm(AValue^.Childs[K]); 
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             end;
             Result := Result + ')';
         end;
         FX_VN_LIST_CONS        : begin
             Result := __ListToStr(AValue, B);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
         end;
         FX_VN_LAMBDA      : begin
             Result := __LambdaToStr(AValue);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
         end;
         FX_VN_APPLICATION : begin
             Result := __AppToStr(AValue, AK);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
         end;
         else
             Result := '';
@@ -551,7 +554,7 @@ begin
     
     Result := '';
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
 
     case AValue^.vKind of
         FX_VN_NONE        :
@@ -570,7 +573,7 @@ begin
             Result := Storage[AValue^.D.vIdCode].Name;
             if AValue^.D.tKind <> FX_TN_NONE then begin
                 Result := '(' + Result + ' : ' + __ValueTypeToStr(AValue) + ')';
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             end
             else if (Storage[AValue^.D.vIdCode].Notation.Position <> npPrefix) then
                 Result := '(' + Result + ')';
@@ -584,20 +587,20 @@ begin
             // a >| as ; b >| bs == (a >| as) ; (b >| bs)
             // a b ; c d == (a b) ; (c d)
             Result := __ValueToStrFullForm(AValue^.Childs[0]);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             if AValue^.Childs[0]^.vKind = FX_VN_TRY then
                 Result := '(' + Result + ')';
             Result := Result + ' ; ' + __ValueToStrFullForm(AValue^.Childs[1]);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
         end;
         FX_VN_TUPLE       : begin
             Result := '(';
             for K := 0 to Length(AValue^.Childs) - 1 do begin
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 if K <> 0 then
                     Result := Result + ',';
                 Result := Result + __ValueToStrFullForm(AValue^.Childs[K]);  
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             end;
             Result := Result + ')';
         end;
@@ -606,20 +609,20 @@ begin
             // a ; b >| c ; d == a ; (b >| c) ; d
             // a b >| c d == (a b) >| (c d)
             Result := __ValueToStrFullForm(AValue^.Childs[0]);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             if AValue^.Childs[0]^.vKind = FX_VN_LIST_CONS then
                 Result := '(' + Result + ')'
             else if AValue^.Childs[0]^.vKind = FX_VN_TRY then
                 Result := '(' + Result + ')';
             Str := __ValueToStrFullForm(AValue^.Childs[1]);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             if AValue^.Childs[1]^.vKind = FX_VN_TRY then
                 Str := '(' + Str + ')';
             Result := Result + ' >| ' + Str;
         end;
         FX_VN_LAMBDA      : begin
             Result := '(\ ' + __ValueToStrFullForm(AValue^.Childs[0]) + ' -> ' + __ValueToStrFullForm(AValue^.Childs[1]) + ')';
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             // parentesis para darle elegancia
         end;
         FX_VN_APPLICATION : begin
@@ -627,13 +630,13 @@ begin
             // a >| as b > bs == a >| (as b) > bs
             // a ; b c ; d == a ; (b c) ; d
             Result := __ValueToStrFullForm(AValue^.Childs[0]);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             if AValue^.Childs[0]^.vKind = FX_VN_LIST_CONS then
                 Result := '(' + Result + ')'
             else if AValue^.Childs[0]^.vKind = FX_VN_TRY then
                 Result := '(' + Result + ')';
             Str := __ValueToStrFullForm(AValue^.Childs[1]);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             if AValue^.Childs[1]^.vKind = FX_VN_LIST_CONS then
                 Str := '(' + Str + ')'
             else if AValue^.Childs[1]^.vKind = FX_VN_TRY then
@@ -660,7 +663,7 @@ begin
     
     Result := '';
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     case AValueType^.D.tKind of
         FX_TN_NONE      :
@@ -682,26 +685,26 @@ begin
         FX_TN_TUPLE     : begin
             Result := '(';
             for K := 0 to Length(AValueType^.Childs) - 1 do begin
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 if K <> 0 then
                     Result := Result + ', ';
                 Result := Result + __ValueTypeToStr(AValueType^.Childs[K]);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             end;
             Result := Result + ')';
         end;
         FX_TN_LIST      : begin
             Result := '[' + __ValueTypeToStr(AValueType^.Childs[0]) + ']';
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
         end;
         FX_TN_FUNCTION  : begin
             // (a -> b) -> c =/= a -> b -> c; para otro caso hacer explicito
             Result := __ValueTypeToStr(AValueType^.Childs[0]);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             if AValueType^.Childs[0]^.D.tKind = FX_TN_FUNCTION then
                 Result := '(' + Result + ')';
             Result := Result + ' -> ' + __ValueTypeToStr(AValueType^.Childs[1]);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
         end;
         else
             Result := '';
@@ -721,7 +724,7 @@ begin
 
     Result := '';
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
 
     case AType^.tKind of
         FX_TN_NONE      :
@@ -743,26 +746,26 @@ begin
         FX_TN_TUPLE     : begin
             Result := '(';
             for K := 0 to Length(AType^.Childs) - 1 do begin
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 if K <> 0 then
                     Result := Result + ', ';
                 Result := Result + __TypeToStr(AType^.Childs[K]);
-                IF STOP THEN GOTO LBL_END;                
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;                
             end;
             Result := Result + ')';
         end;
         FX_TN_LIST      : begin
             Result := '[' + __TypeToStr(AType^.Childs[0]) + ']';
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
         end;
         FX_TN_FUNCTION  : begin
             // (a -> b) -> c =/= a -> b -> c; para otro caso hacer explicito
             Result := __TypeToStr(AType^.Childs[0]);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             if AType^.Childs[0]^.tKind = FX_TN_FUNCTION then
                 Result := '(' + Result + ')';
             Result := Result + ' -> ' + __TypeToStr(AType^.Childs[1]);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
         end;
         else
             Result := '';
@@ -775,6 +778,16 @@ end;
 procedure TStrConverter.Interrupt;
 begin
     STOP := TRUE;
+end;
+                 
+procedure TStrConverter.Pause;
+begin
+    SLEEP := TRUE;
+end;
+
+procedure TStrConverter.Resume;
+begin
+    SLEEP := FALSE;
 end;
 
 end.

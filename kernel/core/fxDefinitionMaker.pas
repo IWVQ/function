@@ -25,7 +25,8 @@ type
         function __CheckForSynonymous(var ATypeBranch: TTypeExpr): Word;
         function __InheritTypeBranch(ATypeBranch: TTypeExpr; var AValueBranch: TValueExpr): Word;
     protected
-        STOP: BOOLEAN;
+        STOP: BOOLEAN;   
+        SLEEP: BOOLEAN;
     public
         constructor Create(AFrontEnd: IFrontEndListener; AInterpreter: IInterpreterListener;
             AStorage: TStorage; AError: TErrorRegister);
@@ -34,6 +35,8 @@ type
         function __InheritType(AIdCode: Integer; var APatterns: TPatternExprArray; var AReturn: TValueExpr): Word;
         function __MakeValue(AIdCode: Integer; var AValue: TValueExpr): Word;
         procedure Interrupt;
+        procedure Pause;
+        procedure Resume;
     end;
     
 implementation
@@ -103,13 +106,13 @@ begin
 
     Result := FX_RES_SUCCESS;
 
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
 
     if ATypeBranch^.tKind = FX_TN_IDENTIFIER then begin
         if Storage[ATypeBranch^.tIdCode].HasTypeSynonymous then begin
             ATypeBranch := Storage[ATypeBranch^.tIdCode].TypeSynonymous;
             Result := __CheckForSynonymous(ATypeBranch);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
         end
         else
             Result := DefMakingError(UndefinedTypeSynonymousStr, [Storage[ATypeBranch^.tIdCode].Name]);
@@ -132,13 +135,13 @@ begin
 
     Result := FX_RES_SUCCESS;
 
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
 
     if ATypeBranch^.tKind = FX_TN_IDENTIFIER then begin
         if Storage[ATypeBranch^.tIdCode].HasTypeSynonymous then begin
             ATypeBranch := Storage[ATypeBranch^.tIdCode].TypeSynonymous;
             Result := __InheritTypeBranch(ATypeBranch, AValueBranch);
-            IF STOP THEN GOTO LBL_END;
+            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
         end
         else
             Result := DefMakingError(UndefinedTypeSynonymousStr, [Storage[ATypeBranch^.tIdCode].Name]);
@@ -154,9 +157,9 @@ begin
                 end
                 else begin
                     S1 := FStrConverter.__TypeToStr(ATypeBranch);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     S2 := FStrConverter.__ValueToStr(AValueBranch);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     Result := DefMakingError(CouldNotInheritTypeOnExpressionStr, [S1, S2]);
                 end;
             end;
@@ -166,9 +169,9 @@ begin
                 end
                 else begin
                     S1 := FStrConverter.__TypeToStr(ATypeBranch);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     S2 := FStrConverter.__ValueToStr(AValueBranch);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     Result := DefMakingError(CouldNotInheritTypeOnExpressionStr, [S1, S2]);
                 end;
             end;
@@ -178,9 +181,9 @@ begin
                 end
                 else begin
                     S1 := FStrConverter.__TypeToStr(ATypeBranch);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     S2 := FStrConverter.__ValueToStr(AValueBranch);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     Result := DefMakingError(CouldNotInheritTypeOnExpressionStr, [S1, S2]);
                 end;
             end;
@@ -190,9 +193,9 @@ begin
                 end
                 else begin
                     S1 := FStrConverter.__TypeToStr(ATypeBranch);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     S2 := FStrConverter.__ValueToStr(AValueBranch);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     Result := DefMakingError(CouldNotInheritTypeOnExpressionStr, [S1, S2]);
                 end;
             end;
@@ -203,15 +206,15 @@ begin
                 end
                 else begin
                     Result := FTypeChecker.__ValueTypeIsSubTypeOf(AValueBranch, ATypeBranch, B);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     if Result = FX_RES_SUCCESS then begin
                         if B then begin
                         end
                         else begin
                             S1 := FStrConverter.__TypeToStr(ATypeBranch);
-                            IF STOP THEN GOTO LBL_END;
+                            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                             S2 := FStrConverter.__ValueToStr(AValueBranch);
-                            IF STOP THEN GOTO LBL_END;
+                            IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                             Result := DefMakingError(CouldNotInheritTypeOnExpressionStr, [S1, S2]);
                         end;
                     end;
@@ -225,18 +228,18 @@ begin
                 end
                 else if (ATypeBranch^.tKind = FX_TN_TUPLE) and (Length(AValueBranch^.Childs) = Length(ATypeBranch^.Childs)) then begin
                     for K := 0 to Length(ATypeBranch^.Childs) - 1 do begin
-                        IF STOP THEN GOTO LBL_END;
+                        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                         Result := __InheritTypeBranch(ATypeBranch^.Childs[K], AValueBranch^.Childs[K]);
-                        IF STOP THEN GOTO LBL_END;
+                        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                         if Result <> FX_RES_SUCCESS then
                             Break;
                     end;
                 end
                 else begin
                     S1 := FStrConverter.__TypeToStr(ATypeBranch);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     S2 := FStrConverter.__ValueToStr(AValueBranch);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     Result := DefMakingError(CouldNotInheritTypeOnExpressionStr, [S1, S2]);
                 end;
             end;
@@ -245,17 +248,17 @@ begin
                 end
                 else if (ATypeBranch^.tKind = FX_TN_LIST) then begin
                     Result := __InheritTypeBranch(ATypeBranch^.Childs[0], AValueBranch^.Childs[0]);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     if Result = FX_RES_SUCCESS then begin
                         Result := __InheritTypeBranch(ATypeBranch, AValueBranch^.Childs[1]);
-                        IF STOP THEN GOTO LBL_END;
+                        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     end;
                 end
                 else begin
                     S1 := FStrConverter.__TypeToStr(ATypeBranch);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     S2 := FStrConverter.__ValueToStr(AValueBranch);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     Result := DefMakingError(CouldNotInheritTypeOnExpressionStr, [S1, S2]);
                 end;
             end;
@@ -264,17 +267,17 @@ begin
                 end
                 else if ATypeBranch^.tKind = FX_TN_FUNCTION then begin
                     Result := __InheritTypeBranch(ATypeBranch^.Childs[0], AValueBranch^.Childs[0]);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     if Result = FX_RES_SUCCESS then begin
                         Result := __InheritTypeBranch(ATypeBranch^.Childs[1], AValueBranch^.Childs[1]);
-                        IF STOP THEN GOTO LBL_END;
+                        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     end;
                 end
                 else begin
                     S1 := FStrConverter.__TypeToStr(ATypeBranch);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     S2 := FStrConverter.__ValueToStr(AValueBranch);
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     Result := DefMakingError(CouldNotInheritTypeOnExpressionStr, [S1, S2]);
                 end;
             end;
@@ -302,7 +305,7 @@ begin
     Result := FX_RES_SUCCESS;
     TailBranch := nil;
     
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
     
     Arity := Storage[AIdCode].DefinitionArity;
     if Arity < 0 then
@@ -312,19 +315,19 @@ begin
         if Storage[AIdCode].HasInheritableType then begin
             TailBranch := Storage[AIdCode].InheritableType;
             for M := 0 to Arity - 1 do begin
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 Result := __CheckForSynonymous(TailBranch);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 if Result = FX_RES_SUCCESS then begin
                     if TailBranch^.tKind = FX_TN_FUNCTION then begin
                         Result := __InheritTypeBranch(TailBranch^.Childs[0], APatterns[M]);
-                        IF STOP THEN GOTO LBL_END;
+                        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                         if Result = FX_RES_SUCCESS then
                             TailBranch := TailBranch^.Childs[1];
                     end
                     else begin
                         S1 := FStrConverter.__TypeToStr(TailBranch);
-                        IF STOP THEN GOTO LBL_END;
+                        IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                         Result := DefMakingError(CouldNotInheritTypeOnPatternStr, [S1]);
                     end;
                 end;
@@ -332,7 +335,7 @@ begin
             end;
             if Result = FX_RES_SUCCESS then begin
                 Result := __InheritTypeBranch(TailBranch, AReturn);
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
             end;
         end;
     end
@@ -366,7 +369,7 @@ begin
 
     AValue := nil;
 
-    IF STOP THEN GOTO LBL_END;
+    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
 
     Arity := Storage[AIdCode].DefinitionArity;
 
@@ -385,7 +388,7 @@ begin
                 NewIds[M] := UseNewInternalVariable(AIdCode);
 
             for M := 0 to Arity - 1 do begin
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 TailBranch^.vKind := FX_VN_LAMBDA;
                 AddValueBranchChilds(TailBranch, 2);
 
@@ -395,14 +398,14 @@ begin
             end;
             
             for N := 0 to Length(Storage[AIdCode].Definitions) - 1 do begin
-                IF STOP THEN GOTO LBL_END;
+                IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                 TailBranch^.vKind := FX_VN_TRY;
                 AddValueBranchChilds(TailBranch, 2);
                 
                 System.New(TailBranch^.Childs[0]);
                 TailPatternBranch := TailBranch^.Childs[0];
                 for M := Arity - 1 downto 0 do begin
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     TailPatternBranch^.vKind := FX_VN_APPLICATION;
                     AddValueBranchChilds(TailPatternBranch, 2);
 
@@ -412,7 +415,7 @@ begin
                 end;
                 
                 for M := 0 to Arity - 1 do begin
-                    IF STOP THEN GOTO LBL_END;
+                    IF STOP THEN GOTO LBL_END; IF SLEEP THEN FRONTEND.DOPAUSE;
                     TailPatternBranch^.vKind := FX_VN_LAMBDA;
                     AddValueBranchChilds(TailPatternBranch, 2);
                     
@@ -461,6 +464,20 @@ begin
     STOP := TRUE;
     FTypeChecker.Interrupt;
     FStrConverter.Interrupt;
+end;
+              
+procedure TDefinitionMaker.Pause;
+begin
+    SLEEP := TRUE;
+    FTypeChecker.Pause;
+    FStrConverter.Pause;
+end;
+
+procedure TDefinitionMaker.Resume;
+begin
+    SLEEP := FALSE;
+    FTypeChecker.Resume;
+    FStrConverter.Resume;
 end;
 
 end.
