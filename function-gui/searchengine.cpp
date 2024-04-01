@@ -11,7 +11,7 @@ void SearchEngine::init(CodeEditor *e)
 QTextCursor SearchEngine::findText(const QTextCursor &from, bool backward)
 {
     // options
-    QTextDocument::FindFlags flags = 0;
+    QTextDocument::FindFlags flags;
     if (backward) flags |= QTextDocument::FindBackward;
     if (casesensitive) flags |= QTextDocument::FindCaseSensitively;
     if (wholeword) flags |= QTextDocument::FindWholeWords;

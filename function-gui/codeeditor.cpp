@@ -125,14 +125,18 @@ CodeEditor::CodeEditor(QWidget *parent)
     setFont(font);
 
     QTextCharFormat format = currentCharFormat();
-    format.setFontFamily("Courier New");
+    format.setFontFamily("Courier New"); // ! deprecated in qt
     format.setFontFixedPitch(true);
     setCurrentCharFormat(format);
     setLineWrapMode(QPlainTextEdit::NoWrap);
 
     // set inital tab size
     int spacewidth = QFontMetrics(currentCharFormat().font()).horizontalAdvance(' ');
+#if QT_VERSION_MAJOR <= 5
     setTabStopWidth(tabsize*spacewidth);
+#elif QT_VERSION_MAJOR == 6
+    this->setTabStopDistance(tabsize*spacewidth);
+#endif
     //
 
 
@@ -1002,7 +1006,11 @@ void CodeEditor::setTabSize(int s)
     if (tabsize != s){
         tabsize = s;
         int spacewidth = QFontMetrics(currentCharFormat().font()).horizontalAdvance(' ');
+#if QT_VERSION_MAJOR <= 5
         setTabStopWidth(tabsize*spacewidth);
+#elif QT_VERSION_MAJOR == 6
+        setTabStopDistance(tabsize*spacewidth);
+#endif
     }
 }
 

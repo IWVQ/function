@@ -2,7 +2,7 @@
 
 bool isEoLChar(const QChar &c)
 {
-    return (c == 0x10) || (c == 0x13);
+    return (c == CR) || (c == LF);
 }
 
 bool isSpaceChar(const QChar &c)
