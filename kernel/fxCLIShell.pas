@@ -8,7 +8,7 @@ uses
 
 const
     FxVersion = 'v0.5';    
-    FX_CONSOLE_HEADER = 'Function %s Copyright (c) Ivar Wiligran Vilca Quispe';
+    FX_CONSOLE_HEADER = 'Function %s Copyright (c) 2023-2024 Ivar Wiligran Vilca Quispe';
 
 const
 

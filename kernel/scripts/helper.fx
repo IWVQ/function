@@ -14,7 +14,7 @@ ShowAbout() :=
     begin
         Print "*************************************************************"
         Print "*                       Function [v0.5]                     *"
-        Print "*          Copyright(c) Ivar Wiligran Vilca Quispe          *"
+        Print "*     Copyright(c) 2023-2024 Ivar Wiligran Vilca Quispe     *"
         Print "*                                                           *"
         Print "* Function es un software diseñado para programar funciones *"
         Print "* y algoritmos de manera facil y elegante.                  *"

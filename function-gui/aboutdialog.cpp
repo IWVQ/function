@@ -10,6 +10,8 @@ AboutDialog::AboutDialog(QWidget *parent) :
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint | Qt::Popup);
 
     ui->textEdit->setVisible(false);
+    ui->labelCopying->setText(FUNCTION_COPY_STR);
+    ui->labelBuildOn->setText("Build on: " + BUILDDATETIME);
 }
 
 AboutDialog::~AboutDialog()
@@ -26,12 +28,14 @@ void AboutDialog::showAbout()
 void AboutDialog::on_pushButtonCredits_clicked()
 {
     ui->textEdit->setVisible(true);
+    ui->textEdit->setHtml(FUNCTION_CREDITS_TEXT);
 }
 
 
 void AboutDialog::on_pushButtonLicense_clicked()
 {
     ui->textEdit->setVisible(true);
+    ui->textEdit->setHtml(FUNCTION_LICENSE_NOTICE);
 }
 
 void AboutDialog::mousePressEvent(QMouseEvent *event)

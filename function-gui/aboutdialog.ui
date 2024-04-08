@@ -24,7 +24,7 @@ background-image: url(:/img/function.png);
   <widget class="QPushButton" name="pushButtonCredits">
    <property name="geometry">
     <rect>
-     <x>130</x>
+     <x>124</x>
      <y>210</y>
      <width>75</width>
      <height>23</height>
@@ -45,7 +45,7 @@ background-image: url(:/img/function.png);
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>131</width>
+     <width>391</width>
      <height>15</height>
     </rect>
    </property>
@@ -84,13 +84,29 @@ background-image: url(:/img/function.png);
     </rect>
    </property>
    <property name="lineWrapMode">
-    <enum>QTextEdit::NoWrap</enum>
+    <enum>QTextEdit::WidgetWidth</enum>
+   </property>
+   <property name="readOnly">
+    <bool>true</bool>
+   </property>
+   <property name="html">
+    <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: &quot;\2610&quot;; }
+li.checked::marker { content: &quot;\2612&quot;; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
+   <property name="textInteractionFlags">
+    <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
    </property>
   </widget>
   <widget class="QPushButton" name="pushButtonLicense">
    <property name="geometry">
     <rect>
-     <x>210</x>
+     <x>204</x>
      <y>210</y>
      <width>75</width>
      <height>23</height>
@@ -109,9 +125,9 @@ background-image: url(:/img/function.png);
   <widget class="QWidget" name="widget" native="true">
    <property name="geometry">
     <rect>
-     <x>120</x>
+     <x>47</x>
      <y>110</y>
-     <width>168</width>
+     <width>311</width>
      <height>71</height>
     </rect>
    </property>
@@ -139,7 +155,6 @@ background-image: url(:/img/function.png);
       <property name="font">
        <font>
         <pointsize>10</pointsize>
-        <weight>75</weight>
         <bold>true</bold>
        </font>
       </property>
@@ -160,7 +175,7 @@ background-image: url(:/img/function.png);
        <string notr="true"/>
       </property>
       <property name="text">
-       <string>Build on Oct 22 2023 05:08:23.442</string>
+       <string>-</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignCenter</set>
@@ -176,7 +191,7 @@ background-image: url(:/img/function.png);
        </sizepolicy>
       </property>
       <property name="text">
-       <string>Copyright (c) 2023 Ivar Vilca</string>
+       <string>-</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignCenter</set>
