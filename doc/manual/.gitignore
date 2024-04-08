@@ -1,4 +1,4 @@
-# ignore latex aux files
+# ignore latex aux files 
 *.aux
 *.log
 *.bbl
